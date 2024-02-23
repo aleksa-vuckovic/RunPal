@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">RacePal</string>
+    <string name="title_activity_running">RunningActivity</string>
+</resources>
