@@ -147,13 +147,7 @@ class RunningActivity : ComponentActivity() {
                                     icon = BitmapDescriptorFactory.fromBitmap(runnerBitmap),
                                     anchor = Offset(0.5f, 0.5f)
                                 )
-                                for (i in 0..vm.path.size-2) {
-                                    if (vm.path[i].end || vm.path[i+1].end)
-                                        PathEndMarker(latLng = vm.path[i+1].toLatLng())
-                                    if (!vm.path[i].end) Polyline(points = listOf(vm.path[i].toLatLng(), vm.path[i+1].toLatLng()), color = MediumBlue, width = 20f, visible = true)
-                                }
-                                if (vm.path.size > 0) PathEndMarker(latLng = vm.path[0].toLatLng())
-
+                                GoogleMapPath(pathPoints = vm.path, color = MediumBlue)
                             }
 
                             IconButton(onClick = { vm.centerSwitch() },
@@ -208,11 +202,21 @@ class RunningActivity : ComponentActivity() {
 }
 
 @Composable
-fun PathEndMarker(latLng: LatLng) {
+fun PathEndMarker(latLng: LatLng, color: Color) {
     Circle(center = latLng,
         clickable = false,
-        fillColor = MediumBlue.copy(alpha = 0.7f),
-        strokeColor = MediumBlue,
+        fillColor = color.copy(alpha = 0.7f),
+        strokeColor = color,
         radius = 20.0,
     )
+}
+
+@Composable
+fun GoogleMapPath(pathPoints: List<PathPoint>, color: Color) {
+    for (i in 0..pathPoints.size-2) {
+        if (pathPoints[i].end || pathPoints[i+1].end)
+            PathEndMarker(latLng = pathPoints[i+1].toLatLng(), color)
+        if (pathPoints[i].end) Polyline(points = listOf(pathPoints[i].toLatLng(), pathPoints[i+1].toLatLng()), color = color, width = 20f, visible = true)
+    }
+    if (pathPoints.size > 0) PathEndMarker(latLng = pathPoints[0].toLatLng(), color = color)
 }

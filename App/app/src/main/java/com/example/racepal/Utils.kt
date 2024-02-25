@@ -31,6 +31,30 @@ class Utils {
             if (hours == 0L) return "%02d:%02d".format(mins, secs)
             else return "%02d:%02d:%02d".format(hours, mins, secs)
         }
+
+        /**
+         * The should be already sorted in ascending order.
+         */
+        fun<T> binarySearch(data: List<T>, value: (T) -> Float, target: Float): T? {
+            var i = 0
+            var j = data.size
+            if (j == 0) return null
+            if (j == 1) return data[0]
+
+            while (j - i > 1) {
+                val k = (i + j) / 2
+                val valueK = value(data[k])
+
+                if (valueK > target) j = k
+                else if (valueK < target) i = k
+                else return data[k]
+            }
+
+            val valueI = value(data[i])
+            val valueJ = value(data[j])
+            if (target - valueI <  valueJ - target) return data[i]
+            else return data[j]
+        }
     }
 
 }

@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.racepal"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -89,4 +89,5 @@ dependencies {
 
     //icons
     implementation("androidx.compose.material:material-icons-extended:1.6.2")
+
 }
