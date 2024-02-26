@@ -83,7 +83,9 @@ import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberMarkerState
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class RunningActivity : ComponentActivity() {
 
     val vm: RunningViewModel by viewModels()
@@ -101,16 +103,15 @@ class RunningActivity : ComponentActivity() {
         ) this.finish()
 
         val provider = LocationServices.getFusedLocationProviderClient(this)
-        val req = LocationRequest.Builder(1000).setMaxUpdateAgeMillis(0).setPriority(
+        val req = LocationRequest.Builder(200).setMaxUpdateAgeMillis(0).setPriority(
             Priority.PRIORITY_HIGH_ACCURACY).build()
-
-        provider.requestLocationUpdates(req, object: LocationCallback() {
+        provider.requestLocationUpdates(req, {vm.updateLocation(it)}, null)
+        /*provider.requestLocationUpdates(req, object: LocationCallback() {
             override fun onLocationResult(res: LocationResult) {
                 val loc = res.lastLocation
                 if (loc != null) vm.updateLocation(loc)
-                Log.d("LOCATION", loc.toString())
             }
-        }, null)
+        }, null)*/
 
         setContent {
             RacePalTheme {
@@ -120,34 +121,31 @@ class RunningActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
 
-                    val cur by vm.cur.collectAsState()
-                    val started by vm.started.collectAsState()
-                    val paused by vm.paused.collectAsState()
-                    val ended by vm.ended.collectAsState()
-                    val runTime by vm.runTime.collectAsState()
+                    val cur by vm.runState.curAsState()
+                    val state by vm.timer.stateAsState()
+                    val time by vm.timer.timeAsState()
                     val runnerBitmap = remember {
                         getRunnerBitmap(RUNNER_ICON_SIZE)
                     }
-                    val centered by vm.centered.collectAsState()
+                    val centered by vm.mapState.centeredAsState()
 
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        RunDataPanel(distance = cur.distance, kcal = cur.kcal, time = runTime, speed = cur.speed, modifier = Modifier
+                        RunDataPanel(distance = cur.distance, kcal = cur.kcal, time = time, speed = cur.speed, modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp))
                         Box(modifier = Modifier.fillMaxSize()) {
                             GoogleMap(
-                                modifier = Modifier
-                                    .fillMaxSize(),
-                                cameraPositionState = vm.cameraPositionState
+                                modifier = Modifier.fillMaxSize(),
+                                cameraPositionState = vm.mapState.cameraPositionState
                             ) {
                                 Marker(
                                     state = MarkerState(position = cur.toLatLng()),
                                     icon = BitmapDescriptorFactory.fromBitmap(runnerBitmap),
                                     anchor = Offset(0.5f, 0.5f)
                                 )
-                                GoogleMapPath(pathPoints = vm.path, color = MediumBlue)
+                                GoogleMapPath(pathPoints = vm.runState.pathAsState(), color = MediumBlue)
                             }
 
                             IconButton(onClick = { vm.centerSwitch() },
@@ -163,7 +161,7 @@ class RunningActivity : ComponentActivity() {
                                 )
                             }
 
-                            if (!started) ElevatedButton(onClick = {vm.start()},
+                            if (state == Timer.State.READY) ElevatedButton(onClick = {vm.start()},
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter)
                                     .padding(bottom = 10.dp),
@@ -171,10 +169,7 @@ class RunningActivity : ComponentActivity() {
                             ) {
                                 Text("Start")
                             }
-                            else if (ended) {
-
-                            }
-                            else if (!paused) ElevatedButton(onClick = {vm.pause()},
+                            else if (state == Timer.State.RUNNING) ElevatedButton(onClick = {vm.pause()},
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter)
                                     .padding(bottom = 10.dp),
@@ -182,13 +177,16 @@ class RunningActivity : ComponentActivity() {
                             ) {
                                 Text("Pause")
                             }
-                            else ElevatedButton(onClick = {vm.resume()},
+                            else if (state == Timer.State.PAUSED) ElevatedButton(onClick = {vm.resume()},
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter)
                                     .padding(bottom = 10.dp),
                                 colors = ButtonDefaults.elevatedButtonColors(containerColor = Color.Yellow.copy(alpha = 0.7f))
                             ) {
                                 Text("Resume")
+                            }
+                            else {
+                                //activity ended
                             }
                         }
 

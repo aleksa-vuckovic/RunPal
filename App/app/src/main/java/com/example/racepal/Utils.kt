@@ -55,6 +55,21 @@ class Utils {
             if (target - valueI <  valueJ - target) return data[i]
             else return data[j]
         }
+
+        /**
+         * @param speed Running speed in m/s.
+         * @param slope Slope as a percentage (postive or negative).
+         * @param weight Runner's weight in kg.
+         *
+         * @return kcal per second.
+         */
+        fun kcalExpenditure(speed: Double, slope: Double, weight: Double): Double {
+            var factor = 0.2 + 0.9*slope
+            if (factor < 0.1) factor = 0.1
+            val VO2 = speed * factor / 1000
+            val PE = VO2 * weight * 5
+            return PE
+        }
     }
 
 }

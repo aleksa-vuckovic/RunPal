@@ -53,6 +53,10 @@ data class PathPoint(
     fun distance(to: PathPoint): Double {
         return this.toLatLng().distance(to.toLatLng())
     }
+
+    companion object {
+        final val NONE = PathPoint()
+    }
 }
 
 fun Location.toPathPoint(): PathPoint = PathPoint(latitude.round(5), longitude.round(5), altitude, time, false)

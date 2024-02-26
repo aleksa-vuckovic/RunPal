@@ -1,4 +1,4 @@
-package com.example.racepal
+package com.example.racepal.filters
 
 class MovingAverageFilter(private val size: Int) {
 
