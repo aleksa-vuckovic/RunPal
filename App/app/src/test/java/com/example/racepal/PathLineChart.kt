@@ -9,6 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.racepal.ui.AxesOptions
+import com.example.racepal.ui.PathChart
+import com.example.racepal.ui.PathLineChartDataset
+import com.example.racepal.ui.PathLineChartOptions
 import com.example.racepal.ui.theme.MediumBlue
 import com.example.racepal.ui.theme.Pink
 
@@ -56,7 +60,8 @@ fun PathLineChartTest() {
                 shade = true,
                 width = 15f,
                 markers = true,
-                markerLabel = AltitudeAxisValueFormatter(labelStyle)
+                markerLabel = AltitudeFormatter,
+                markerLabelStyle = labelStyle
             ),
             PathLineChartOptions(
                 color = Pink,
@@ -69,8 +74,9 @@ fun PathLineChartTest() {
     }
     val axes = remember {
         AxesOptions(
-            xLabel = NoLabelAxisValueFormatter(),
-            yLabel = AltitudeAxisValueFormatter(labelStyle),
+            xLabel = null,
+            yLabel = AltitudeFormatter,
+            labelStyle = labelStyle,
             xTickCount = 10,
             yTickCount = 5
         )

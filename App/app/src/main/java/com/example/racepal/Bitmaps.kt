@@ -4,6 +4,11 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color.alpha
+import android.graphics.Color.argb
+import android.graphics.Color.blue
+import android.graphics.Color.green
+import android.graphics.Color.red
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.get
@@ -21,12 +26,6 @@ import com.example.racepal.ui.theme.LightBlue
  * @return Returns a new bitmap with the specified blur applied.
  */
 fun Bitmap.outerBlur(blurLevel: Int, radius: Int, transition: Int, targetColor: Color? = null): Bitmap {
-    fun alpha(col: Int) = (col shr 24) and 0xFF
-    fun red(col: Int) = (col shr 16) and 0xFF
-    fun green(col: Int) = (col shr 8) and 0xFF
-    fun blue(col: Int) = (col shr 0) and 0xFF
-    fun argb(alpha: Int, red: Int, green: Int, blue: Int) = (alpha shl 24) or (red shl 16) or (green shl 8) or blue
-
     val centerX = this.width/2
     val centerY = this.height/2
     fun r(i: Int, j: Int): Int = Math.sqrt(((i-centerX)*(i-centerX)+(j-centerY)*(j-centerY)).toDouble()).toInt()

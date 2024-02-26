@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">RacePal</string>
     <string name="title_activity_running">RunningActivity</string>
+    <string name="title_activity_solo_running_results">SoloRunningResults</string>
 </resources>

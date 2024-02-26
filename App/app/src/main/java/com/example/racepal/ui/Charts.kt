@@ -1,21 +1,17 @@
-package com.example.racepal
+package com.example.racepal.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
@@ -27,39 +23,18 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.toSize
+import com.example.racepal.Formatter
+import com.example.racepal.PathPoint
+import com.example.racepal.Utils
+import com.example.racepal.join
 import kotlin.math.max
 import kotlin.math.min
 
 
-/**
- * Specifies the formatting of axis labels, including text style.
- */
-abstract class AxisValueFormatter(open val style: TextStyle = TextStyle.Default) {
-    abstract fun formatValue(value: Double): String
-
-    fun measure(value: Double, measurer: TextMeasurer): TextLayoutResult {
-        return measurer.measure(formatValue(value), style)
-    }
-}
-class NoLabelAxisValueFormatter(): AxisValueFormatter() {
-    override fun formatValue(value: Double): String {
-        return ""
-    }
-}
-class AltitudeAxisValueFormatter(override val style: TextStyle): AxisValueFormatter() {
-    override fun formatValue(value: Double): String {
-        val meters = value.toInt()
-        if (meters >= 1000) return "%.1fkm".format(value/1000)
-        else return "${meters}m"
-    }
-}
 
 /**
  * This class is used for calculating the range of values presented on the chart,
@@ -122,8 +97,8 @@ class ChartData(val minX: Double, val maxX: Double, val minY: Double, val maxY: 
  * data points to actual canvas coordinates.
  */
 class ChartConfiguration(val chartData: ChartData,
-                                 val chartSize: Size,
-                                 val chartOffset: Size
+                         val chartSize: Size,
+                         val chartOffset: Size
     ) {
 
     /**
@@ -179,13 +154,15 @@ class PathLineChartOptions(
     val shade: Boolean = false,
     val width: Float = 3f,
     val markers: Boolean = false,
-    val markerLabel: AxisValueFormatter? = null
+    val markerLabel: Formatter<Double>? = null,
+    val markerLabelStyle: TextStyle = TextStyle.Default
 )
 class AxesOptions(
-    val xLabel: AxisValueFormatter? = null,
-    val yLabel: AxisValueFormatter? = null,
+    val xLabel: Formatter<Double>? = null,
+    val yLabel: Formatter<Double>? = null,
+    val labelStyle: TextStyle = TextStyle.Default,
     val xTickCount: Int = 0,
-    val yTickCount: Int = 0
+    val yTickCount: Int = 0,
 )
 
 @Composable
@@ -249,7 +226,8 @@ private fun PathChartLine(data: PathLineChartDataset,
         }
         if (options.markers && touchPositionState.value != Offset.Zero) {
             val touch = touchPositionState.value
-            val point = Utils.binarySearch(data.path, { chartConfiguration.mapX(data.xValue(it)) }, touch.x)
+            val point =
+                Utils.binarySearch(data.path, { chartConfiguration.mapX(data.xValue(it)) }, touch.x)
             if (point == null) return@Canvas
             val selectedX = data.xValue(point)
             val selectedY = data.yValue(point)
@@ -269,10 +247,11 @@ private fun PathChartLine(data: PathLineChartDataset,
                 center = selected)
             drawCircle(color = Color.White, center = selected, radius = options.width/2)
 
-            val text = options.markerLabel?.measure(selectedY,textMeasurer)
-            if (text != null) drawText(
-                text, topLeft = Offset(selected.x - text.size.width - options.width*4, selected.y - text.size.height)
-            )
+            if (options.markerLabel != null) {
+                val label = options.markerLabel.format(selectedY).join()
+                val text = textMeasurer.measure(label, options.markerLabelStyle)
+                drawText(text, topLeft = Offset(selected.x - text.size.width - options.width*4, selected.y - text.size.height))
+            }
         }
     }
 }
@@ -346,7 +325,8 @@ fun PathChart(datasets: List<PathLineChartDataset>,
                     drawLine(color = Color.Black, strokeWidth = 10f, start = pos, end = pos.copy(y = pos.y + 6f))
 
 
-                    val text = axes.xLabel.measure(x, textMeasurer)
+                    val label = axes.xLabel.format(x).join()
+                    val text = textMeasurer.measure(label, axes.labelStyle)
                     drawText(text, topLeft = pos.copy(x = pos.x - text.size.width/2, y = pos.y+6f))
                 }
             }
@@ -357,14 +337,14 @@ fun PathChart(datasets: List<PathLineChartDataset>,
                     val pos = chartConfiguration.mapTickY(y)
                     drawLine(color = Color.Black, strokeWidth = 10f, start = pos, end = pos.copy(x = pos.x - 5f))
 
-                    val text = axes.yLabel.measure(y, textMeasurer)
+                    val label = axes.yLabel.format(y).join()
+                    val text = textMeasurer.measure(label, axes.labelStyle)
                     drawText(text, topLeft = pos.copy(x = pos.x - chartOffset.width, y = pos.y - (if(i!=axes.yTickCount) text.size.height/2  else 0)))
                 }
             }
         }
 
         //Draw the lines
-
         for (i in 0..datasets.size - 1) {
             PathChartLine(
                 data = datasets[i],
