@@ -20,6 +20,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -84,6 +85,23 @@ fun Modifier.borderRight(strokeWidth: Dp, color: Color): Modifier {
         )
     }
 }
+@Composable
+fun Modifier.borderBottom(strokeWidth: Dp, color: Color): Modifier {
+    val density = LocalDensity.current
+    val strokeWidthPx = density.run { strokeWidth.toPx() }
+
+    return this.drawBehind {
+        val width = size.width - strokeWidthPx/2
+        val height = size.height
+
+        drawLine(
+            color = color,
+            start = Offset(x = 0f, y = height),
+            end = Offset(x = width , y = height),
+            strokeWidth = strokeWidthPx
+        )
+    }
+}
 
 @Composable
 fun PanelText(text: Pair<String,String>, modifier: Modifier = Modifier) {
@@ -130,9 +148,9 @@ fun RunDataPanel(distance: Double, kcal: Double, time: Long, speed: Double, modi
             )
             PanelText(text = KcalFormatter.format(kcal),
                 modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)
-                .padding(vertical = 20.dp)
+                    .fillMaxSize()
+                    .weight(1f)
+                    .padding(vertical = 20.dp)
             )
         }
         Divider(
@@ -155,9 +173,9 @@ fun RunDataPanel(distance: Double, kcal: Double, time: Long, speed: Double, modi
                     .padding(vertical = 20.dp))
             PanelText(text = TimeFormatter.format(time),
                 modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)
-                .padding(vertical = 20.dp)
+                    .fillMaxSize()
+                    .weight(1f)
+                    .padding(vertical = 20.dp)
             )
         }
     }
@@ -218,7 +236,8 @@ fun ProgressFloatingButton(onProgress: (Float) -> Unit,
                     awaitPointerEventScope {
                         while (true) {
                             val event = awaitPointerEvent(PointerEventPass.Main)
-                            if (event.type == PointerEventType.Press) pressed = System.currentTimeMillis()
+                            if (event.type == PointerEventType.Press) pressed =
+                                System.currentTimeMillis()
                             else if (event.type == PointerEventType.Release) pressed = 0L
                         }
                     }
@@ -228,6 +247,24 @@ fun ProgressFloatingButton(onProgress: (Float) -> Unit,
         }
     }
 
+}
+
+@Composable
+fun DoubleInput(initial: Double, onChange: (Double) -> Unit, modifier: Modifier = Modifier) {
+    var input by rememberSaveable {
+        mutableStateOf("%.2f".format(initial))
+    }
+    TextField(value = input, onValueChange = {
+        val v = it.toDoubleOrNull()
+        if (v != null) {
+            input = it
+            onChange(v)
+        }
+        else if (it == "") {
+            input = it
+            onChange(0.0)
+        }
+    }, modifier = modifier)
 }
 
 //@Preview(showBackground = true)

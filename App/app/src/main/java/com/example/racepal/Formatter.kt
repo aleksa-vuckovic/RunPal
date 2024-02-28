@@ -8,8 +8,6 @@ package com.example.racepal
 interface Formatter<T> {
     fun format(value: T): Pair<String, String>
 }
-private const val KM_TO_MILE: Double = 0.621371
-private const val MILE_TO_FT: Double = 5280.0
 object TimeFormatter: Formatter<Long> {
     override fun format(time: Long): Pair<String, String> {
         var t = time/1000
