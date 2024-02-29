@@ -28,7 +28,7 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.toSize
 import com.example.racepal.Formatter
-import com.example.racepal.PathPoint
+import com.example.racepal.models.PathPoint
 import com.example.racepal.Utils
 import com.example.racepal.join
 import kotlin.math.max

@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.example.racepal.RUNNER_ICON_SIZE
 import com.example.racepal.RunDataPanel
-import com.example.racepal.Timer
+import com.example.racepal.run.Timer
 import com.example.racepal.getRunnerBitmap
 import com.example.racepal.ui.GoogleMapRun
 import com.example.racepal.ui.MapPause

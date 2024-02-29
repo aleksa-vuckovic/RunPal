@@ -2,9 +2,9 @@ package com.example.racepal.activities
 
 import android.location.Location
 import androidx.lifecycle.ViewModel
-import com.example.racepal.LocalRunState
+import com.example.racepal.run.LocalRunState
 import com.example.racepal.MapState
-import com.example.racepal.Timer
+import com.example.racepal.run.Timer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

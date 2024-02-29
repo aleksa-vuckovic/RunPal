@@ -1,6 +1,6 @@
 package com.example.racepal.filters
 
-import com.example.racepal.PathPoint
+import com.example.racepal.models.PathPoint
 
 /**
  * Even when a device is stationary, the location provided by the GPS satellite will oscillate.

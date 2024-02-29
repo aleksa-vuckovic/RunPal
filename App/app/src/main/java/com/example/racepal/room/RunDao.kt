@@ -1,0 +1,17 @@
+package com.example.racepal.room
+
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import com.example.racepal.models.Run
+
+
+interface RunDao {
+
+    @Query("select * from run where id = :id")
+    suspend fun findById(id: Long): Run?
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(run: Run): Long
+}

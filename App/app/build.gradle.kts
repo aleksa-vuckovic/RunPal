@@ -86,6 +86,11 @@ dependencies {
     //navigation
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
+    //room
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+
     //hilt
     implementation("com.google.dagger:hilt-android:2.44")
     kapt("com.google.dagger:hilt-compiler:2.44")
@@ -94,6 +99,7 @@ dependencies {
     //retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
     implementation ("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     //icons

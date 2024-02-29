@@ -1,12 +1,15 @@
-package com.example.racepal
+package com.example.racepal.run
 
 import android.location.Location
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.example.racepal.models.PathPoint
+import com.example.racepal.Utils
 import com.example.racepal.filters.MovingAverageFilter
 import com.example.racepal.filters.PositionFilter
+import com.example.racepal.models.toPathPoint
 
 /**
  * Represents the state of an ongoing run, including distance, kcal,

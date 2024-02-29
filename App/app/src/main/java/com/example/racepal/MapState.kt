@@ -3,6 +3,8 @@ package com.example.racepal
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import com.example.racepal.models.PathPoint
+import com.example.racepal.models.toLatLng
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState

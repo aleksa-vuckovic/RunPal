@@ -14,6 +14,11 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.get
 import androidx.core.graphics.set
 import com.example.racepal.ui.theme.LightBlue
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.ByteArrayOutputStream
 
 /**
  * Applies a blur in a circular area around the center of the bitmap, starting from the specified radius.
@@ -105,4 +110,13 @@ fun Context.getRunnerBitmap(size: Int): Bitmap {
     val blurWidth = (size*0.15).toInt()
     val res = BitmapFactory.decodeResource(resources, R.drawable.runner)
     return res.resize(iconSize, iconSize).addMargin(margin).outerBlur(20, blurRadius, blurWidth, LightBlue.copy(alpha = 0.3f))
+}
+
+fun Bitmap.toRequestBody(): RequestBody {
+    val stream = ByteArrayOutputStream()
+    this.compress(Bitmap.CompressFormat.PNG, 100, stream)
+    return stream.toByteArray().toRequestBody("image/png".toMediaType())
+}
+fun Bitmap.toMultipartPart(fieldName: String = "image", fileName: String = "image.png"): MultipartBody.Part {
+    return MultipartBody.Part.createFormData(fieldName, fileName, this.toRequestBody())
 }

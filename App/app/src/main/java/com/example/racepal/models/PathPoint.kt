@@ -1,4 +1,4 @@
-package com.example.racepal
+package com.example.racepal.models
 
 import android.location.Location
 import com.google.android.gms.maps.model.LatLng

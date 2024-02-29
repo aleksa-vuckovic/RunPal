@@ -27,10 +27,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.racepal.MapState
-import com.example.racepal.PathPoint
+import com.example.racepal.models.PathPoint
 import com.example.racepal.ProgressFloatingButton
-import com.example.racepal.RunState
-import com.example.racepal.toLatLng
+import com.example.racepal.run.RunState
+import com.example.racepal.models.toLatLng
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle

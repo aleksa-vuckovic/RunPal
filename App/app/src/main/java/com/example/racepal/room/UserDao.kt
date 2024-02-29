@@ -1,4 +1,6 @@
 package com.example.racepal.room
 
-class Run {
+interface UserDao {
+
+
 }
