@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonElevation
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,6 +37,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
@@ -51,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.core.graphics.ColorUtils
 import com.example.racepal.ui.theme.RacePalTheme
+import com.example.racepal.ui.theme.StandardTextField
 import kotlinx.coroutines.delay
 import java.lang.Float.min
 
@@ -194,8 +197,11 @@ fun ProgressFloatingButton(onProgress: (Float) -> Unit,
     val diameter = remember(size) {
         min(size.width, size.height)
     }
+    val center = remember(size) {
+        Offset(size.width/2, size.height/2)
+    }
     val topLeft = remember(size) {
-        Offset(size.width/2 - diameter/2, size.height/2 - diameter/2)
+        Offset(center.x - diameter/2, center.y - diameter/2)
     }
     val buttonSize = LocalDensity.current.run {
         (diameter*0.8f).toDp()
@@ -218,7 +224,7 @@ fun ProgressFloatingButton(onProgress: (Float) -> Unit,
         .onSizeChanged { size = it.toSize() }
         .drawBehind {
             drawArc(
-                color = color.lightness(0.8f),
+                color = color,
                 startAngle = -90f,
                 sweepAngle = progress * 360f,
                 useCenter = true,
@@ -226,9 +232,16 @@ fun ProgressFloatingButton(onProgress: (Float) -> Unit,
                 size = Size(diameter, diameter),
                 style = Fill
             )
+            drawCircle(
+                color = color,
+                center = center,
+                radius = diameter/2,
+                style = Stroke(width = 4f)
+            )
         }) {
         FloatingActionButton(onClick = {  },
-            containerColor = color,
+            containerColor = MaterialTheme.colorScheme.background,
+            contentColor = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .size(buttonSize)
                 .align(Alignment.Center)
@@ -254,7 +267,7 @@ fun DoubleInput(initial: Double, onChange: (Double) -> Unit, modifier: Modifier 
     var input by rememberSaveable {
         mutableStateOf("%.2f".format(initial))
     }
-    TextField(value = input, onValueChange = {
+    StandardTextField(value = input, onChange = {
         val v = it.toDoubleOrNull()
         if (v != null) {
             input = it

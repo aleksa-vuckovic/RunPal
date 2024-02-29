@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ImageSearch
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,6 +30,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,6 +43,8 @@ import coil.compose.rememberImagePainter
 import com.example.racepal.DoubleInput
 import com.example.racepal.LB_TO_KG
 import com.example.racepal.borderBottom
+import com.example.racepal.ui.theme.StandardButton
+import com.example.racepal.ui.theme.StandardTextField
 
 @Composable
 fun LoginScreen(onLogin: (String, String) -> Unit, errorMessage: String, modifier: Modifier = Modifier) {
@@ -55,20 +59,27 @@ fun LoginScreen(onLogin: (String, String) -> Unit, errorMessage: String, modifie
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.spacedBy(30.dp)
     ) {
-        val spacing = 10.dp
         val style = MaterialTheme.typography.displaySmall
 
-        Text(text = "Email:", style = style)
-        TextField(value = email, onValueChange = {email = it})
-        Spacer(modifier = modifier.height(spacing))
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Email", style = style, modifier = Modifier.weight(0.3f))
+            StandardTextField(value = email, onChange = {email = it}, modifier = Modifier.weight(0.7f))
+        }
 
-        Text(text = "Password:", style = style)
-        TextField(value = "*".repeat(password.length), onValueChange = {password = it})
-        Spacer(modifier = modifier.height(spacing))
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Password", style = style, modifier = Modifier.weight(0.3f))
+            StandardTextField(value = "*".repeat(password.length), onChange = {password = it}, modifier = Modifier.weight(0.7f))
+        }
 
-        Button(onClick = { onLogin(email, password)}) {
+        StandardButton(onClick = { onLogin(email, password)}) {
             Text("Login")
         }
         Text(text = errorMessage, style = style.copy(color = Color.Red))
@@ -102,48 +113,76 @@ fun RegisterScreen(onRegister: (String, String, String, String, Uri?, Double) ->
     }
 
     Column(
-        modifier = modifier.verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        modifier = modifier.verticalScroll(rememberScrollState())
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(30.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val spacing = 10.dp
         val style = MaterialTheme.typography.displaySmall
 
-        Text(text = "Email:", style = style)
-        TextField(value = email, onValueChange = {email = it})
-        Spacer(modifier = modifier.height(spacing))
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Email", style = style, modifier = Modifier.weight(0.3f))
+            StandardTextField(value = email, onChange = {email = it}, modifier = Modifier.weight(0.7f))
+        }
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Password", style = style, modifier = Modifier.weight(0.3f))
+            StandardTextField(value = "*".repeat(password.length), onChange = {password = it}, modifier = Modifier.weight(0.7f))
+        }
 
-        Text(text = "Password:", style = style)
-        TextField(value = "*".repeat(password.length), onValueChange = {password = it})
-        Spacer(modifier = modifier.height(spacing))
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("First name", style = style, modifier = Modifier.weight(0.3f))
+            StandardTextField(value = name, onChange = {name = it}, modifier = Modifier.weight(0.7f))
+        }
 
-        Text(text = "First name:", style = style)
-        TextField(value = name, onValueChange = {name = it})
-        Spacer(modifier = modifier.height(spacing))
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Last name", style = style, modifier = Modifier.weight(0.3f))
+            StandardTextField(value = last, onChange = {last = it}, modifier = Modifier.weight(0.7f))
+        }
 
-        Text(text = "Last name:", style = style)
-        TextField(value = last, onValueChange = {last = it})
-        Spacer(modifier = modifier.height(spacing))
-
-        Text(text = "Profile photo:", style = style)
-        ImageSelector(input = profile, onSelect = {profile = it}, Modifier.size(200.dp))
-        Spacer(modifier = modifier.height(spacing))
-
-        Text(text = "Weight:", style = style)
-        Row {
-            DoubleInput(initial = 80.0, onChange = {weight = it}, modifier = Modifier.width(150.dp))
-            Box(modifier = Modifier.size(55.dp)
-                .clickable { imperial = !imperial }
-                .background(color = Color.LightGray)
-                .borderBottom(1.dp, MaterialTheme.colorScheme.primary)) {
-                Text(text = if (imperial) "lb" else "kg",
-                    style = style,
-                    modifier = Modifier.align(Alignment.Center))
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("Weight", style = style, modifier = Modifier.weight(0.3f))
+            Row(modifier = Modifier.weight(0.7f),
+                horizontalArrangement = Arrangement.End) {
+                DoubleInput(initial = 80.0, onChange = {weight = it}, modifier = Modifier.width(150.dp))
+                Box(modifier = Modifier
+                    .size(55.dp)
+                    .clickable { imperial = !imperial }
+                    .background(color = MaterialTheme.colorScheme.surfaceVariant)
+                    .borderBottom(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)) {
+                    Text(text = if (imperial) "lb" else "kg",
+                        style = style,
+                        modifier = Modifier.align(Alignment.Center))
+                }
             }
         }
-        Spacer(modifier = modifier.height(spacing))
 
-        Button(onClick = { onRegister(email, password, name, last, profile, if (imperial) weight* LB_TO_KG else weight)}) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Profile photo", style = style, modifier = Modifier.weight(0.3f))
+            ImageSelector(input = profile, onSelect = {profile = it}, Modifier.size(200.dp))
+        }
+
+        StandardButton(onClick = { onRegister(email, password, name, last, profile, if (imperial) weight* LB_TO_KG else weight)})
+         {
             Text("Register")
         }
         Text(text = errorMessage, style = style.copy(color = Color.Red))
