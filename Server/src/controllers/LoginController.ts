@@ -12,32 +12,31 @@ export class LoginController {
 
     test = async (req: express.Request, res: express.Response) => {
         let sent = req.query.test
-        res.json({message: "You sent "+ sent})
+        res.json({message:"ok"})
         //res.status(400).type("text/plain").send("Some plain text.")
     }
 
     login = async (req: express.Request, res: express.Response) => {
         let user = await DB.user(req.body.email)
         if (user == null) {
-            res.status(401).type("text/plain").send("Email does not exist.")
+            res.json({message: "Email does not exist."})
             return
         }
 
         if (!(await bcrypt.compare(req.body.password, user.password))) {
-            res.status(401).type("text/plain").send("Incorrect password.")
+            res.json({message: "Incorrect password."})
             return
         }
 
-        delete user.password
-        delete user.profile
-        let token = JWT.generateJWT(user)
-        res.status(200).type("text/plain").send(token)
+
+        let token = JWT.generateJWT(Utils.payload(user))
+        res.json({message: "ok", data: token})
     }
 
     refresh = async(req: express.Request, res: express.Response) => {
         JWT.authenticateJWT(req, res, () => {
-            let newToken = JWT.generateJWT(req.jwt)
-            res.status(200).type("text/plain").send(newToken)
+            let newToken = JWT.generateJWT(Utils.payload(req.jwt))
+            res.json({message: "ok", data: newToken})
         })
     }
 
@@ -46,15 +45,15 @@ export class LoginController {
         let output: any = {}
         let ret = await Validation.registration(input, output)
         if (ret != "ok") {
-            res.status(400).type("text/plain").send(ret)
+            res.json({message: ret})
             return
         }
 
         let profile: any = req.file
         ret = Validation.profile(profile)
-        if (ret != "ok") output.profile = "default.png"
+        if (ret != "ok") output.profile = Utils.defaultProfile()
         else {
-            let uniqueName = `${Date.now()}.${profile.mimetype.split('/')[1]}`
+            let uniqueName = `${Utils.randomUniqueFileName()}.${profile.mimetype.split('/')[1]}`
             let uploadPath = Utils.uploadPath(uniqueName)
             fs.writeFileSync(uploadPath, profile.buffer)
             output.profile = uniqueName
@@ -65,14 +64,12 @@ export class LoginController {
         
         ret = await DB.addUser(output)
         if (ret != "ok") {
-            res.status(500).type("text/plain").send("Database error.")
+            res.json({message: "Database error."})
             return
         }
 
-        delete output.profile
-        delete output.password
-        let token = JWT.generateJWT(output)
-        res.status(200).type("text/plain").send(token)
+        let token = JWT.generateJWT(Utils.payload(output))
+        res.json({message: "ok", data: token})
         return
     }
 

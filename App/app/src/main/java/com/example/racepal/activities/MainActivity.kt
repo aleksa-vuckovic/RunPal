@@ -1,46 +1,78 @@
 package com.example.racepal.activities
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.core.content.ContextCompat
-import com.example.racepal.activities.login.RegisterScreen
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
+import com.example.racepal.LoadingDots
+import com.example.racepal.repositories.LoginManager
+import com.example.racepal.R
+import com.example.racepal.activities.home.HomeActivity
+import com.example.racepal.activities.login.LoginActivity
+import com.example.racepal.timeAsState
 import com.example.racepal.ui.theme.RacePalTheme
-import com.example.racepal.ui.theme.StandardButton
-import com.example.racepal.ui.theme.StandardTextField
+import com.example.racepal.waveFloat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    @Inject
+    lateinit var loginManager: LoginManager
+
+
+    override fun onStart() {
+        super.onStart()
+
+        lifecycleScope.launch {
+            try {
+                //Try to reuse an existing JWT
+                loginManager.refresh()
+                startActivity(Intent(this@MainActivity, HomeActivity::class.java))
+            } catch(e: Exception) {
+                e.printStackTrace()
+                startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+            }
+
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        /*
         val launcher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
             if (granted.size != 2) this@MainActivity.finish()
         }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
             ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            launcher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+            launcher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+            )
+         */
 
         super.onCreate(savedInstanceState)
         setContent {
@@ -50,38 +82,59 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                   // RegisterScreen(onRegister = { _, _, _, _, _, _ -> }, errorMessage = "", modifier = Modifier.fillMaxSize())
-                        /*
-                    Column {
-                        StandardButton(onClick = { /*TODO*/ }) {
-                            Text("Button")
-                        }
-                        var value by remember {
-                            mutableStateOf("value")
-                        }
-                        StandardTextField(value = value, onChange = {value = it})
-                    }*/
-
-                    Column(modifier = Modifier.fillMaxSize()) {
-
-
-                        
-                        Button(onClick = {
-                            val intent = Intent(this@MainActivity, SoloRunningActivity::class.java)
-                            startActivity(intent)
-                        }) {
-                            Text(text = "GO")
-                        }
-                     
-                    }
                     
-
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Image(painter = painterResource(id = R.drawable.runner),
+                            contentDescription = "Loading",
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(140.dp))
+                        LoadingDots(size = 30.dp, count = 3, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 30.dp))
+                    }
                 }
             }
         }
     }
 }
 
+/*
+@AndroidEntryPoint
+class MainActivity: ComponentActivity() {
+    @Inject
+    lateinit var loginApi: LoginApi
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        /*
+        val launcher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
+            if (granted.size != 2) this@MainActivity.finish()
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            launcher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+            )
+         */
+
+        lifecycleScope.launch {
+            delay(1000)
+            val res = loginApi.test("Test data.")
+            Log.d("RESPONSE", "${res.message} ${res.data}")
+        }
+
+        super.onCreate(savedInstanceState)
+        setContent {
+            RacePalTheme {
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+
+                }
+            }
+        }
+    }
+}
+*/
 
 @Composable
 fun myAnimateFloat(newgoal: Float): State<Float> {
@@ -94,11 +147,10 @@ fun myAnimateFloat(newgoal: Float): State<Float> {
     goal.value = newgoal
 
     LaunchedEffect(key1 = null) {
-        while(true) {
+        while (true) {
             delay(1000)
-            state.value += (goal.value-state.value)/2
+            state.value += (goal.value - state.value) / 2
         }
     }
     return state
 }
-

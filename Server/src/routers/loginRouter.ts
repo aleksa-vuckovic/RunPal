@@ -6,7 +6,7 @@ const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
         fileSize: 5*1024*1024,
-        files: 2
+        files: 1
     }
 });
 
@@ -19,7 +19,7 @@ loginRouter.route("/login").post((req: express.Request, res: express.Response) =
     new LoginController().login(req, res)
 })
 loginRouter.route("/refresh").get((req: express.Request, res: express.Response) => {
-    new LoginController().login(req, res)
+    new LoginController().refresh(req, res)
 })
 loginRouter.route("/register").post(upload.single("profile"), (req, res) => {
     new LoginController().register(req, res)

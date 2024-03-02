@@ -6,9 +6,9 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.example.racepal.models.PathPoint
-import com.example.racepal.Utils
 import com.example.racepal.filters.MovingAverageFilter
 import com.example.racepal.filters.PositionFilter
+import com.example.racepal.kcalExpenditure
 import com.example.racepal.models.toPathPoint
 
 /**
@@ -65,7 +65,7 @@ class LocalRunState(updateInterval: Int = 200): RunState {
             if (addToPath) {
                 cur.distance += distanceDifference
                 val slope = if (distanceDifference != 0.0) (cur.altitude - prev.altitude)/distanceDifference else 0.0
-                val expenditure = Utils.kcalExpenditure(cur.speed, slope, userWeight)
+                val expenditure = kcalExpenditure(cur.speed, slope, userWeight)
                 cur.kcal += expenditure*timeDifference
                 _path.add(cur)
             }

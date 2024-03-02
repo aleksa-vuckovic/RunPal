@@ -6,7 +6,7 @@ import com.example.racepal.models.RunInfo
 
 
 /**
- * All methods may throw an IOException.
+ * All methods will throw an exception upon failure.
  */
 interface RunRepository {
 

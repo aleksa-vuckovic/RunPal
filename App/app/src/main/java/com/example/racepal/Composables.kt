@@ -4,6 +4,11 @@ import android.graphics.Color.alpha
 import android.graphics.Color.blue
 import android.graphics.Color.green
 import android.graphics.Color.red
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,10 +20,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ImageSearch
 import androidx.compose.material3.Divider
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonElevation
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -44,6 +52,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
@@ -52,6 +61,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.core.graphics.ColorUtils
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberImagePainter
 import com.example.racepal.ui.theme.RacePalTheme
 import com.example.racepal.ui.theme.StandardTextField
 import kotlinx.coroutines.delay
@@ -235,7 +246,7 @@ fun ProgressFloatingButton(onProgress: (Float) -> Unit,
             drawCircle(
                 color = color,
                 center = center,
-                radius = diameter/2,
+                radius = diameter / 2,
                 style = Stroke(width = 4f)
             )
         }) {
@@ -278,6 +289,74 @@ fun DoubleInput(initial: Double, onChange: (Double) -> Unit, modifier: Modifier 
             onChange(0.0)
         }
     }, modifier = modifier)
+}
+
+@OptIn(ExperimentalCoilApi::class)
+@Composable
+fun ImageSelector(input: Uri?, onSelect: (Uri?) -> Unit, modifier: Modifier = Modifier) {
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+    ) { uri: Uri? ->
+        uri?.let {
+            onSelect(it)
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .clickable {
+                launcher.launch("image/*")
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        if (input != null) {
+            Image(
+                painter = rememberImagePainter(data = input),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.ImageSearch,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun LoadingDots(size: Dp, count: Int, color: Color = MaterialTheme.colorScheme.primary, modifier: Modifier = Modifier) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(size * 2 / 3),
+        verticalAlignment = Alignment.Bottom,
+        modifier = modifier
+    ) {
+        val time = timeAsState(start = System.currentTimeMillis())
+        for (i in 0..count - 1)
+            Box(
+                modifier = Modifier
+                    .padding(
+                        bottom = waveFloat(
+                            0f,
+                            size.value * 4 / 3,
+                            3000L,
+                            -i * 200L,
+                            size.value / 3,
+                            time.value
+                        ).dp
+                    )
+                    .size(size)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
+                    )
+            )
+    }
 }
 
 //@Preview(showBackground = true)

@@ -3,19 +3,24 @@ package com.example.racepal.repositories
 import com.example.racepal.models.User
 
 /**
- * All methods may throw a GenericExcpetion.
+ * All methods will throw an exception upon failure.
  */
 interface UserRepository {
 
     /**
      * Updates the user with the new data.
-     * Fields that are set to null are unchanged.
+     * The profile field is expected to be a valid URI.
      */
-    fun update(user: User)
+    suspend fun update(user: User)
+
+    /**
+     * Same as update, but if a user with the given email does not exist,
+     * a new one is inserted.
+     */
+    suspend fun upsert(user: User)
 
     /**
      * Retrieves user with given email.
-     * (The password is always set to null)
      */
-    fun getUser(email:String): User
+    suspend fun getUser(email:String): User
 }

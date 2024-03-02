@@ -10,7 +10,7 @@ import com.example.racepal.models.Run
 @Dao
 interface RunDao {
 
-    @Query("select * from run where id = :id")
+    @Query("select * from runs where id = :id")
     suspend fun findById(id: Long): Run?
 
 

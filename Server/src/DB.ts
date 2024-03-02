@@ -11,4 +11,9 @@ export class DB {
         let ret = await userModel.insertMany([user])
         return "ok"
     }
+    static async updateUser(email: string, data: any) {
+        let ret = await userModel.updateOne({email: email}, {$set: data})
+        if (ret.modifiedCount > 0) return "ok"
+        else return "Database error."
+    }
 }

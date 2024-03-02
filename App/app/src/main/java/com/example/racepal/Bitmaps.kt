@@ -1,5 +1,6 @@
 package com.example.racepal
 
+import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -9,6 +10,7 @@ import android.graphics.Color.argb
 import android.graphics.Color.blue
 import android.graphics.Color.green
 import android.graphics.Color.red
+import android.net.Uri
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.get
@@ -19,6 +21,10 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 
 /**
  * Applies a blur in a circular area around the center of the bitmap, starting from the specified radius.
@@ -119,4 +125,55 @@ fun Bitmap.toRequestBody(): RequestBody {
 }
 fun Bitmap.toMultipartPart(fieldName: String = "image", fileName: String = "image.png"): MultipartBody.Part {
     return MultipartBody.Part.createFormData(fieldName, fileName, this.toRequestBody())
+}
+
+/**
+ * Reads the image pointed to by the URI, and returns it as a bitmap.
+ *
+ * @return The bitamp of the image pointed to by the URI,
+ * or null in case of an error.
+ */
+fun Uri.getBitmap(contentResolver: ContentResolver): Bitmap? {
+    var inputStream: InputStream? = null
+    try {
+        inputStream = contentResolver.openInputStream(this)
+        if (inputStream != null) {
+            return BitmapFactory.decodeStream(inputStream)
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    } finally {
+        inputStream?.close()
+    }
+    return null
+}
+
+/**
+ * Saves the bitmap image as a temporary PNG file in the cache directory
+ * and returns the corresponding URI.
+ * The name parameter should be a unique name for the image, with the appropriate
+ * .png extension. If the file already exists, it will be overwritten.
+ *
+ * @return URI of the saved image, or null in case of error.
+ */
+fun Bitmap.cacheUri(context: Context, name: String): Uri? {
+    var uri: Uri? = null
+    var fileOutputStream: FileOutputStream? = null
+    try {
+        val file = File(context.cacheDir, name)
+        fileOutputStream = FileOutputStream(file)
+        this.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream)
+        fileOutputStream.flush()
+        fileOutputStream.close()
+        uri = Uri.fromFile(file)
+    } catch (e: Exception) {
+        e.printStackTrace()
+    } finally {
+        try {
+            fileOutputStream?.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+    return uri
 }

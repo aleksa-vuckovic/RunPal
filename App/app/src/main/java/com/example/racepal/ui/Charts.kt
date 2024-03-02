@@ -28,8 +28,8 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.toSize
 import com.example.racepal.Formatter
+import com.example.racepal.binarySearch
 import com.example.racepal.models.PathPoint
-import com.example.racepal.Utils
 import com.example.racepal.join
 import kotlin.math.max
 import kotlin.math.min
@@ -227,7 +227,7 @@ private fun PathChartLine(data: PathLineChartDataset,
         if (options.markers && touchPositionState.value != Offset.Zero) {
             val touch = touchPositionState.value
             val point =
-                Utils.binarySearch(data.path, { chartConfiguration.mapX(data.xValue(it)) }, touch.x)
+                binarySearch(data.path, { chartConfiguration.mapX(data.xValue(it)) }, touch.x)
             if (point == null) return@Canvas
             val selectedX = data.xValue(point)
             val selectedY = data.yValue(point)

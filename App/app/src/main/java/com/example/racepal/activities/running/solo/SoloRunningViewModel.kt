@@ -1,4 +1,4 @@
-package com.example.racepal.activities
+package com.example.racepal.activities.running.solo
 
 import android.location.Location
 import androidx.lifecycle.ViewModel

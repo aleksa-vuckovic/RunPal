@@ -14,35 +14,38 @@ import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Query
 
+/**
+ * All of the API calls return a GenericResponse object.
+ * If successful, 'message' is set to "ok", and 'data' holds the relevant data, if any.
+ * (This is what @return refers to.)
+ * If unsuccessful, 'message' contains the relevant error message.
+ */
 interface LoginApi {
 
     @GET("test")
-    suspend fun test(@Query("test") testData: String): ResponseBody
+    suspend fun test(@Query("test") testData: String): GenericResponse<Unit>
 
     /**
      * Login using email and password.
      *
-     * @return On success, the JWT token as plain text,
-     * on failure the error message as plain text.
+     * @return JWT token.
      */
     @FormUrlEncoded
     @POST("login")
-    suspend fun login(@Field("email") email: String, @Field("password") password: String): Response<String>
+    suspend fun login(@Field("email") email: String, @Field("password") password: String): GenericResponse<String>
 
     /**
      * Refresh a valid JWT token.
      *
-     * @return On success the JWT token as plain text,
-     * on failure the error message as plain text.
+     * @return New JWT token.
      */
     @GET("refresh")
-    suspend fun refresh(@Header("Authorization") auth: String = "Bearer "): Response<String>
+    suspend fun refresh(@Header("Authorization") auth: String = "Bearer "): GenericResponse<String>
 
     /**
      * Submits the user data for registration.
      *
-     * @return On success a new JWT token as plain text,
-     * on failure the error message as plain text.
+     * @return JWT token.
      */
     @Multipart
     @POST("register")
@@ -51,6 +54,6 @@ interface LoginApi {
                          @Part("name") name: String,
                          @Part("last") last: String,
                          @Part("weight") weight: String,
-                         @Part("profile") profile: MultipartBody.Part?): Response<String>
+                         @Part profile: MultipartBody.Part?): GenericResponse<String>
 }
 

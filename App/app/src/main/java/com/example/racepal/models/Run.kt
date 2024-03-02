@@ -17,7 +17,7 @@ import androidx.room.Entity
  * @property running Total running milliseconds.
  * @property end The end timestamp, null if run did not end (properly).
  */
-@Entity(tableName = "run", primaryKeys = ["id", "user"])
+@Entity(tableName = "runs", primaryKeys = ["id", "user"])
 class Run(
     val id: Long = 0,
     val user: String = "",

@@ -1,4 +1,4 @@
-package com.example.racepal.activities
+package com.example.racepal.activities.running.solo
 
 import android.Manifest
 import android.content.Intent
@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.example.racepal.RUNNER_ICON_SIZE
 import com.example.racepal.RunDataPanel
+import com.example.racepal.activities.SoloRunningResults
 import com.example.racepal.run.Timer
 import com.example.racepal.getRunnerBitmap
 import com.example.racepal.ui.GoogleMapRun

@@ -1,22 +1,27 @@
-package com.example.racepal
+package com.example.racepal.repositories
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.compose.runtime.Composable
+import android.net.Uri
+import com.example.racepal.IntelligibleException
+import com.example.racepal.getBitmap
 import com.example.racepal.models.User
+import com.example.racepal.room.UserDao
 import com.example.racepal.server.LoginApi
+import com.example.racepal.toMultipartPart
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * This class manages user JWT tokens,
- * user log in, and log out.
+ * user login, and logout.
  */
-
 @Singleton
-class LoginManager @Inject constructor(val loginApi: LoginApi, @ApplicationContext val context: Context) {
+class LoginManager @Inject constructor(
+    private val loginApi: LoginApi,
+    @ApplicationContext private val context: Context
+) {
 
     companion object {
         private const val SHARED_PREFS_LOGIN = "LOGIN"
@@ -51,57 +56,52 @@ class LoginManager @Inject constructor(val loginApi: LoginApi, @ApplicationConte
     }
     /**
      * Attempts to refresh the jwt token, if it exists.
-     * Throws GenericException if the token was not successfully refreshed.
+     * Throws exception if not successful.
      */
     suspend fun refresh() {
         val user = currentUser()
         val token = currentToken()
-
-        if (user == null || token == null) throw GenericException("No log history.")
+        if (user == null || token == null) throw IntelligibleException("No log history.")
 
         val response = loginApi.refresh(auth = "Bearer ${token}")
-        val body = response.body()
-        if (!response.isSuccessful) throw GenericException(body)
-        if (body == null) throw GenericException("Server error.")
+        if (response.message != "ok") throw IntelligibleException(response.message)
+        if (response.data == null) throw IntelligibleException("Server error.")
 
-        setToken(body)
+        setToken(response.data)
     }
 
     /**
      * Attempts to register a new user on the server.
      * If successful, the user is immediately logged in.
-     * Otherwise, a GenericException is thrown.
+     * Otherwise an exception is thrown.
      */
-    suspend fun register(user: User) {
+    suspend fun register(email: String, password: String, name: String, last: String, weight: Double, profile: Uri?) {
+        val response = loginApi.register(email, password, name, last, weight.toString(), profile?.getBitmap(context.contentResolver)?.toMultipartPart(fieldName = "profile", fileName = "profile.png"))
+        if (response.message != "ok") throw IntelligibleException(response.message)
+        if (response.data == null) throw IntelligibleException("Server error.")
 
-        val response = loginApi.register(user.email, user.password?:"", user.name, user.last, user.weight.toString(), user.profile?.toMultipartPart())
-        val body = response.body()
-        if (!response.isSuccessful) throw GenericException(body)
-        if (body == null) throw GenericException("Server error.")
-
-        setUser(user.email)
-        setToken(body)
+        setUser(email)
+        setToken(response.data)
     }
 
     /**
      * Logs the user out by deleting the JWT token.
      */
-    fun logOut() {
+    fun logout() {
         setUser(null)
         setToken(null)
     }
 
     /**
      * Attempts to log in using the given email and password.
-     * Throws GenericException if unsuccessful.
+     * Throws exception if not successful.
      */
     suspend fun login(email: String, password: String) {
         val response = loginApi.login(email, password)
-        val body = response.body()
-        if (!response.isSuccessful) throw GenericException(body)
-        if (body == null) throw GenericException("Server error.")
+        if (response.message != "ok") throw IntelligibleException(response.message)
+        if (response.data == null) throw IntelligibleException("Server error.")
 
         setUser(email)
-        setToken(body)
+        setToken(response.data)
     }
 }
