@@ -15,6 +15,9 @@ val Typography = Typography(
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
     ),
+    /**
+     * Countdown.
+     */
     displayLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.ExtraBold,
@@ -22,6 +25,9 @@ val Typography = Typography(
         lineHeight = 90.sp,
         letterSpacing = 3.sp
     ),
+    /**
+     * Full width buttons (e.g. Home screen).
+     */
     displayMedium = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.SemiBold,
@@ -29,13 +35,19 @@ val Typography = Typography(
         lineHeight = 50.sp,
         letterSpacing = 2.sp
     ),
+    /**
+     * Centered text on sparse screens.
+     */
     displaySmall = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = 25.sp,
-        lineHeight = 28.sp,
+        fontSize = 20.sp,
+        lineHeight = 24.sp,
         letterSpacing = 1.sp
     ),
+    /**
+     * Form labels.
+     */
     labelMedium = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
@@ -43,6 +55,9 @@ val Typography = Typography(
         lineHeight = 25.sp,
         letterSpacing = 1.sp
     ),
+    /**
+     *
+     */
     titleMedium = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,

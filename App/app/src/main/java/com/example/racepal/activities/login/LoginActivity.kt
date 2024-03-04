@@ -23,8 +23,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.racepal.ServerException
 import com.example.racepal.repositories.LoginManager
 import com.example.racepal.activities.home.HomeActivity
-import com.example.racepal.repositories.RoomUserRepository
-import com.example.racepal.repositories.ServerUserRespository
+import com.example.racepal.repositories.user.LocalUserRepository
+import com.example.racepal.repositories.user.ServerUserRespository
 import com.example.racepal.ui.theme.RacePalTheme
 import com.example.racepal.ui.theme.StandardNavBar
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,7 +40,7 @@ class LoginActivity : ComponentActivity() {
     @Inject
     lateinit var serverUserRespository: ServerUserRespository
     @Inject
-    lateinit var roomUserRepository: RoomUserRepository
+    lateinit var localUserRepository: LocalUserRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,7 +97,7 @@ class LoginActivity : ComponentActivity() {
                                         try {
                                             loginManager.register(email, password, name, last, weight, uri)
                                             val user = serverUserRespository.getUser(email)
-                                            roomUserRepository.upsert(user)
+                                            localUserRepository.upsert(user)
                                             this@LoginActivity.startActivity(
                                                 Intent(
                                                     this@LoginActivity,

@@ -12,8 +12,8 @@ import com.example.racepal.kcalExpenditure
 import com.example.racepal.models.Run
 import com.example.racepal.models.RunData
 import com.example.racepal.models.toPathPoint
-import com.example.racepal.repositories.RunRepository
-import com.example.racepal.repositories.UserRepository
+import com.example.racepal.repositories.run.RunRepository
+import com.example.racepal.repositories.user.UserRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

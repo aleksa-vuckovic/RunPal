@@ -18,7 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.racepal.RUN_ID_KEY
-import com.example.racepal.account.AccountActivity
+import com.example.racepal.activities.account.AccountActivity
 import com.example.racepal.activities.running.solo.SoloRunningActivity
 import com.example.racepal.hasLocationPermission
 import com.example.racepal.repositories.LoginManager

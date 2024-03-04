@@ -1,4 +1,4 @@
-package com.example.racepal.account
+package com.example.racepal.activities.account
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.racepal.Destination

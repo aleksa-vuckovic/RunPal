@@ -18,7 +18,7 @@
         android:theme="@style/Theme.RacePal"
         tools:targetApi="31">
         <activity
-            android:name=".account.AccountActivity"
+            android:name=".activities.account.AccountActivity"
             android:exported="false"
             android:label="@string/title_activity_account"
             android:theme="@style/Theme.RacePal" />

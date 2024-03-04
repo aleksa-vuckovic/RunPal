@@ -1,9 +1,10 @@
-package com.example.racepal.repositories
+package com.example.racepal.repositories.run
 
 import com.example.racepal.ServerException
 import com.example.racepal.models.Run
 import com.example.racepal.models.RunInfo
 import com.example.racepal.models.RunData
+import com.example.racepal.repositories.run.RunRepository
 import com.example.racepal.server.RunApi
 import javax.inject.Inject
 import javax.inject.Singleton

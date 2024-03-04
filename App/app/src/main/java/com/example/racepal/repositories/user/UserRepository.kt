@@ -1,4 +1,4 @@
-package com.example.racepal.repositories
+package com.example.racepal.repositories.user
 
 import com.example.racepal.models.User
 

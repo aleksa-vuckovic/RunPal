@@ -1,5 +1,7 @@
 import userModel from './models/User'
 import runModel from './models/Run'
+import roomModel from './models/Room'
+import { ObjectId } from 'mongodb'
 
 export class DB {
 
@@ -64,5 +66,36 @@ export class DB {
         ])
         if (ret.length > 0) return ret[0]
         else return null
+    }
+
+    static async createRoom(): Promise<string> {
+        let room = new roomModel({
+            members: [],
+            ready: []
+        })
+        let saved = await room.save()
+        return saved._id.toString()
+    }
+
+    static async joinRoom(user: string, room: string): Promise<string> {
+        let ret = await roomModel.updateOne({_id: new ObjectId(room)}, {$addToSet: {members: user}})
+        if (ret.matchedCount > 0) return "ok"
+        else return "Room does not exist."
+    }
+
+    static async readyRoom(user: string, room: string): Promise<string> {
+        let ret = await roomModel.updateOne({_id: new ObjectId(room), members: user}, {$addToSet: {ready: user}})
+        if (ret.matchedCount > 0) return "ok"
+        else return "Room does not exist, or the user is not a member."
+    }
+
+    static async leaveRoom(user: string, room: string): Promise<string> {
+        let ret = await roomModel.updateOne({_id: room}, {$pull: {members: user, ready: user}})
+        if (ret.matchedCount > 0) return "ok"
+        else return "Room does not exist."
+    }
+
+    static async room(id: string): Promise<any> {
+        return await roomModel.findOne({_id: new ObjectId(id)})
     }
 }

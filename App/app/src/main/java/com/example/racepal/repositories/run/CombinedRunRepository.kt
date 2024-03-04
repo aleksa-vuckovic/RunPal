@@ -1,4 +1,4 @@
-package com.example.racepal.repositories
+package com.example.racepal.repositories.run
 
 import android.content.Context
 import android.util.Log
@@ -8,6 +8,7 @@ import com.example.racepal.ServerException
 import com.example.racepal.models.Run
 import com.example.racepal.models.RunInfo
 import com.example.racepal.models.RunData
+import com.example.racepal.repositories.LoginManager
 import com.example.racepal.room.Sync
 import com.example.racepal.room.SyncDao
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -23,7 +24,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class CombinedRunRepository @Inject constructor(
-    private val roomRunRepository: RoomRunRepository,
+    private val localRunRepository: LocalRunRepository,
     private val serverRunRepository: ServerRunRepository,
     private val loginManager: LoginManager,
     private val syncDao: SyncDao,
@@ -55,7 +56,7 @@ class CombinedRunRepository @Inject constructor(
             unsynced.remove(run.user to run.id)
             return
         }
-        val update = roomRunRepository.getUpdate(user = run.user, id = run.id, since = s.since ?: 0)
+        val update = localRunRepository.getUpdate(user = run.user, id = run.id, since = s.since ?: 0)
         try {
             if (s.since == null) {
                 serverRunRepository.create(update.run)
@@ -84,7 +85,7 @@ class CombinedRunRepository @Inject constructor(
 
 
     override suspend fun create(run: Run) {
-        roomRunRepository.create(run)
+        localRunRepository.create(run)
         if (isSynced(run)) try {
             serverRunRepository.create(run)
         } catch(_: ServerException) {/*-||-*/}
@@ -94,7 +95,7 @@ class CombinedRunRepository @Inject constructor(
         else attemptSync(run)
     }
     override suspend fun update(runData: RunData) {
-        roomRunRepository.update(runData)
+        localRunRepository.update(runData)
         val run = runData.run
         if (isSynced(run)) try {
             serverRunRepository.update(runData)
@@ -115,13 +116,13 @@ class CombinedRunRepository @Inject constructor(
         if (loginManager.currentUser() == user) {
             Log.d("RUNREPO", "Retrieving update for user ${user} who is logged in.")
             try {
-                return roomRunRepository.getUpdate(user, id, room, event, since)
+                return localRunRepository.getUpdate(user, id, room, event, since)
             } catch (e: NotFound) {
                 //The run must be from a different device, so synchronize.
                 try {
                     val ret = serverRunRepository.getUpdate(user, id, room, event, since)
-                    roomRunRepository.create(ret.run)
-                    roomRunRepository.update(ret)
+                    localRunRepository.create(ret.run)
+                    localRunRepository.update(ret)
                     return ret
                 } catch (e: ServerException) {
                     e.printStackTrace()

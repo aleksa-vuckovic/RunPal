@@ -106,4 +106,8 @@ class ServerModule {
     @Singleton
     @Provides
     fun provideUploadApi(@AuthorizedRetrofit retrofit: Retrofit): UploadApi = retrofit.create(UploadApi::class.java)
+
+    @Singleton
+    @Provides
+    fun provideRoomApi(@AuthorizedRetrofit retrofit: Retrofit): RoomApi = retrofit.create((RoomApi::class.java))
 }

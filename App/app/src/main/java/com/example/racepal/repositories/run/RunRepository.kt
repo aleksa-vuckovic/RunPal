@@ -1,4 +1,4 @@
-package com.example.racepal.repositories
+package com.example.racepal.repositories.run
 
 import com.example.racepal.models.Run
 import com.example.racepal.models.RunInfo

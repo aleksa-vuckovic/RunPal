@@ -1,4 +1,4 @@
-package com.example.racepal.repositories
+package com.example.racepal.repositories.user
 
 import android.content.Context
 import android.widget.Toast
@@ -17,14 +17,14 @@ import javax.inject.Singleton
  */
 @Singleton
 class CombinedUserRepository @Inject constructor(
-    private val roomUserRepository: RoomUserRepository,
+    private val localUserRepository: LocalUserRepository,
     private val serverUserRepository: ServerUserRespository,
     @ApplicationContext private val context: Context
 ): UserRepository {
     override suspend fun update(user: User) {
         serverUserRepository.update(user)
         val newUser = serverUserRepository.getUser(user.email)
-        roomUserRepository.upsert(newUser)
+        localUserRepository.upsert(newUser)
         //No try block, because this is the only acceptable sequence of events.
     }
 
@@ -36,10 +36,10 @@ class CombinedUserRepository @Inject constructor(
     private val fresh: MutableList<String> = mutableListOf()
 
     override suspend fun getUser(email: String): User {
-        if (fresh.contains(email)) return roomUserRepository.getUser(email)
+        if (fresh.contains(email)) return localUserRepository.getUser(email)
         else try {
             val user = serverUserRepository.getUser(email)
-            roomUserRepository.upsert(user)
+            localUserRepository.upsert(user)
             fresh.add(email)
             return user
         } catch(e: ServerException) {
@@ -50,6 +50,6 @@ class CombinedUserRepository @Inject constructor(
             e.printStackTrace()
             Toast.makeText(context, "No internet connection.", Toast.LENGTH_SHORT).show()
         }
-        return roomUserRepository.getUser(email)
+        return localUserRepository.getUser(email)
     }
 }

@@ -1,10 +1,9 @@
-package com.example.racepal.repositories
+package com.example.racepal.repositories.user
 
 import android.content.Context
 import android.net.Uri
 import androidx.core.net.toFile
 import com.example.racepal.NotFound
-import com.example.racepal.ServerException
 import com.example.racepal.makePermanentFile
 import com.example.racepal.models.User
 import com.example.racepal.room.UserDao
@@ -13,7 +12,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RoomUserRepository @Inject constructor(private val userDao: UserDao, @ApplicationContext val context: Context): UserRepository {
+class LocalUserRepository @Inject constructor(private val userDao: UserDao, @ApplicationContext val context: Context):
+    UserRepository {
 
     private suspend fun saveProfile(user: User) {
         try { //delete previous profile picture

@@ -10,6 +10,8 @@ const pathPointSchema = new mongoose.Schema({
     speed: Number,
     distance: Number,
     kcal: Number
+}, {
+    _id: false
 })
 
 const runSchema = new mongoose.Schema({

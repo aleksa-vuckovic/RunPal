@@ -1,11 +1,11 @@
-package com.example.racepal.account
+package com.example.racepal.activities.account
 
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.racepal.models.User
-import com.example.racepal.repositories.CombinedUserRepository
+import com.example.racepal.repositories.user.CombinedUserRepository
 import com.example.racepal.repositories.LoginManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext

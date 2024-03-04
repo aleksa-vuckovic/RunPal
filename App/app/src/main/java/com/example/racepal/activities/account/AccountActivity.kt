@@ -1,4 +1,4 @@
-package com.example.racepal.account
+package com.example.racepal.activities.account
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

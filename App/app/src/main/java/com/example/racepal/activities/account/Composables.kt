@@ -1,4 +1,4 @@
-package com.example.racepal.account
+package com.example.racepal.activities.account
 
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke

@@ -1,4 +1,4 @@
-package com.example.racepal.repositories
+package com.example.racepal.repositories.run
 
 import com.example.racepal.NotFound
 import com.example.racepal.models.Run
@@ -12,7 +12,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RoomRunRepository @Inject constructor (val runDao: RunDao, val pathDao: PathDao): RunRepository {
+class LocalRunRepository @Inject constructor (val runDao: RunDao, val pathDao: PathDao):
+    RunRepository {
     override suspend fun create(run: Run) {
         runDao.insert(run)
     }

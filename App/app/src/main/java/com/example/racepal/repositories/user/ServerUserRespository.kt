@@ -1,9 +1,11 @@
-package com.example.racepal.repositories
+package com.example.racepal.repositories.user
 
 import android.content.Context
 import com.example.racepal.ServerException
 import com.example.racepal.getBitmap
 import com.example.racepal.models.User
+import com.example.racepal.repositories.LoginManager
+import com.example.racepal.repositories.ServerUploadRepository
 import com.example.racepal.server.UserApi
 import com.example.racepal.toMultipartPart
 import dagger.hilt.android.qualifiers.ApplicationContext
