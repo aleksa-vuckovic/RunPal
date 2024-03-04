@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "RacePal"
+rootProject.name = "RunPal"
 include(":app")
  

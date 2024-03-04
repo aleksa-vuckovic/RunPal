@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.racepal"
+    namespace = "com.example.runpal"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.racepal"
+        applicationId = "com.example.runpal"
         minSdk = 26
         targetSdk = 33
         versionCode = 1
