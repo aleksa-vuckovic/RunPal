@@ -2,7 +2,7 @@ package com.example.racepal.repositories
 
 import android.content.Context
 import android.widget.Toast
-import com.example.racepal.IntelligibleException
+import com.example.racepal.ServerException
 import com.example.racepal.models.User
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -32,19 +32,24 @@ class CombinedUserRepository @Inject constructor(
         throw Exception("Upserts not supported on the server side!")
     }
 
+    //Users whose data has been loaded from the server already (during the lifetime of this singleton)
+    private val fresh: MutableList<String> = mutableListOf()
+
     override suspend fun getUser(email: String): User {
-        try {
+        if (fresh.contains(email)) return roomUserRepository.getUser(email)
+        else try {
             val user = serverUserRepository.getUser(email)
             roomUserRepository.upsert(user)
+            fresh.add(email)
             return user
-        } catch(e: IntelligibleException) {
-            //This means that the exception was not due to server unavailability
-            throw e
+        } catch(e: ServerException) {
+            e.printStackTrace()
+            Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
         }
         catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(context, "No internet connection.", Toast.LENGTH_SHORT).show()
-            return roomUserRepository.getUser(email)
         }
+        return roomUserRepository.getUser(email)
     }
 }

@@ -3,10 +3,8 @@ package com.example.racepal.repositories
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
-import com.example.racepal.IntelligibleException
+import com.example.racepal.ServerException
 import com.example.racepal.getBitmap
-import com.example.racepal.models.User
-import com.example.racepal.room.UserDao
 import com.example.racepal.server.LoginApi
 import com.example.racepal.toMultipartPart
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -61,11 +59,10 @@ class LoginManager @Inject constructor(
     suspend fun refresh() {
         val user = currentUser()
         val token = currentToken()
-        if (user == null || token == null) throw IntelligibleException("No log history.")
+        if (user == null || token == null) throw Exception("No log history.")
 
         val response = loginApi.refresh(auth = "Bearer ${token}")
-        if (response.message != "ok") throw IntelligibleException(response.message)
-        if (response.data == null) throw IntelligibleException("Server error.")
+        if (response.message != "ok") throw ServerException(response.message)
 
         setToken(response.data)
     }
@@ -77,8 +74,7 @@ class LoginManager @Inject constructor(
      */
     suspend fun register(email: String, password: String, name: String, last: String, weight: Double, profile: Uri?) {
         val response = loginApi.register(email, password, name, last, weight.toString(), profile?.getBitmap(context.contentResolver)?.toMultipartPart(fieldName = "profile", fileName = "profile.png"))
-        if (response.message != "ok") throw IntelligibleException(response.message)
-        if (response.data == null) throw IntelligibleException("Server error.")
+        if (response.message != "ok") throw ServerException(response.message)
 
         setUser(email)
         setToken(response.data)
@@ -98,8 +94,7 @@ class LoginManager @Inject constructor(
      */
     suspend fun login(email: String, password: String) {
         val response = loginApi.login(email, password)
-        if (response.message != "ok") throw IntelligibleException(response.message)
-        if (response.data == null) throw IntelligibleException("Server error.")
+        if (response.message != "ok") throw ServerException(response.message)
 
         setUser(email)
         setToken(response.data)

@@ -12,10 +12,12 @@ import com.google.maps.android.compose.CameraPositionState
 
 class MapState {
     private val _centered: MutableState<Boolean> = mutableStateOf(true)
+
     val cameraPositionState: CameraPositionState = CameraPositionState(CameraPosition.fromLatLngZoom(
         LatLng(44.8195, 20.4423), 15f
     ))
-    fun centeredAsState(): State<Boolean> = _centered
+    val centered: Boolean
+        get() = _centered.value
 
     fun adjustCamera(pathPoint: PathPoint, zoom: Float? = null) {
         if (_centered.value)

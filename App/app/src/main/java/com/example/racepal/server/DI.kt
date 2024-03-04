@@ -1,6 +1,6 @@
 package com.example.racepal.server
 
-import com.example.racepal.IntelligibleException
+import com.example.racepal.ServerException
 import com.example.racepal.SERVER_ADDRESS
 import com.example.racepal.repositories.LoginManager
 import com.google.gson.GsonBuilder
@@ -61,7 +61,7 @@ class ServerModule {
         val authorizationInterceptor = object: Interceptor {
             override fun intercept(chain: Interceptor.Chain): Response {
                 val token = loginManager.currentToken()
-                if (token == null) throw IntelligibleException("Token expired.")
+                if (token == null) throw ServerException("Token expired.")
                 val request = chain.request().newBuilder()
                     .addHeader("Authorization", "Bearer $token")
                     .build()

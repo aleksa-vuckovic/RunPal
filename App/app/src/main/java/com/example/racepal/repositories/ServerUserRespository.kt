@@ -1,8 +1,7 @@
 package com.example.racepal.repositories
 
 import android.content.Context
-import android.graphics.BitmapFactory
-import com.example.racepal.IntelligibleException
+import com.example.racepal.ServerException
 import com.example.racepal.getBitmap
 import com.example.racepal.models.User
 import com.example.racepal.server.UserApi
@@ -21,9 +20,8 @@ class ServerUserRespository @Inject constructor(
 
 
     override suspend fun update(user: User) {
-        if (user.email != loginManager.currentUser()) throw IntelligibleException("Cannot alter other users' data.")
         val response = userApi.update(user.name, user.last, user.weight.toString(), user.profileUri.getBitmap(context.contentResolver)?.toMultipartPart("profile"))
-        if (response.message != "ok") throw IntelligibleException(response.message)
+        if (response.message != "ok") throw ServerException(response.message)
         loginManager.refresh()
     }
 
@@ -40,10 +38,8 @@ class ServerUserRespository @Inject constructor(
      */
     override suspend fun getUser(email: String): User {
         val response = userApi.data(email)
-        if (response.message != "ok") throw IntelligibleException(response.message)
-        val user = response.data
-        if (user == null) throw IntelligibleException("Server error.") //Never happens
-
+        if (response.message != "ok") throw ServerException(response.message)
+        val user = response.data!!
         user.profileUri = serverUploadRepository.get(user.profile)
         return user
     }

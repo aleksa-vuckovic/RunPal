@@ -31,4 +31,9 @@ class RoomModule {
     @Provides
     @Singleton
     fun provideUserDao(database: Database): UserDao = database.userDao()
+
+    @Provides
+    @Singleton
+    fun provideSyncDao(database: Database): SyncDao = database.syncDao()
+
 }

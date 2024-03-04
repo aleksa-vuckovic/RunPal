@@ -2,15 +2,11 @@ package com.example.racepal.account
 
 import android.content.Context
 import android.net.Uri
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.racepal.IntelligibleException
 import com.example.racepal.models.User
 import com.example.racepal.repositories.CombinedUserRepository
 import com.example.racepal.repositories.LoginManager
-import com.example.racepal.repositories.RoomUserRepository
-import com.example.racepal.repositories.ServerUserRespository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow

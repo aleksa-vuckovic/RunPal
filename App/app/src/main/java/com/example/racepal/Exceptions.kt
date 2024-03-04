@@ -1,7 +1,11 @@
 package com.example.racepal
 
 /**
- * An exception whose message is presentable, and understandable
- * to the user.
+ * An exception thrown when the server responds with an error message.
  */
-class IntelligibleException(msg: String?): Exception(msg) {}
+class ServerException(msg: String?): Exception(msg) {}
+
+/**
+ * Used when a repository does not contain some data.
+ */
+class NotFound(msg: String?): Exception(msg) {}

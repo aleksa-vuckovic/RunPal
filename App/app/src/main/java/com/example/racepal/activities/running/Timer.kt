@@ -1,4 +1,4 @@
-package com.example.racepal.run
+package com.example.racepal.activities.running
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 class Timer @Inject constructor() {
     enum class State {
         READY,

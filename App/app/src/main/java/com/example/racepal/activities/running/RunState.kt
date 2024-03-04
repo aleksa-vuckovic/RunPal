@@ -1,0 +1,223 @@
+package com.example.racepal.activities.running
+
+import android.location.Location
+import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.example.racepal.models.PathPoint
+import com.example.racepal.filters.MovingAverageFilter
+import com.example.racepal.filters.PositionFilter
+import com.example.racepal.kcalExpenditure
+import com.example.racepal.models.Run
+import com.example.racepal.models.RunData
+import com.example.racepal.models.toPathPoint
+import com.example.racepal.repositories.RunRepository
+import com.example.racepal.repositories.UserRepository
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+/**
+ * Represents the state of an ongoing run, including distance, kcal,
+ * the entire path, time.
+ */
+interface RunState {
+    val run: Run
+    val location: PathPoint
+    val path: List<PathPoint>
+}
+
+/**
+ * A RunState which filters and manages GPS location data.
+ * Used for activities on the host device.
+ *
+ * @param run Should contain the user and id fields. If the run already exists,
+ * its state will be restored. Otherwise, the run will be in ready state, and
+ * created once start() is invoked.
+ * @param runRepository The run repository used to send updates, and also retrieve the existing run data during initialization.
+ * @param scope The run state has its own timer, which needs a scope to run in.
+ * Repository updates will also be launched in this scope.
+ * THe scope must use the main dispatcher, to avoid concurrency issues.
+ * @param updateInterval The average interval between two consecutive location updates,
+ * used to determine the filter buffer sizes.
+ */
+class LocalRunState @AssistedInject constructor (@Assisted run: Run,
+                                                 @Assisted private val scope: CoroutineScope,
+                                                 @Assisted updateInterval: Long,
+                                                 private val runRepository: RunRepository,
+                                                 private val userRepository: UserRepository
+    ): RunState {
+    private val _run = mutableStateOf(run)
+    private val _location = mutableStateOf(PathPoint.NONE)
+    private val _path: SnapshotStateList<PathPoint> = SnapshotStateList()
+    private var userWeight: Double = 80.0
+
+    init {
+        scope.launch {
+            try {
+                val existingData = runRepository.getUpdate(user = run.user, id = run.id)
+                _run.value = existingData.run
+                _location.value = existingData.location ?: _location.value
+                _path.addAll(existingData.path)
+                pause()
+            } catch(e: Exception) { e.printStackTrace()/*It's a new run.*/}
+
+            try {
+                userWeight = userRepository.getUser(run.user).weight
+            } catch (e: Exception) { e.printStackTrace();/* User does not exist?! Crash. */ throw e }
+        }
+    }
+
+    private val positionFilter: PositionFilter = PositionFilter(if (updateInterval < 2000) 2000/updateInterval.toInt() else 1, 3, 10.0, 2000)
+    private val speedFilter: MovingAverageFilter = MovingAverageFilter(if (updateInterval < 2000) 2000/updateInterval.toInt() else 1)
+
+    override val run: Run
+        get() = _run.value
+    override val location: PathPoint
+        get() = _location.value
+    override val path: List<PathPoint>
+        get() = _path
+
+    init {
+        scope.launch {
+            var prev = System.currentTimeMillis()
+            while(true) {
+                val cur = System.currentTimeMillis()
+                if (_run.value.state == Run.State.RUNNING) _run.value = _run.value.copy(running = _run.value.running + cur - prev)
+                prev = cur
+                delay(500)
+            }
+        }
+    }
+
+
+    /**
+     * @param loc The current location provided by GPS.
+     */
+    fun update(loc: Location) {
+        val cur = positionFilter.filter(loc.toPathPoint())
+        if (cur == null) return
+
+        val runUpdate = RunData(run = _run.value, location = cur)
+
+        val prev = _location.value
+        if (prev != PathPoint.NONE) {
+            cur.distance = prev.distance
+            cur.kcal = prev.kcal
+            val distanceDifference = prev.distance(cur)
+            val timeDifference = (cur.time - prev.time) / 1000
+            cur.speed = if (timeDifference != 0L) distanceDifference / timeDifference else prev.speed
+            cur.speed = speedFilter.filter(cur.speed)
+
+            if (_run.value.state == Run.State.RUNNING) {
+                cur.distance += distanceDifference
+                val slope = if (distanceDifference != 0.0) (cur.altitude - prev.altitude)/distanceDifference else 0.0
+                val expenditure = kcalExpenditure(cur.speed, slope, userWeight)
+                cur.kcal += expenditure*timeDifference
+                _path.add(cur)
+                runUpdate.path = listOf(cur)
+            }
+        }
+        _location.value = cur
+        if (_run.value.state != Run.State.READY) scope.launch { runRepository.update(runUpdate) }
+    }
+
+    fun start() {
+        if (_run.value.state != Run.State.READY) return
+        _run.value = _run.value.copy(start = System.currentTimeMillis(), paused = false)
+        scope.launch {
+            runRepository.create(_run.value)
+        }
+    }
+    fun pause() {
+        if (_run.value.state != Run.State.RUNNING) return
+        _run.value = _run.value.copy(paused = true)
+        segmentEndUpdate()
+    }
+    fun resume() {
+        if (_run.value.state != Run.State.PAUSED) return
+        _run.value = _run.value.copy(paused = false)
+    }
+    fun stop() {
+        if (_run.value.state == Run.State.READY || _run.value.state == Run.State.ENDED) return
+        _run.value = _run.value.copy(end = System.currentTimeMillis())
+        segmentEndUpdate()
+    }
+    private fun segmentEndUpdate() {
+        _location.value = _location.value.copy(end = true, time = _location.value.time + 1)
+        _path.add(_location.value)
+        val runUpdate = RunData(run = _run.value, path = listOf(_location.value))
+        scope.launch {
+            runRepository.update(runUpdate)
+            Log.d("SEGMENT END", "Complete")
+        }
+    }
+}
+
+/**
+ * A RunState which is used for data obtained from the server,
+ * tracked by another device.
+ *
+ * @param run A run object containing some valid pair of identifying fields.
+ * (id+user, room+user, event+user)
+ * If id is not to be used, set to -1.
+ * @param scope A scope for the fetcher coroutine.
+ * @param interval The time in millis between two update fetches.
+ * @param runRepository The repository to fetch from.
+ */
+class NonlocalRunState @AssistedInject constructor (
+    @Assisted run: Run,
+    @Assisted scope: CoroutineScope,
+    @Assisted private val interval: Long,
+    private val runRepository: RunRepository
+): RunState {
+    private val _run = mutableStateOf(run)
+    private val _location: MutableState<PathPoint> = mutableStateOf(PathPoint.NONE)
+    private val _path: SnapshotStateList<PathPoint> = SnapshotStateList()
+
+    private var lastFetch: Long = 0L
+
+    override val run: Run
+        get() = _run.value
+    override val location: PathPoint
+        get() = _location.value
+    override val path: List<PathPoint>
+        get() = _path
+
+    init {
+        val user = _run.value.user
+        val id = if (_run.value.id == -1L) null else _run.value.id
+        val room = _run.value.room
+        val event = _run.value.event
+
+        scope.launch {
+            while(true) {
+                try {
+                    val update = runRepository.getUpdate(user = user, id = id, room = room, event = event, since = lastFetch)
+                    _run.value = update.run
+                    _location.value = update.location ?: _location.value
+                    _path.addAll(update.path)
+                    if (update.path.size > 0) lastFetch = update.path.last().time
+                } catch(_: Exception) {}
+                delay(interval)
+            }
+        }
+    }
+}
+
+@AssistedFactory
+interface LocalRunStateFactory {
+    fun createLocalRunState(run: Run,
+                            scope: CoroutineScope,
+                            updateInterval: Long = 200L): LocalRunState
+}
+@AssistedFactory
+interface NonlocalRunStateFactory {
+    fun createNonlocalRunState(run: Run,
+                               scope: CoroutineScope,
+                               interval: Long = 1000L): NonlocalRunState
+}

@@ -5,6 +5,8 @@ import android.net.Uri
 import com.example.racepal.server.UploadApi
 import com.example.racepal.tempServerFile
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.FileOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,14 +26,15 @@ class ServerUploadRepository @Inject constructor(private val uploadApi: UploadAp
         val uploadBA = uploadApi.get(id).bytes()
         val tempFile = context.tempServerFile(id)
 
-        var fos: FileOutputStream? = null
-        try {
-            fos = FileOutputStream(tempFile)
-            fos.write(uploadBA)
-        } finally {
-            fos?.close()
+        withContext(Dispatchers.IO) {
+            var fos: FileOutputStream? = null
+            try {
+                fos = FileOutputStream(tempFile)
+                fos.write(uploadBA)
+            } finally {
+                fos?.close()
+            }
         }
-
         val uri = Uri.fromFile(tempFile)
         cache.put(id, uri)
         return uri

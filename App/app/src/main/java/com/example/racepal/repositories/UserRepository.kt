@@ -9,13 +9,14 @@ interface UserRepository {
 
     /**
      * Updates the user with the new data.
-     * The profile field is expected to be a valid URI.
+     * The profile field is expected to be a valid URI,
+     * referencing an image file on the device.
      */
     suspend fun update(user: User)
 
     /**
      * Same as update, but if a user with the given email does not exist,
-     * a new one is inserted.
+     * a new one is inserted. Not supported on the server.
      */
     suspend fun upsert(user: User)
 

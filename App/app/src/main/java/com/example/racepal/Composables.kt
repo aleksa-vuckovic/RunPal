@@ -118,84 +118,6 @@ fun Modifier.borderBottom(strokeWidth: Dp, color: Color): Modifier {
 }
 
 @Composable
-fun PanelText(text: Pair<String,String>, modifier: Modifier = Modifier) {
-    var subscriptOffset: Float
-    LocalDensity.current.run { subscriptOffset = MaterialTheme.typography.labelLarge.fontSize.toPx() / 2 }
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(text = text.first,
-            style = MaterialTheme.typography.labelLarge)
-        Text(
-            text = text.second,
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
-            modifier = Modifier.graphicsLayer {
-                this.translationY = subscriptOffset
-            })
-    }
-
-}
-
-@Composable
-fun RunDataPanel(distance: Double, kcal: Double, time: Long, speed: Double, modifier: Modifier = Modifier) {
-    var imperial by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var pace by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    Column(modifier = modifier) {
-        Row(modifier = Modifier
-            .weight(1f)
-            .fillMaxWidth()) {
-            PanelText(text = if (imperial) ImperialDistanceFormatter.format(distance)
-                            else MetricDistanceFormatter.format(distance),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .borderRight(1.dp, Color.LightGray)
-                    .weight(1f)
-                    .clickable { imperial = !imperial }
-                    .padding(vertical = 20.dp)
-            )
-            PanelText(text = KcalFormatter.format(kcal),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f)
-                    .padding(vertical = 20.dp)
-            )
-        }
-        Divider(
-            modifier = Modifier
-                .height(1.dp)
-                .fillMaxWidth()
-        )
-        Row(modifier = Modifier
-            .weight(1f)
-            .fillMaxWidth()) {
-            PanelText(text = if (pace && imperial) ImperialPaceFormatter.format(speed)
-                            else if (pace && !imperial) MetricPaceFormatter.format(speed)
-                            else if (!pace && imperial) ImperialSpeedFormatter.format(speed)
-                            else MetricSpeedFormatter.format(speed),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .borderRight(1.dp, Color.LightGray)
-                    .weight(1f)
-                    .clickable { pace = !pace }
-                    .padding(vertical = 20.dp))
-            PanelText(text = TimeFormatter.format(time),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f)
-                    .padding(vertical = 20.dp)
-            )
-        }
-    }
-}
-
-@Composable
 fun ProgressFloatingButton(onProgress: (Float) -> Unit,
                            time: Long,
                            color: Color = Color.Gray,
@@ -357,15 +279,4 @@ fun LoadingDots(size: Dp, count: Int, color: Color = MaterialTheme.colorScheme.p
                     )
             )
     }
-}
-
-//@Preview(showBackground = true)
-@Composable
-fun Preview() {
-    RacePalTheme {
-        RunDataPanel(distance = 1240.0, kcal = 120.0, time = 1250000, speed = 3.0, modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp))
-    }
-
 }

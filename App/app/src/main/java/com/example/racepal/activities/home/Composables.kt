@@ -57,9 +57,7 @@ fun MenuScreen(onSoloRun: () -> Unit, onGroupRun: () -> Unit, onEvent: () -> Uni
         HomeButton(
             icon = Icons.AutoMirrored.Filled.DirectionsRun,
             text = "Solo run",
-            onClick = {
-
-            },
+            onClick = onSoloRun,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
@@ -67,9 +65,7 @@ fun MenuScreen(onSoloRun: () -> Unit, onGroupRun: () -> Unit, onEvent: () -> Uni
         HomeButton(
             icon = Icons.Default.Groups,
             text = "Group run",
-            onClick = {
-
-            },
+            onClick = onGroupRun,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
@@ -77,9 +73,7 @@ fun MenuScreen(onSoloRun: () -> Unit, onGroupRun: () -> Unit, onEvent: () -> Uni
         HomeButton(
             icon = Icons.Default.SportsScore,
             text = "Event",
-            onClick = {
-
-            },
+            onClick = onEvent,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)

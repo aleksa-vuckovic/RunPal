@@ -17,6 +17,10 @@ val Pink = Color(0xFFEFB8C8)
 val White = Color.White
 val Transparent = Color.Transparent
 
+val LightGreen = Color(0xFFC4f2c2)
+val LightRed = Color(0xFFF6b1b1)
+
+
 val MainBlue = Color(0xFFa8d5e2)
 val UltraViolet = Color(0xFF6c698d)
 val DimGray = Color(0xFF6e6a6f)

@@ -2,44 +2,40 @@ package com.example.racepal.activities.running.solo
 
 import android.location.Location
 import androidx.lifecycle.ViewModel
-import com.example.racepal.run.LocalRunState
+import androidx.lifecycle.viewModelScope
+import com.example.racepal.DEFAULT_ZOOM
+import com.example.racepal.activities.running.LocalRunState
 import com.example.racepal.MapState
-import com.example.racepal.run.Timer
+import com.example.racepal.activities.running.LocalRunStateFactory
+import com.example.racepal.models.Run
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class SoloRunningViewModel @Inject constructor(val timer: Timer) : ViewModel() {
-    val userWeight = 80.0
+class SoloRunningViewModel @Inject constructor(private val localRunStateFactory: LocalRunStateFactory) : ViewModel() {
     //STATE
-    val runState: LocalRunState = LocalRunState()
+    lateinit var runState: LocalRunState
     val mapState: MapState = MapState()
 
-    init {
-        timer.reset()
+    /**
+     * Should be called per activity creation, to configure the viewmodel with a specific run id.
+     * The view model will restore previous run state, if it exists.
+     */
+    fun setRun(run: Run) {
+        runState = localRunStateFactory.createLocalRunState(run, viewModelScope)
     }
 
     fun updateLocation(loc: Location) {
-        runState.update(loc, userWeight, timer.state == Timer.State.RUNNING)
-        mapState.adjustCamera(runState.cur)
+        runState.update(loc)
+        mapState.adjustCamera(runState.location)
     }
-    fun start() {
-        timer.start()
-    }
-    fun pause() {
-        timer.pause()
-        runState.endSegment()
-    }
-    fun resume() {
-        timer.resume()
-    }
-    fun end() {
-        timer.stop()
-        runState.endSegment()
-    }
+    fun start() = runState.start()
+    fun pause() = runState.pause()
+    fun resume() = runState.resume()
+    fun end() = runState.stop()
     fun centerSwitch() {
         mapState.centerToggle()
-        mapState.adjustCamera(runState.cur, 15f)
+        mapState.adjustCamera(runState.location, DEFAULT_ZOOM)
     }
 
 }

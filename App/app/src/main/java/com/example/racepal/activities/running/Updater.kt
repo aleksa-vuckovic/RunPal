@@ -1,4 +1,4 @@
-package com.example.racepal.run
+package com.example.racepal.activities.running
 
 import com.example.racepal.models.PathPoint
 import com.example.racepal.room.PathDao

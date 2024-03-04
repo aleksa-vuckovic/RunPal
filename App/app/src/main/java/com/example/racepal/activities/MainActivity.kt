@@ -1,6 +1,8 @@
 package com.example.racepal.activities
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,12 +26,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.racepal.LoadingDots
 import com.example.racepal.repositories.LoginManager
 import com.example.racepal.R
 import com.example.racepal.activities.home.HomeActivity
 import com.example.racepal.activities.login.LoginActivity
+import com.example.racepal.repositories.CombinedRunRepository
+import com.example.racepal.room.PathDao
+import com.example.racepal.room.RunDao
+import com.example.racepal.room.SyncDao
 import com.example.racepal.timeAsState
 import com.example.racepal.ui.theme.RacePalTheme
 import com.example.racepal.waveFloat
@@ -44,12 +51,26 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var loginManager: LoginManager
+    @Inject
+    lateinit var combinedRunRepository: CombinedRunRepository
+
+    @Inject
+    lateinit var runDao: RunDao
+    @Inject
+    lateinit var pathDao: PathDao
+    @Inject
+    lateinit var syncDao: SyncDao
 
 
     override fun onStart() {
         super.onStart()
 
         lifecycleScope.launch {
+            runDao.deleteAll()
+            pathDao.deleteAll()
+            syncDao.deleteAll()
+
+            //combinedRunRepository.attemptSyncAll()
             try {
                 //Try to reuse an existing JWT
                 loginManager.refresh()

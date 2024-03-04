@@ -1,8 +1,8 @@
 package com.example.racepal.repositories
 
-import com.example.racepal.models.PathPoint
 import com.example.racepal.models.Run
 import com.example.racepal.models.RunInfo
+import com.example.racepal.models.RunData
 
 
 /**
@@ -12,44 +12,28 @@ interface RunRepository {
 
     /**
      * Creates a run as specified in the argument object.
+     * The runId must be generated prior to invoking this method,
+     * and it must be unique for the user. (System.currentTimeMillis() should work)
      */
     suspend fun create(run: Run)
-    /**
-     * Updates data specified by run.
-     * The run object must have a valid existing id.
-     */
-    suspend fun update(run: Run)
 
     /**
-     * Update the current location (without changing the path).
+     * Update run, location, and add the given pathPoints to path.
      *
-     * @param run Should contain valid 'id' and 'user' fields.
-     * Other fields are NOT used, nor updated.
+     * @param runData has to contain a Run object with valid 'id' and 'user' fields.
      */
-    suspend fun updateLocation(run: Run, pathPoint: PathPoint)
+    suspend fun update(runData: RunData)
 
     /**
-     * Update path.
-     * @param run Should contain valid 'id' and 'user' fields.
-     * Other fileds are NOT used, nor updated.
-     */
-    suspend fun updatePath(run: Run, pathPoint: PathPoint)
-
-    /**
-     * Retrieve path points starting from and not including the timestamp 'since'
+     * One of id/room/event must be specified to identify the run.
+     * If the run does not exist, an exception will be thrown.
      *
-     * @param run Should contain a valid pair of identifier fields:
-     * id + user, event + user, or room + user.
-     * Other fields will not be used.
-     * @return All subsequent path points ordered by timestamp.
+     * @param since The path of the returned RunUpdate will consist of
+     * pathPoints later then the specified unix timestamp (time > since).
      */
-    suspend fun getPath(run: Run, since: Long): List<PathPoint>
+    suspend fun getUpdate(user: String, id: Long? = null, room: String? = null, event: String? = null,
+        since: Long = 0): RunData
 
-    /**
-     * Retrieve the current location of a run.
-     * @param run See getPath.
-     */
-    suspend fun getLocation(run: Run): PathPoint
 
     /**
      * Get all all RunInfo objects for each run of the

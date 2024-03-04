@@ -2,7 +2,7 @@ package com.example.racepal.models
 
 /**
  * This is a helper class which includes all
- * fields from run, and additionaly distance and kcal.
+ * fields from run, and additionally distance and kcal.
  */
 class RunInfo(
     val id: Long = 0,

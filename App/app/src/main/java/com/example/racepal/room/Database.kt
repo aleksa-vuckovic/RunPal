@@ -8,10 +8,11 @@ import com.example.racepal.models.User
 
 
 @TypeConverters(BitmapConverter::class)
-@Database(entities = [User::class, Run::class, Path::class], version = 1, exportSchema = false)
+@Database(entities = [User::class, Run::class, Path::class, Sync::class], version = 1, exportSchema = false)
 abstract class Database: RoomDatabase() {
 
     abstract fun userDao(): UserDao
     abstract fun runDao(): RunDao
     abstract fun pathDao(): PathDao
+    abstract fun syncDao(): SyncDao
 }

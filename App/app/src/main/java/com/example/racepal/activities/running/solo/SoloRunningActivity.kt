@@ -1,8 +1,8 @@
 package com.example.racepal.activities.running.solo
 
-import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,48 +14,63 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.racepal.RUNNER_ICON_SIZE
-import com.example.racepal.RunDataPanel
-import com.example.racepal.activities.SoloRunningResults
-import com.example.racepal.run.Timer
+import com.example.racepal.RUN_ID_KEY
+import com.example.racepal.activities.results.SoloRunningResults
+import com.example.racepal.activities.running.RunDataPanel
+import com.example.racepal.activities.running.RunPause
+import com.example.racepal.activities.running.RunResume
+import com.example.racepal.activities.running.RunStart
 import com.example.racepal.getRunnerBitmap
+import com.example.racepal.hasLocationPermission
+import com.example.racepal.models.Run
+import com.example.racepal.repositories.LoginManager
 import com.example.racepal.ui.GoogleMapRun
-import com.example.racepal.ui.MapPause
-import com.example.racepal.ui.MapResume
-import com.example.racepal.ui.MapStart
 import com.example.racepal.ui.theme.MediumBlue
 import com.example.racepal.ui.theme.RacePalTheme
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationListener
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SoloRunningActivity : ComponentActivity() {
 
-    val vm: SoloRunningViewModel by viewModels()
+    @Inject
+    lateinit var loginManager: LoginManager
 
+    val vm: SoloRunningViewModel by viewModels()
+    val locationListener: LocationListener = object: LocationListener {
+        override fun onLocationChanged(p0: Location) {
+            vm.updateLocation(p0)
+        }
+    }
+    lateinit var provider: FusedLocationProviderClient
+
+    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) this.finish()
+        val user = loginManager.currentUser()
+        val runId = intent.getLongExtra(RUN_ID_KEY, 0L)
+        assert(runId != 0L)
+        vm.setRun(Run(user = user!!, id = runId))
 
-        val provider = LocationServices.getFusedLocationProviderClient(this)
+        if (!this.hasLocationPermission()) this.finish()
+        provider = LocationServices.getFusedLocationProviderClient(this)
         val req = LocationRequest.Builder(200).setMaxUpdateAgeMillis(0).setPriority(
             Priority.PRIORITY_HIGH_ACCURACY).build()
-        provider.requestLocationUpdates(req, {vm.updateLocation(it)}, null)
+        provider.requestLocationUpdates(req, locationListener, null)
+
 
         setContent {
             RacePalTheme {
@@ -65,9 +80,9 @@ class SoloRunningActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
 
-                    val cur by vm.runState.curAsState()
-                    val state by vm.timer.stateAsState()
-                    val time by vm.timer.timeAsState()
+                    val location = vm.runState.location
+                    val run = vm.runState.run
+                    val state = run.state
                     val runnerBitmap = remember {
                         getRunnerBitmap(RUNNER_ICON_SIZE)
                     }
@@ -75,7 +90,7 @@ class SoloRunningActivity : ComponentActivity() {
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        RunDataPanel(distance = cur.distance, kcal = cur.kcal, time = time, speed = cur.speed, modifier = Modifier
+                        RunDataPanel(distance = location.distance, kcal = location.kcal, time = run.running, speed = location.speed, modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp))
                         Box(modifier = Modifier.fillMaxSize()) {
@@ -88,13 +103,18 @@ class SoloRunningActivity : ComponentActivity() {
                                 onCenterSwitch = vm::centerSwitch,
                                 modifier = Modifier.fillMaxSize())
 
-                            if (state == Timer.State.READY) MapStart(onStart = vm::start)
-                            else if (state == Timer.State.RUNNING) MapPause(onPause = vm::pause, onFinish = vm::end)
-                            else if (state == Timer.State.PAUSED) MapResume(onResume = vm::resume, onFinish = vm::end)
+                            if (state == Run.State.READY) RunStart(onStart = vm::start)
+                            else if (state == Run.State.RUNNING) RunPause(onPause = vm::pause, onFinish = vm::end)
+                            else if (state == Run.State.PAUSED) RunResume(onResume = vm::resume, onFinish = vm::end)
                             else {
+                                lifecycleScope.launch {
+                                    delay(200) //giving time for the server update
+                                    this@SoloRunningActivity.finish()
+                                    val intent = Intent(this@SoloRunningActivity, SoloRunningResults::class.java )
+                                    startActivity(intent)
+                                }
                                 //activity ended
-                                val intent = Intent(this@SoloRunningActivity, SoloRunningResults::class.java )
-                                startActivity(intent)
+
                             }
                         }
 
@@ -102,5 +122,10 @@ class SoloRunningActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        provider.removeLocationUpdates(locationListener)
     }
 }

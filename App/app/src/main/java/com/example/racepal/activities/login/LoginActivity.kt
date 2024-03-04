@@ -20,7 +20,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.racepal.IntelligibleException
+import com.example.racepal.ServerException
 import com.example.racepal.repositories.LoginManager
 import com.example.racepal.activities.home.HomeActivity
 import com.example.racepal.repositories.RoomUserRepository
@@ -78,7 +78,7 @@ class LoginActivity : ComponentActivity() {
                                         try {
                                             loginManager.login(email, password)
                                             this@LoginActivity.startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
-                                        } catch (e: IntelligibleException) {
+                                        } catch (e: ServerException) {
                                             error = e.message ?: ""
                                         } catch (e: Exception) {
                                             e.printStackTrace()
@@ -104,7 +104,7 @@ class LoginActivity : ComponentActivity() {
                                                     HomeActivity::class.java
                                                 )
                                             )
-                                        } catch (e: IntelligibleException) {
+                                        } catch (e: ServerException) {
                                             error = e.message ?: ""
                                         } catch (e: Exception) {
                                             e.printStackTrace()

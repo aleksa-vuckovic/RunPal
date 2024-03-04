@@ -3,7 +3,6 @@ import fs from 'fs'
 import { DB } from '../DB'
 import { Utils } from '../Utils'
 import { Validation } from '../Validations'
-import { JWT } from '../JWT'
 
 
 export class UserController {
@@ -33,6 +32,7 @@ export class UserController {
             profile: user.profile
         }
         res.json({message: "ok", data: user})
+        return
     }
 
     update = async (req: express.Request, res: express.Response) => {
@@ -57,7 +57,6 @@ export class UserController {
         }
         
         ret = await DB.updateUser(req.jwt.email, output)
-
         res.json({message: ret})
         return
     }

@@ -33,7 +33,7 @@
             android:label="@string/title_activity_login"
             android:theme="@style/Theme.RacePal" />
         <activity
-            android:name=".activities.SoloRunningResults"
+            android:name=".activities.results.SoloRunningResults"
             android:exported="false"
             android:label="@string/title_activity_solo_running_results"
             android:theme="@style/Theme.RacePal" />

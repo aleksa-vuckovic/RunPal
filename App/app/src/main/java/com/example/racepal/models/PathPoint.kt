@@ -10,11 +10,6 @@ import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-fun Double.round(precision: Int): Double {
-    return BigDecimal.valueOf(this).setScale(precision, RoundingMode.FLOOR).toDouble()
-}
-
-
 /**
  * Represents a single point along the path of a running activity.
  * Includes the basic info: lat, lon, alt, time.
@@ -23,7 +18,7 @@ fun Double.round(precision: Int): Double {
  * @property end Indicates whether this path point is the end of
  * a segment (which happens when the user pauses)
  * or possibly of the entire run (when the user ends the session).
- * @property time UNIX timestamp
+ * @property time UNIX timestamp.
  */
 data class PathPoint(
     var latitude: Double = 0.0,
@@ -55,11 +50,15 @@ data class PathPoint(
     }
 
     companion object {
-        final val NONE = PathPoint()
+        /**
+         * Represents an unknown path point
+         * and is used as the initial path point in a run state.
+         */
+        val NONE = PathPoint()
     }
 }
 
-fun Location.toPathPoint(): PathPoint = PathPoint(latitude.round(5), longitude.round(5), altitude, time, false)
+fun Location.toPathPoint(): PathPoint = PathPoint(latitude, longitude, altitude, time, false)
 fun PathPoint.toLatLng(): LatLng = LatLng(latitude, longitude)
 fun LatLng.distance(to: LatLng): Double {
     val lon1Rad = Math.toRadians(longitude)
