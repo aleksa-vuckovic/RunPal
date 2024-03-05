@@ -5,4 +5,6 @@
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_home">HomeActivity</string>
     <string name="title_activity_account">AccountActivity</string>
+    <string name="title_activity_group_run">GroupRunActivity</string>
+    <string name="title_activity_group_run_entry">GroupRunEntryActivity</string>
 </resources>

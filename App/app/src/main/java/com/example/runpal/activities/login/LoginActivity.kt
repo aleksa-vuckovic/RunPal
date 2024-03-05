@@ -25,7 +25,7 @@ import com.example.runpal.repositories.LoginManager
 import com.example.runpal.activities.home.HomeActivity
 import com.example.runpal.repositories.user.LocalUserRepository
 import com.example.runpal.repositories.user.ServerUserRespository
-import com.example.runpal.ui.theme.RacePalTheme
+import com.example.runpal.ui.theme.RunPalTheme
 import com.example.runpal.ui.theme.StandardNavBar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -45,7 +45,7 @@ class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            RacePalTheme {
+            RunPalTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),

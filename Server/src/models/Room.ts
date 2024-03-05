@@ -10,6 +10,11 @@ const roomSchema = new mongoose.Schema({
         type: Array<String>,
         require: true,
         default: []
+    },
+    start: {
+        type: Number,
+        require: true,
+        default: null
     }
 })
 

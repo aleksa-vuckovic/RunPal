@@ -19,11 +19,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.runpal.RUN_ID_KEY
 import com.example.runpal.activities.account.AccountActivity
+import com.example.runpal.activities.running.group.GroupRunEntryActivity
 import com.example.runpal.activities.running.solo.SoloRunningActivity
 import com.example.runpal.hasLocationPermission
+import com.example.runpal.models.Run
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.restartApp
-import com.example.runpal.ui.theme.RacePalTheme
+import com.example.runpal.ui.theme.RunPalTheme
 import com.example.runpal.ui.theme.StandardNavBar
 import com.example.runpal.ui.theme.StandardTopBar
 import dagger.hilt.android.AndroidEntryPoint
@@ -48,7 +50,7 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            RacePalTheme {
+            RunPalTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -89,13 +91,16 @@ class HomeActivity : ComponentActivity() {
                             composable(route = MenuDestination.argsRoute) {
                                 MenuScreen(
                                     onSoloRun = {
-                                        val runId = System.currentTimeMillis()
                                         startIntent = Intent(this@HomeActivity, SoloRunningActivity::class.java)
-                                        startIntent?.putExtra(RUN_ID_KEY, runId)
+                                        startIntent?.putExtra(RUN_ID_KEY, Run.UNKNOWN_ID)
                                         if (hasLocationPermission()) startActivity(startIntent)
                                         else launcher.launch(PERMISSIONS)
                                     },
-                                    onGroupRun = { /*TODO*/ },
+                                    onGroupRun = {
+                                        startIntent = Intent(this@HomeActivity, GroupRunEntryActivity::class.java)
+                                        if (hasLocationPermission()) startActivity(startIntent)
+                                        else launcher.launch(PERMISSIONS)
+                                    },
                                     onEvent = { /*TODO*/ },
                                     modifier = Modifier.fillMaxSize())
                             }

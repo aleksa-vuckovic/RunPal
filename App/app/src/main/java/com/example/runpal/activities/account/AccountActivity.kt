@@ -26,7 +26,7 @@ import com.example.runpal.LoadingDots
 import com.example.runpal.activities.home.StatsDestination
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.restartApp
-import com.example.runpal.ui.theme.RacePalTheme
+import com.example.runpal.ui.theme.RunPalTheme
 import com.example.runpal.ui.theme.StandardTopBar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -44,7 +44,7 @@ class AccountActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            RacePalTheme {
+            RunPalTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -96,7 +96,7 @@ class AccountActivity : ComponentActivity() {
                         }
                         else Box(modifier = Modifier.fillMaxSize().padding(30.dp), contentAlignment = Alignment.Center) {
                             if (state == AccountViewModel.State.LOADING) LoadingDots(size = 20.dp, count = 4, color = MaterialTheme.colorScheme.onBackground)
-                            else Text(text = "An error has occured. Check your internet connection.", style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+                            else Text(text = "An error has occured. Check your internet connection.", style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center)
                         }
                     }
                 }

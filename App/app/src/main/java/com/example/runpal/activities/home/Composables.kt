@@ -90,61 +90,6 @@ fun MenuScreen(onSoloRun: () -> Unit, onGroupRun: () -> Unit, onEvent: () -> Uni
 }
 
 
-@Composable
-fun GroupRunSelectionScreen( onJoin: (String) -> Unit, onCreate: () -> Unit, modifier: Modifier = Modifier) {
-
-    var room by rememberSaveable {
-        mutableStateOf("")
-    }
-
-    val round = 20.dp
-    val style = MaterialTheme.typography.displaySmall
-
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceAround
-    ) {
-
-        Text(text = "Paste the room ID here:",
-            style = style,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth())
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(30.dp)
-        ) {
-            StandardOutlinedTextField(value = room,
-                onChange = {room = it},
-                shape = RoundedCornerShape(topStart = round, topEnd = round, bottomStart = 0.dp, bottomEnd = 0.dp),
-                minLines = 3,
-                modifier = Modifier
-                    .fillMaxWidth())
-            Button(onClick = { onJoin(room) },
-                shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = round, bottomEnd = round),
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = LightGreen,
-                    contentColor = Color.Black
-                )
-            ) {
-                Text(text = "Join")
-            }
-        }
-        
-        Text(text = "Or create and share the code with your friends:",
-            style = style,
-            textAlign = TextAlign.Center)
-        
-        StandardButton(onClick = onCreate) {
-            Text(text = "Create")
-        }
-    }
-}
-
-
 
 
 //////////////////////////Previews
@@ -152,6 +97,6 @@ fun GroupRunSelectionScreen( onJoin: (String) -> Unit, onCreate: () -> Unit, mod
 @Preview
 @Composable
 fun PreviewHomeButton() {
-    GroupRunSelectionScreen(onJoin = {}, onCreate = {}, modifier = Modifier.fillMaxSize().padding(30.dp))
+    //GroupRunSelectionScreen(onJoin = {}, onCreate = {}, modifier = Modifier.fillMaxSize().padding(30.dp))
     
 }

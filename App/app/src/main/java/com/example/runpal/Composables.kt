@@ -260,7 +260,7 @@ fun LoadingDots(size: Dp, count: Int, color: Color = MaterialTheme.colorScheme.p
                     )
                     .size(size)
                     .background(
-                        color = MaterialTheme.colorScheme.primary,
+                        color = color,
                         shape = CircleShape
                     )
             )

@@ -121,11 +121,17 @@ fun StandardTopBar(onBack: () -> Unit, onAccount: () -> Unit, onLogout: () -> Un
                 ) {
                 DropdownMenuItem(
                     text = { Text("Account")},
-                    onClick = onAccount)
+                    onClick = {
+                        expanded = false
+                        onAccount()
+                    })
                 HorizontalDivider(modifier = Modifier.fillMaxSize())
                 DropdownMenuItem(
                     text = { Text("Logout") },
-                    onClick = onLogout
+                    onClick = {
+                        expanded = false
+                        onLogout()
+                    }
                 )
             }
 
@@ -163,7 +169,7 @@ fun StandardOutlinedTextField(value: String,
 //@Preview(showBackground = true)
 @Composable
 fun designPreview() {
-    RacePalTheme {
+    RunPalTheme {
         // A surface container using the 'background' color from the theme
         Surface(
             modifier = Modifier.fillMaxSize(),

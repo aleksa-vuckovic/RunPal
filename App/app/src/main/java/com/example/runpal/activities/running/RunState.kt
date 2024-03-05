@@ -59,7 +59,12 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
     init {
         scope.launch {
             try {
-                val existingData = runRepository.getUpdate(user = run.user, id = run.id)
+                val existingData = runRepository.getUpdate(
+                    user = run.user,
+                    id = if (run.id == Run.UNKNOWN_ID) null else run.id,
+                    room = run.room,
+                    event = run.event
+                )
                 _run.value = existingData.run
                 _location.value = existingData.location ?: _location.value
                 _path.addAll(existingData.path)
@@ -128,7 +133,11 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
 
     fun start() {
         if (_run.value.state != Run.State.READY) return
-        _run.value = _run.value.copy(start = System.currentTimeMillis(), paused = false)
+        _run.value = _run.value.copy(
+            start = System.currentTimeMillis(),
+            paused = false,
+            id = if (_run.value.id == Run.UNKNOWN_ID) System.currentTimeMillis() else _run.value.id
+        )
         scope.launch {
             runRepository.create(_run.value)
         }
@@ -189,15 +198,15 @@ class NonlocalRunState @AssistedInject constructor (
         get() = _path
 
     init {
-        val user = _run.value.user
-        val id = if (_run.value.id == -1L) null else _run.value.id
-        val room = _run.value.room
-        val event = _run.value.event
-
         scope.launch {
             while(true) {
                 try {
-                    val update = runRepository.getUpdate(user = user, id = id, room = room, event = event, since = lastFetch)
+                    val update = runRepository.getUpdate(
+                        user = _run.value.user,
+                        id = if (_run.value.id == Run.UNKNOWN_ID) null else _run.value.id,
+                        room = _run.value.room,
+                        event = _run.value.event,
+                        since = lastFetch)
                     _run.value = update.run
                     _location.value = update.location ?: _location.value
                     _path.addAll(update.path)

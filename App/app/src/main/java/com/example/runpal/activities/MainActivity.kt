@@ -30,7 +30,7 @@ import com.example.runpal.repositories.run.CombinedRunRepository
 import com.example.runpal.room.PathDao
 import com.example.runpal.room.RunDao
 import com.example.runpal.room.SyncDao
-import com.example.runpal.ui.theme.RacePalTheme
+import com.example.runpal.ui.theme.RunPalTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -88,7 +88,7 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
         setContent {
-            RacePalTheme {
+            RunPalTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),

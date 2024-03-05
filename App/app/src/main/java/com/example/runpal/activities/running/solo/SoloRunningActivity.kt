@@ -31,7 +31,7 @@ import com.example.runpal.models.Run
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.ui.GoogleMapRun
 import com.example.runpal.ui.theme.MediumBlue
-import com.example.runpal.ui.theme.RacePalTheme
+import com.example.runpal.ui.theme.RunPalTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationListener
 import com.google.android.gms.location.LocationRequest
@@ -73,7 +73,7 @@ class SoloRunningActivity : ComponentActivity() {
 
 
         setContent {
-            RacePalTheme {
+            RunPalTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),

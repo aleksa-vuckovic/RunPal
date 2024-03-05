@@ -56,7 +56,7 @@ val Typography = Typography(
         letterSpacing = 1.sp
     ),
     /**
-     *
+     * Screen title
      */
     titleMedium = TextStyle(
         fontFamily = FontFamily.Default,
@@ -65,11 +65,14 @@ val Typography = Typography(
         lineHeight = 33.sp,
         letterSpacing = 1.sp
     ),
+    /**
+     * Subtitle
+     */
     titleSmall = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = 24.sp,
-        lineHeight = 26.sp,
+        fontSize = 20.sp,
+        lineHeight = 24.sp,
         letterSpacing = 0.5.sp
     )
     /* Other default text styles to override

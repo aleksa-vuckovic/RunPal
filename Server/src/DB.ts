@@ -71,7 +71,8 @@ export class DB {
     static async createRoom(): Promise<string> {
         let room = new roomModel({
             members: [],
-            ready: []
+            ready: [],
+            start: null
         })
         let saved = await room.save()
         return saved._id.toString()
@@ -90,12 +91,17 @@ export class DB {
     }
 
     static async leaveRoom(user: string, room: string): Promise<string> {
-        let ret = await roomModel.updateOne({_id: room}, {$pull: {members: user, ready: user}})
+        let ret = await roomModel.updateOne({_id: new ObjectId(room)}, {$pull: {members: user, ready: user}})
         if (ret.matchedCount > 0) return "ok"
         else return "Room does not exist."
     }
 
     static async room(id: string): Promise<any> {
         return await roomModel.findOne({_id: new ObjectId(id)})
+    }
+    static async startRoom(id: string): Promise<string> {
+        let ret = await roomModel.updateOne({_id: new ObjectId(id)}, {$set: {start: Date.now()}})
+        if (ret.modifiedCount > 0) return "ok"
+        else return "Database error."
     }
 }
