@@ -2,6 +2,7 @@ package com.example.runpal.activities.running.group
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,10 +12,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -35,6 +40,8 @@ class GroupRunEntryActivity : ComponentActivity() {
 
     @Inject
     lateinit var serverRoomRepository: ServerRoomRepository
+
+    val popBackStack = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,16 +105,22 @@ class GroupRunEntryActivity : ComponentActivity() {
                                 onCopy = vm::copy,
                                 onLeave = vm::leave,
                                 onReady = vm::ready,
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier
+                                    .fillMaxSize()
                                     .padding(10.dp))
 
-                            if (vm.state == LobbyViewModel.State.LEAVE || vm.state == LobbyViewModel.State.ERROR) navController.popBackStack()
-                            if (vm.state == LobbyViewModel.State.START) {
-                                val intent = Intent(this@GroupRunEntryActivity, GroupRunActivity::class.java)
-                                intent.putExtra(ROOM_ID_KEY, vm.room._id)
-                                finish()
-                                startActivity(intent)
+                            LaunchedEffect(key1 = vm.state) {
+                                if (vm.state == LobbyViewModel.State.LEAVE || vm.state == LobbyViewModel.State.ERROR) {
+                                    navController.popBackStack()
+                                }
+                                else if (vm.state == LobbyViewModel.State.START) {
+                                    val intent = Intent(this@GroupRunEntryActivity, GroupRunActivity::class.java)
+                                    intent.putExtra(ROOM_ID_KEY, vm.room._id)
+                                    finish()
+                                    startActivity(intent)
+                                }
                             }
+
 
                         }
                     }

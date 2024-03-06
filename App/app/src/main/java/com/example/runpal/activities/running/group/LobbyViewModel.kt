@@ -53,7 +53,7 @@ class LobbyViewModel  @Inject constructor(
     val room : Room
         get() = _room.value
     val users: Map<String, User>
-        get() = _users as Map<String, User>
+        get() = _users
 
 
 

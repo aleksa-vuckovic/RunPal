@@ -1,6 +1,7 @@
 package com.example.runpal.activities
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,22 +19,33 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.example.runpal.LoadingDots
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.R
+import com.example.runpal.RUN_MARKER_SIZE
 import com.example.runpal.activities.home.HomeActivity
 import com.example.runpal.activities.login.LoginActivity
+import com.example.runpal.generateSimpleMarkerBitmap
 import com.example.runpal.repositories.run.CombinedRunRepository
 import com.example.runpal.room.PathDao
 import com.example.runpal.room.RunDao
 import com.example.runpal.room.SyncDao
+import com.example.runpal.ui.theme.DarkBlue
+import com.example.runpal.ui.theme.DarkPink
+import com.example.runpal.ui.theme.DarkPurple
+import com.example.runpal.ui.theme.DarkYellow
 import com.example.runpal.ui.theme.RunPalTheme
+import com.example.runpal.ui.theme.YellowGreen
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import javax.inject.Inject
 
 
@@ -55,6 +67,22 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
+    /*
+        val colors = listOf(DarkBlue, DarkPurple, DarkPink, DarkYellow, YellowGreen, Color.Green, Color.Red)
+        val names = listOf("darkblue", "darkpurple", "darkpink", "darkyellow", "yellowgreen", "green", "red")
+        for (i in colors.indices) {
+            val file = File(filesDir, names[i] + ".png")
+            val bitmap = generateSimpleMarkerBitmap(RUN_MARKER_SIZE, colors[i])
+            try {
+                val fileOutputStream = FileOutputStream(file)
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream)
+                fileOutputStream.close()
+                // File saved successfully
+            } catch (e: IOException) {
+                e.printStackTrace()
+                // Handle the exception
+            }
+        }*/
 
         lifecycleScope.launch {
             runDao.deleteAll()
@@ -72,20 +100,12 @@ class MainActivity : ComponentActivity() {
             }
 
         }
+
+
     }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        /*
-        val launcher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
-            if (granted.size != 2) this@MainActivity.finish()
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            launcher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-            )
-         */
-
         super.onCreate(savedInstanceState)
         setContent {
             RunPalTheme {
@@ -108,45 +128,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-/*
-@AndroidEntryPoint
-class MainActivity: ComponentActivity() {
-    @Inject
-    lateinit var loginApi: LoginApi
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        /*
-        val launcher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
-            if (granted.size != 2) this@MainActivity.finish()
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            launcher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-            )
-         */
-
-        lifecycleScope.launch {
-            delay(1000)
-            val res = loginApi.test("Test data.")
-            Log.d("RESPONSE", "${res.message} ${res.data}")
-        }
-
-        super.onCreate(savedInstanceState)
-        setContent {
-            RacePalTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-
-                }
-            }
-        }
-    }
-}
-*/
 
 @Composable
 fun myAnimateFloat(newgoal: Float): State<Float> {

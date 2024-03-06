@@ -22,7 +22,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.runpal.ErrorScreen
 import com.example.runpal.LoadingDots
+import com.example.runpal.LoadingScreen
 import com.example.runpal.activities.home.StatsDestination
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.restartApp
@@ -58,7 +60,7 @@ class AccountActivity : ComponentActivity() {
                     Scaffold(
                         topBar = {
                             StandardTopBar(
-                                onBack = { navController.popBackStack() },
+                                onBack = { if (!navController.popBackStack()) finish() },
                                 onAccount = { },
                                 onLogout = {
                                     loginManager.logout()
@@ -87,17 +89,17 @@ class AccountActivity : ComponentActivity() {
                                         }
                                         navController.navigate(AccountDestination.argsRoute)
                                     }, errorMessage = "",
-                                    modifier = Modifier.fillMaxSize().padding(20.dp))
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(20.dp))
                             }
 
                             composable(route = StatsDestination.argsRoute) {
                                 Text(text = "TODO")
                             }
                         }
-                        else Box(modifier = Modifier.fillMaxSize().padding(30.dp), contentAlignment = Alignment.Center) {
-                            if (state == AccountViewModel.State.LOADING) LoadingDots(size = 20.dp, count = 4, color = MaterialTheme.colorScheme.onBackground)
-                            else Text(text = "An error has occured. Check your internet connection.", style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center)
-                        }
+                        else if (state == AccountViewModel.State.LOADING) LoadingScreen()
+                        else ErrorScreen(message = "An error has occured. Check your internet connection.")
                     }
                 }
             }

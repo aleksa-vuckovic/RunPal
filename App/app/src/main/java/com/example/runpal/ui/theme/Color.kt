@@ -14,11 +14,21 @@ val LightBlue = Color(191, 231, 254, 255)
 val MediumBlue = Color(120, 201, 251, 255)
 val Pink = Color(0xFFEFB8C8)
 
+
 val White = Color.White
 val Transparent = Color.Transparent
+val TransparentWhite = Color.White.copy(alpha = 0.75f)
 
 val LightGreen = Color(0xFFC4f2c2)
 val LightRed = Color(0xFFF6b1b1)
+val LightPurple = Color(230, 165, 255, 255)
+val LightYelow = Color(250, 255, 100, 255)
+
+val DarkBlue = Color(41, 39, 245, 255)
+val DarkPurple = Color(184, 25, 231, 255)
+val DarkPink = Color(231, 35, 180, 255)
+val DarkYellow = Color(232, 247, 6, 255)
+
 
 
 val MainBlue = Color(0xFFa8d5e2)

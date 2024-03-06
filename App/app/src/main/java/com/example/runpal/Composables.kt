@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.filled.ImageSearch
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,6 +46,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
@@ -51,6 +54,7 @@ import androidx.core.graphics.ColorUtils
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.runpal.ui.theme.StandardTextField
+import com.example.runpal.ui.theme.TransparentWhite
 import kotlinx.coroutines.delay
 import java.lang.Float.min
 
@@ -264,5 +268,26 @@ fun LoadingDots(size: Dp, count: Int, color: Color = MaterialTheme.colorScheme.p
                         shape = CircleShape
                     )
             )
+    }
+}
+
+@Composable
+fun LoadingScreen(dotSize: Dp = 30.dp) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(color = TransparentWhite),
+        contentAlignment = Alignment.Center
+    ) {
+        LoadingDots(size = dotSize, count = 3)
+    }
+}
+
+@Composable
+fun ErrorScreen(message: String) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(color = TransparentWhite),
+        contentAlignment = Alignment.Center) {
+        Text(text = message, style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center)
     }
 }

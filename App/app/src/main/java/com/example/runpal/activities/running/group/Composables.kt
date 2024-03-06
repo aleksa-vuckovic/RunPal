@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircleOutline
@@ -144,48 +146,60 @@ fun LobbyScreen(room: Room,
 
             Spacer(modifier = Modifier.height(20.dp))
             Text(text = "Members: ${room.members.size}/5")
-            for (member in room.members) {
-                val user = users[member]
-                if (user == null) continue
-                val ready: Boolean = room.ready.contains(member)
-                Row(
-                    verticalAlignment = Alignment.Top,
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxWidth()
-                        .shadow(elevation = 10.dp)
-                        .background(color = if (ready) LightGreen else MaterialTheme.colorScheme.surfaceContainer)
-                ) {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                for (member in room.members) {
+                    val user = users[member]
+                    if (user == null) continue
+                    val ready: Boolean = room.ready.contains(member)
                     Row(
+                        verticalAlignment = Alignment.Top,
                         modifier = Modifier
+                            .padding(20.dp)
                             .fillMaxWidth()
-                            .weight(0.8f)
-                            .padding(10.dp)
+                            .shadow(elevation = 10.dp)
+                            .background(color = if (ready) LightGreen else MaterialTheme.colorScheme.surfaceContainer)
                     ) {
-                        Image(painter = rememberImagePainter(data = /*user.profileUri*/ DEFAULT_PROFILE_URI),
-                            contentDescription = "Profile picture of ${user.name} ${user.last}",
-                            contentScale = ContentScale.Crop,
+                        Row(
                             modifier = Modifier
-                                .clip(shape = RoundedCornerShape(10.dp))
-                                .size(100.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(text = "${user.name} ${user.last}", style = MaterialTheme.typography.titleSmall)
-                    }
+                                .fillMaxWidth()
+                                .weight(0.8f)
+                                .padding(10.dp)
+                        ) {
+                            Image(
+                                painter = rememberImagePainter(data = user.profileUri),
+                                contentDescription = "Profile picture of ${user.name} ${user.last}",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .clip(shape = RoundedCornerShape(10.dp))
+                                    .size(100.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = "${user.name} ${user.last}",
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(0.2f)
-                            .height(100.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (ready) Icon(
-                            imageVector = Icons.Default.CheckCircleOutline,
-                            contentDescription = "Ready",
-                            modifier = Modifier.size(50.dp))
-                    }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(0.2f)
+                                .height(100.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (ready) Icon(
+                                imageVector = Icons.Default.CheckCircleOutline,
+                                contentDescription = "Ready",
+                                modifier = Modifier.size(50.dp)
+                            )
+                        }
 
+                    }
                 }
             }
         }
@@ -193,7 +207,7 @@ fun LobbyScreen(room: Room,
         Row(
             modifier = Modifier
                 .height(60.dp)
-                .fillMaxSize(),
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {

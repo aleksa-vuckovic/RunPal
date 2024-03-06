@@ -20,7 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.runpal.RUN_ID_KEY
 import com.example.runpal.activities.account.AccountActivity
 import com.example.runpal.activities.running.group.GroupRunEntryActivity
-import com.example.runpal.activities.running.solo.SoloRunningActivity
+import com.example.runpal.activities.running.solo.SoloRunActivity
 import com.example.runpal.hasLocationPermission
 import com.example.runpal.models.Run
 import com.example.runpal.repositories.LoginManager
@@ -62,7 +62,7 @@ class HomeActivity : ComponentActivity() {
                     Scaffold(
                         topBar = {
                             StandardTopBar(
-                                onBack = { navController.popBackStack() },
+                                onBack = { if(!navController.popBackStack()) finish() },
                                 onAccount = { startActivity(Intent(this@HomeActivity, AccountActivity::class.java)) },
                                 onLogout = {
                                     loginManager.logout()
@@ -91,7 +91,7 @@ class HomeActivity : ComponentActivity() {
                             composable(route = MenuDestination.argsRoute) {
                                 MenuScreen(
                                     onSoloRun = {
-                                        startIntent = Intent(this@HomeActivity, SoloRunningActivity::class.java)
+                                        startIntent = Intent(this@HomeActivity, SoloRunActivity::class.java)
                                         startIntent?.putExtra(RUN_ID_KEY, Run.UNKNOWN_ID)
                                         if (hasLocationPermission()) startActivity(startIntent)
                                         else launcher.launch(PERMISSIONS)

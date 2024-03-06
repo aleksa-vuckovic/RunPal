@@ -10,7 +10,7 @@ package com.example.runpal.models
  */
 class RunData(
     var run: Run = Run(),
-    var path: List<PathPoint> = listOf(),
-    var location: PathPoint? = null
+    var location: PathPoint? = null,
+    var path: List<PathPoint> = listOf()
 ) {
 }

@@ -7,4 +7,5 @@
     <string name="title_activity_account">AccountActivity</string>
     <string name="title_activity_group_run">GroupRunActivity</string>
     <string name="title_activity_group_run_entry">GroupRunEntryActivity</string>
+    <string name="title_activity_group_running_results">GroupRunningResults</string>
 </resources>

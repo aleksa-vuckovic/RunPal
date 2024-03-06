@@ -114,7 +114,6 @@ class CombinedRunRepository @Inject constructor(
         since: Long
     ): RunData {
         if (loginManager.currentUser() == user) {
-            Log.d("RUNREPO", "Retrieving update for user ${user} who is logged in.")
             try {
                 return localRunRepository.getUpdate(user, id, room, event, since)
             } catch (e: NotFound) {
@@ -129,19 +128,17 @@ class CombinedRunRepository @Inject constructor(
                     throw e
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    Log.d("RUNREPO", "Server exception! e.message = ${e.message}")
                     Toast.makeText(context, "No internet connection.", Toast.LENGTH_SHORT).show()
                     throw e
                 }
             }
         }
         else {
-            Log.d("RUNREPO", "Retrieving update for user ${user} who is NOT logged in.")
             try {
                 return serverRunRepository.getUpdate(user, id, room, event, since)
             } catch (e: ServerException) {
                 e.printStackTrace()
-                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+                //Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
                 throw e
             } catch (e: Exception) {
                 e.printStackTrace()

@@ -41,6 +41,8 @@ import com.example.runpal.MetricSpeedFormatter
 import com.example.runpal.ProgressFloatingButton
 import com.example.runpal.TimeFormatter
 import com.example.runpal.borderRight
+import com.example.runpal.timeAsState
+import com.example.runpal.ui.theme.TransparentWhite
 
 
 @Composable
@@ -65,7 +67,7 @@ fun PanelText(text: Pair<String,String>, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun RunDataPanel(distance: Double, kcal: Double, time: Long, speed: Double, modifier: Modifier = Modifier) {
+fun RunDataPanel(runState: RunState, modifier: Modifier = Modifier) {
     var imperial by rememberSaveable {
         mutableStateOf(false)
     }
@@ -77,8 +79,8 @@ fun RunDataPanel(distance: Double, kcal: Double, time: Long, speed: Double, modi
         Row(modifier = Modifier
             .weight(1f)
             .fillMaxWidth()) {
-            PanelText(text = if (imperial) ImperialDistanceFormatter.format(distance)
-            else MetricDistanceFormatter.format(distance),
+            PanelText(text = if (imperial) ImperialDistanceFormatter.format(runState.location.distance)
+            else MetricDistanceFormatter.format(runState.location.distance),
                 modifier = Modifier
                     .fillMaxSize()
                     .borderRight(1.dp, Color.LightGray)
@@ -86,7 +88,7 @@ fun RunDataPanel(distance: Double, kcal: Double, time: Long, speed: Double, modi
                     .clickable { imperial = !imperial }
                     .padding(vertical = 20.dp)
             )
-            PanelText(text = KcalFormatter.format(kcal),
+            PanelText(text = KcalFormatter.format(runState.location.kcal),
                 modifier = Modifier
                     .fillMaxSize()
                     .weight(1f)
@@ -101,17 +103,17 @@ fun RunDataPanel(distance: Double, kcal: Double, time: Long, speed: Double, modi
         Row(modifier = Modifier
             .weight(1f)
             .fillMaxWidth()) {
-            PanelText(text = if (pace && imperial) ImperialPaceFormatter.format(speed)
-            else if (pace && !imperial) MetricPaceFormatter.format(speed)
-            else if (!pace && imperial) ImperialSpeedFormatter.format(speed)
-            else MetricSpeedFormatter.format(speed),
+            PanelText(text = if (pace && imperial) ImperialPaceFormatter.format(runState.location.speed)
+            else if (pace && !imperial) MetricPaceFormatter.format(runState.location.speed)
+            else if (!pace && imperial) ImperialSpeedFormatter.format(runState.location.speed)
+            else MetricSpeedFormatter.format(runState.location.speed),
                 modifier = Modifier
                     .fillMaxSize()
                     .borderRight(1.dp, Color.LightGray)
                     .weight(1f)
                     .clickable { pace = !pace }
                     .padding(vertical = 20.dp))
-            PanelText(text = TimeFormatter.format(time),
+            PanelText(text = TimeFormatter.format(runState.run.running),
                 modifier = Modifier
                     .fillMaxSize()
                     .weight(1f)
@@ -139,9 +141,9 @@ fun RunStart(onStart: () -> Unit) {
             onProgress = {
                 if (it == 0f) countdown = ""
                 else if (it >= 1f) onStart()
-                else countdown = (3.5f - it*3.5f).toInt().toString()
+                else countdown = (4f - it*4f).toInt().toString()
             },
-            time = 3500,
+            time = 4000L,
             color = Color.Green,
             modifier = Modifier
                 .padding(bottom = 10.dp)
@@ -160,7 +162,7 @@ fun RunPause(onPause: () -> Unit, onFinish: () -> Unit) {
     ) {
         ProgressFloatingButton(
             onProgress = { if (it > 1f) onPause() },
-            time = 3500L,
+            time = 2000L,
             color = Color.Gray,
             modifier = Modifier
                 .padding(start = 10.dp, bottom = 10.dp)
@@ -171,7 +173,7 @@ fun RunPause(onPause: () -> Unit, onFinish: () -> Unit) {
         }
         ProgressFloatingButton(
             onProgress = { if (it > 1f) onFinish() },
-            time = 3500L,
+            time = 2000L,
             color = Color.Red,
             modifier = Modifier
                 .padding(start = 90.dp, bottom = 10.dp)
@@ -197,7 +199,7 @@ fun RunResume(onResume: () -> Unit, onFinish: () -> Unit) {
                 .align(Alignment.Center))
         ProgressFloatingButton(
             onProgress = { if (it > 1f) onResume() },
-            time = 3500L,
+            time = 2000L,
             color = Color.Yellow,
             modifier = Modifier
                 .padding(start = 10.dp, bottom = 10.dp)
@@ -208,7 +210,7 @@ fun RunResume(onResume: () -> Unit, onFinish: () -> Unit) {
         }
         ProgressFloatingButton(
             onProgress = { if (it > 1f) onFinish() },
-            time = 3500L,
+            time = 2000L,
             color = Color.Red,
             modifier = Modifier
                 .padding(start = 90.dp, bottom = 10.dp)
@@ -217,5 +219,19 @@ fun RunResume(onResume: () -> Unit, onFinish: () -> Unit) {
         ) {
             Text("Finish")
         }
+    }
+}
+
+@Composable
+fun RunCountown(till: Long, onStart: () -> Unit) {
+    val time = timeAsState()
+    val left = till - time.value
+    if (left <= 0L) onStart()
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(color = TransparentWhite)) {
+        Text(text = (left/1000L).toString(),
+            modifier = Modifier.align(Alignment.Center),
+            style = MaterialTheme.typography.displayLarge)
     }
 }

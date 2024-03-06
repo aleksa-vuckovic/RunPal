@@ -1,7 +1,9 @@
 package com.example.runpal.activities.running
 
+import android.content.Context
 import android.location.Location
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -17,6 +19,7 @@ import com.example.runpal.repositories.user.UserRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -50,14 +53,17 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
                                                  @Assisted updateInterval: Long,
                                                  private val runRepository: RunRepository,
                                                  private val userRepository: UserRepository
-    ): RunState {
-    private val _run = mutableStateOf(run)
+): RunState {
+    private val _run = mutableStateOf(Run.LOADING)
     private val _location = mutableStateOf(PathPoint.NONE)
     private val _path: SnapshotStateList<PathPoint> = SnapshotStateList()
     private var userWeight: Double = 80.0
 
     init {
         scope.launch {
+            try {
+                userWeight = userRepository.getUser(run.user).weight
+            } catch (e: Exception) { e.printStackTrace();/* User does not exist?! Crash. */ throw e }
             try {
                 val existingData = runRepository.getUpdate(
                     user = run.user,
@@ -69,11 +75,14 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
                 _location.value = existingData.location ?: _location.value
                 _path.addAll(existingData.path)
                 pause()
-            } catch(e: Exception) { e.printStackTrace()/*It's a new run.*/}
-
-            try {
-                userWeight = userRepository.getUser(run.user).weight
-            } catch (e: Exception) { e.printStackTrace();/* User does not exist?! Crash. */ throw e }
+            } catch(e: Exception) {
+                e.printStackTrace()
+                /*It's a new run.*/
+                _run.value = run.copy(
+                    id = if (run.id == Run.UNKNOWN_ID) System.currentTimeMillis() else run.id,
+                    start = null, running = 0L, end = null, paused = false
+                )
+            }
         }
     }
 
@@ -128,7 +137,9 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
             }
         }
         _location.value = cur
-        if (_run.value.state != Run.State.READY) scope.launch { runRepository.update(runUpdate) }
+        if (_run.value.state != Run.State.READY
+            && _run.value.state != Run.State.LOADING)
+            scope.launch { runRepository.update(runUpdate) }
     }
 
     fun start() {
@@ -152,7 +163,9 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
         _run.value = _run.value.copy(paused = false)
     }
     fun stop() {
-        if (_run.value.state == Run.State.READY || _run.value.state == Run.State.ENDED) return
+        if (_run.value.state == Run.State.READY
+            || _run.value.state == Run.State.ENDED
+            || _run.value.state == Run.State.LOADING) return
         _run.value = _run.value.copy(end = System.currentTimeMillis())
         segmentEndUpdate()
     }
@@ -162,7 +175,6 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
         val runUpdate = RunData(run = _run.value, path = listOf(_location.value))
         scope.launch {
             runRepository.update(runUpdate)
-            Log.d("SEGMENT END", "Complete")
         }
     }
 }
@@ -182,9 +194,10 @@ class NonlocalRunState @AssistedInject constructor (
     @Assisted run: Run,
     @Assisted scope: CoroutineScope,
     @Assisted private val interval: Long,
-    private val runRepository: RunRepository
+    private val runRepository: RunRepository,
+    @ApplicationContext val context: Context
 ): RunState {
-    private val _run = mutableStateOf(run)
+    private val _run = mutableStateOf(Run.LOADING)
     private val _location: MutableState<PathPoint> = mutableStateOf(PathPoint.NONE)
     private val _path: SnapshotStateList<PathPoint> = SnapshotStateList()
 
@@ -202,16 +215,17 @@ class NonlocalRunState @AssistedInject constructor (
             while(true) {
                 try {
                     val update = runRepository.getUpdate(
-                        user = _run.value.user,
-                        id = if (_run.value.id == Run.UNKNOWN_ID) null else _run.value.id,
-                        room = _run.value.room,
-                        event = _run.value.event,
-                        since = lastFetch)
+                        user = run.user,
+                        id = if (run.id == Run.UNKNOWN_ID) null else run.id,
+                        room = run.room,
+                        event = run.event,
+                        since = lastFetch
+                    )
                     _run.value = update.run
                     _location.value = update.location ?: _location.value
                     _path.addAll(update.path)
                     if (update.path.size > 0) lastFetch = update.path.last().time
-                } catch(_: Exception) {}
+                } catch(_: Exception) { }
                 delay(interval)
             }
         }

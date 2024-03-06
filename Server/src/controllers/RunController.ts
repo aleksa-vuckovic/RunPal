@@ -1,6 +1,7 @@
 import express from 'express'
 import { Validation } from '../Validations'
 import { DB } from '../DB'
+import { ObjectId } from 'mongodb'
 
 export class RunController {
 
@@ -52,8 +53,8 @@ export class RunController {
             }
             match.id = id
         }
-        else if (req.query.room) match.room = req.query.room
-        else if (req.query.event) match.event = req.query.event
+        else if (req.query.room) match.room = new ObjectId(req.query.room as string)
+        else if (req.query.event) match.event = new ObjectId(req.query.event as string)
         else {
             res.json({message: "Not enough data."})
             return

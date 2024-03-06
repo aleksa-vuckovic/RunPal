@@ -22,7 +22,7 @@ import androidx.room.Entity
 @Entity(tableName = "runs", primaryKeys = ["user", "id"])
 data class Run(
     val user: String = "",
-    val id: Long = 0L,
+    val id: Long = UNKNOWN_ID,
     val event: String? = null,
     val room: String? = null,
     val start: Long? = null,
@@ -32,9 +32,11 @@ data class Run(
 ) {
     companion object {
         const val UNKNOWN_ID: Long = -1L
+        val LOADING: Run = Run(running = -1L)
     }
 
     enum class State {
+        LOADING,
         READY,
         RUNNING,
         PAUSED,
@@ -42,7 +44,8 @@ data class Run(
     }
     val state: State
         get() {
-            if (start == null) return State.READY
+            if (this === LOADING) return State.LOADING
+            else if (start == null) return State.READY
             else if (end != null) return State.ENDED
             else if (paused) return State.PAUSED
             else return State.RUNNING

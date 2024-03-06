@@ -25,6 +25,10 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 
+private fun bitDistance(x: Int, y: Int, a: Int, b: Int): Int {
+    return Math.sqrt(((x-a)*(x-a)+(y-b)*(y-b)).toDouble()).toInt()
+}
+
 /**
  * Applies a blur in a circular area around the center of the bitmap, starting from the specified radius.
  *
@@ -38,7 +42,7 @@ import java.io.InputStream
 fun Bitmap.outerBlur(blurLevel: Int, radius: Int, transition: Int, targetColor: Color? = null): Bitmap {
     val centerX = this.width/2
     val centerY = this.height/2
-    fun r(i: Int, j: Int): Int = Math.sqrt(((i-centerX)*(i-centerX)+(j-centerY)*(j-centerY)).toDouble()).toInt()
+
 
     val target = targetColor?.toArgb() ?: 0
     val targetA = alpha(target)
@@ -51,7 +55,7 @@ fun Bitmap.outerBlur(blurLevel: Int, radius: Int, transition: Int, targetColor: 
     val result = this.copy(Bitmap.Config.ARGB_8888, true)
     for (i in 0 .. this.width - 1) {
         for (j in 0 .. this.height - 1) {
-            val rad = r(i,j)
+            val rad = bitDistance(i,j, centerX, centerY)
             val end = (rad - radius).toDouble()/transition
             if (end > 1.0 || end < 0.0) continue
 
@@ -108,13 +112,49 @@ fun Bitmap.resize(width: Int, height: Int): Bitmap {
     return Bitmap.createScaledBitmap(this, width, height, true)
 }
 
-fun Context.getRunnerBitmap(size: Int): Bitmap {
+fun Bitmap.cropCircle(): Bitmap {
+    val width = width
+    val height = height
+    val centerX = width/2
+    val centerY = height/2
+    val diameter = minOf(width, height)
+    val radius = diameter/2
+    val result = Bitmap.createBitmap(diameter, diameter, this.config)
+    for (i in 0..width-1)
+        for (j in 0..height-1) {
+            val r = bitDistance(i, j, centerX, centerY)
+            if (r <= radius) {
+                try {
+                    result.set(i - radius + centerX, j - radius + centerY, this.get(i, j))
+                } catch(_: Exception) {}
+            }
+        }
+    return result
+}
+
+fun generateSimpleMarkerBitmap(size: Int, color: Color): Bitmap {
+    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    val r = size/2
+    val ri = r/8
+    for (i in 0..size-1) {
+        for (j in 0..size-1) {
+            val d = bitDistance(i, j, r, r)
+            if (d < r-ri) bitmap.set(i, j, color.toArgb())
+            else if (d < r) bitmap.set(i, j, Color.White.toArgb())
+        }
+    }
+    return bitmap
+}
+
+fun Bitmap.getMarkerBitmap(size: Int, color: Color): Bitmap {
     val iconSize = (size*0.9).toInt()
     val margin = (size*0.05).toInt()
     val blurRadius = (size*0.35).toInt()
     val blurWidth = (size*0.15).toInt()
-    val res = BitmapFactory.decodeResource(resources, R.drawable.runner)
-    return res.resize(iconSize, iconSize).addMargin(margin).outerBlur(20, blurRadius, blurWidth, LightBlue.copy(alpha = 0.3f))
+    return this.cropCircle()
+        .resize(iconSize, iconSize)
+        .addMargin(margin)
+        .outerBlur(20, blurRadius, blurWidth, color.copy(alpha = 0.3f))
 }
 
 fun Bitmap.toRequestBody(): RequestBody {

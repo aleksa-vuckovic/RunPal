@@ -14,6 +14,7 @@ import androidx.core.app.ActivityCompat
 import com.example.runpal.activities.MainActivity
 import kotlinx.coroutines.delay
 import java.io.File
+import kotlin.math.exp
 import kotlin.math.max
 import kotlin.math.sin
 
@@ -71,7 +72,7 @@ fun waveFloat(mid: Float, range: Float, period: Long, phase: Long, lowerBound: F
 
 @Composable
 fun timeAsState(start: Long = 0L, updateInterval: Long = 100L): State<Long> {
-    val state = remember { mutableStateOf(start) }
+    val state = remember { mutableStateOf(System.currentTimeMillis() - start) }
     LaunchedEffect(key1 = null) {
         while(true) {
             state.value = System.currentTimeMillis() - start
@@ -126,3 +127,17 @@ fun Context.hasLocationPermission(): Boolean {
         Manifest.permission.ACCESS_COARSE_LOCATION
     ) == PackageManager.PERMISSION_GRANTED
 }
+
+
+
+suspend fun<T> tryRepeat(reps: Long = 10, interval: (Long) -> Long = {1000L}, producer: suspend () -> T): T {
+    var i = 1L
+    while(true) {
+        try {
+            return producer()
+        } catch(e: Exception) { if (i == reps) throw e}
+        i++
+        delay(interval(i))
+    }
+}
+suspend fun<T> tryRepeatExp(reps: Long = 10, producer: suspend () -> T) = tryRepeat(reps = reps, interval = { 50L*exp(it.toDouble()).toLong() }, producer = producer)
