@@ -73,7 +73,7 @@ fun Color.lightness(factor: Float): Color {
 }
 
 @Composable
-fun Modifier.borderRight(strokeWidth: Dp, color: Color): Modifier {
+fun Modifier.borderRight(strokeWidth: Dp = 1.dp, color: Color = Color.Black): Modifier {
     val density = LocalDensity.current
     val strokeWidthPx = density.run { strokeWidth.toPx() }
 

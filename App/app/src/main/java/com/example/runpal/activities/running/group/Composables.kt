@@ -1,5 +1,12 @@
 package com.example.runpal.activities.running.group
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,13 +55,23 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.runpal.DEFAULT_PROFILE_URI
+import com.example.runpal.KcalFormatter
 import com.example.runpal.LoadingDots
+import com.example.runpal.MetricDistanceFormatter
+import com.example.runpal.R
+import com.example.runpal.activities.running.PanelText
+import com.example.runpal.activities.running.RunState
+import com.example.runpal.borderBottom
+import com.example.runpal.borderRight
+import com.example.runpal.models.PathPoint
 import com.example.runpal.models.Room
+import com.example.runpal.models.Run
 import com.example.runpal.models.User
 import com.example.runpal.ui.theme.LightGreen
 import com.example.runpal.ui.theme.LightRed
 import com.example.runpal.ui.theme.StandardButton
 import com.example.runpal.ui.theme.StandardOutlinedTextField
+import com.example.runpal.ui.theme.TransparentWhite
 
 @Composable
 fun EntryScreen( onJoin: (String) -> Unit, onCreate: () -> Unit, modifier: Modifier = Modifier) {
@@ -237,23 +256,124 @@ fun LobbyScreen(room: Room,
     }
 }
 
+@Composable
+fun MapRanking(runStates: List<RunState>, users: List<User>) {
+    var show by rememberSaveable {
+        mutableStateOf(false)
+    }
+    
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier
+            .padding(top = 20.dp)
+            .size(70.dp)
+            .align(Alignment.TopEnd)
+            .clip(
+                shape = RoundedCornerShape(
+                    topStart = 10.dp,
+                    bottomStart = 10.dp,
+                    topEnd = 0.dp,
+                    bottomEnd = 0.dp
+                )
+            )
+            .clickable { show = !show }
+            .background(color = TransparentWhite),
+            contentAlignment = Alignment.Center
+            ) {
+            Icon(painter = painterResource(id = R.drawable.podium),
+                contentDescription = "Live ranking",
+                modifier = Modifier.fillMaxSize(0.8f))
+        }
+        AnimatedVisibility(visible = show,
+            enter = slideInVertically(
+                animationSpec = tween(
+                    durationMillis = 800,
+                    easing = LinearOutSlowInEasing,
+                ), initialOffsetY = {it}
+            ), exit = slideOutVertically(
+                animationSpec = tween(
+                    durationMillis = 800,
+                    easing = LinearOutSlowInEasing
+                ), targetOffsetY = {it}
+            ),
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth()
+        ) {
+            val data = runStates.zip(users).sortedBy { -it.first.location.distance }
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .clip(shape = RoundedCornerShape(topEnd = 10.dp))
+                    .background(color = MaterialTheme.colorScheme.background)
+            ) {
+                for (i in 1..data.size) {
+                    UserRankingRow(runState = data[i-1].first, user = data[i - 1].second, rank = i)
+                }
+            }
+
+
+        }
+    }
+}
+
+@OptIn(ExperimentalCoilApi::class)
+@Composable
+fun UserRankingRow(runState: RunState, user: User, rank: Int) {
+    val bg = if (runState.run.state == Run.State.ENDED) LightRed
+        else if (runState.run.state == Run.State.PAUSED) Color.LightGray
+        else if (runState.run.state == Run.State.READY) LightGreen
+        else Color.Transparent
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = bg)
+            .borderBottom()
+            .padding(10.dp)
+        , verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        Text(text = "${rank}.", style = MaterialTheme.typography.titleSmall)
+        Image(painter = rememberImagePainter(data = user.profileUri),
+            contentDescription = user.name,
+            modifier = Modifier.size(50.dp)
+                .clip(shape = RoundedCornerShape(5.dp)),
+            contentScale = ContentScale.Crop)
+        Text(text = user.name, style = MaterialTheme.typography.titleSmall)
+        Spacer(modifier = Modifier.weight(1f))
+        PanelText(text = MetricDistanceFormatter.format(runState.location.distance),
+            modifier = Modifier
+                .borderRight()
+                .padding(10.dp)
+        )
+        PanelText(text = KcalFormatter.format(runState.location.kcal),
+            modifier = Modifier
+                .padding(10.dp))
+    }
+}
+
+val fakeUser = User(name = "Name", last = "Last", profile = DEFAULT_PROFILE_URI.toString())
+val fakeRunState = object: RunState {
+    override val run: Run = Run()
+    override val location: PathPoint = PathPoint(
+        distance = 100.0,
+        kcal = 120.0
+    )
+    override val path: List<PathPoint> = listOf()
+}
+val fakeUser2 = User(name = "Name2", last = "Last2", profile = DEFAULT_PROFILE_URI.toString())
+val fakeRunState2 = object: RunState {
+    override val run: Run = Run()
+    override val location: PathPoint = PathPoint(
+        distance = 90.0,
+        kcal = 110.0
+    )
+    override val path: List<PathPoint> = listOf()
+}
+
 @Preview
 @Composable
-fun PreviewLobby() {
-    val room = Room(
-        _id = "123456789123456789001234",
-        members = listOf("1", "2", "3"),
-        ready = listOf("2")
-    )
-    val user = User(name = "First", last = "Last")
-    val users = mapOf<String, User>("1" to user, "2" to user, "3" to user)
-    LobbyScreen(room = room,
-        users = users,
-        state = LobbyViewModel.State.READY,
-        onCopy = {},
-        onLeave = {},
-        onReady = {},
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp))
+fun Preview() {
+    Box(modifier = Modifier.size(500.dp)) {
+        MapRanking(runStates = listOf(), users = listOf())
+        //UserRankingRow(runState = fakeRunState, user = fakeUser, rank = 1)
+    }
 }

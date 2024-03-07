@@ -51,6 +51,11 @@ import com.example.runpal.activities.home.EventsScreen
 import com.example.runpal.activities.home.HomeActivity
 import com.example.runpal.activities.home.SmallEventCard
 import com.example.runpal.activities.login.LoginActivity
+import com.example.runpal.activities.running.group.MapRanking
+import com.example.runpal.activities.running.group.fakeRunState
+import com.example.runpal.activities.running.group.fakeRunState2
+import com.example.runpal.activities.running.group.fakeUser
+import com.example.runpal.activities.running.group.fakeUser2
 import com.example.runpal.generateSimpleMarkerBitmap
 import com.example.runpal.models.Event
 import com.example.runpal.repositories.run.CombinedRunRepository
@@ -123,6 +128,17 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    /*
+                    Box(modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.BottomCenter) {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .height(500.dp)
+                            .background(color = Color.Red)) {
+                            MapRanking(runStates = listOf(fakeRunState, fakeRunState2),
+                                users = listOf(fakeUser, fakeUser2))
+                        }
+                    }*/
 
                     Box(modifier = Modifier.fillMaxSize()) {
                         Image(painter = painterResource(id = R.drawable.runner),
@@ -132,6 +148,8 @@ class MainActivity : ComponentActivity() {
                                 .size(140.dp))
                         LoadingDots(size = 30.dp, count = 3, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 30.dp))
                     }
+
+                     
 
                 }
             }
