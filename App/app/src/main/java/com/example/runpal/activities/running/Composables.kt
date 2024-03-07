@@ -1,5 +1,6 @@
 package com.example.runpal.activities.running
 
+import android.media.MediaPlayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +19,9 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,10 +43,12 @@ import com.example.runpal.MetricDistanceFormatter
 import com.example.runpal.MetricPaceFormatter
 import com.example.runpal.MetricSpeedFormatter
 import com.example.runpal.ProgressFloatingButton
+import com.example.runpal.R
 import com.example.runpal.TimeFormatter
 import com.example.runpal.borderRight
 import com.example.runpal.timeAsState
 import com.example.runpal.ui.theme.TransparentWhite
+import kotlinx.coroutines.delay
 
 
 @Composable
@@ -124,7 +130,7 @@ fun RunDataPanel(runState: RunState, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun RunStart(onStart: () -> Unit) {
+fun RunStart(onStart: () -> Unit, sound: MediaPlayer? = null) {
     var countdown by remember {
         mutableStateOf("")
     }
@@ -141,7 +147,11 @@ fun RunStart(onStart: () -> Unit) {
             onProgress = {
                 if (it == 0f) countdown = ""
                 else if (it >= 1f) onStart()
-                else countdown = (4f - it*4f).toInt().toString()
+                else {
+                    val prev = countdown
+                    countdown = (4f - it*4f).toInt().toString()
+                    if (countdown != prev && prev != "") sound?.start()
+                }
             },
             time = 4000L,
             color = Color.Green,
@@ -223,15 +233,31 @@ fun RunResume(onResume: () -> Unit, onFinish: () -> Unit) {
 }
 
 @Composable
-fun RunCountown(till: Long, onStart: () -> Unit) {
-    val time = timeAsState()
-    val left = till - time.value
-    if (left <= 0L) onStart()
+fun RunCountown(till: Long, onStart: () -> Unit, sound: MediaPlayer? = null) {
+    val context = LocalContext.current
+    val beep = remember {
+        MediaPlayer.create(context, R.raw.shortbeep)
+    }
+    var countdown by rememberSaveable {
+        mutableStateOf("")
+    }
     Box(modifier = Modifier
         .fillMaxSize()
         .background(color = TransparentWhite)) {
-        Text(text = (left/1000L).toString(),
+        Text(text = countdown,
             modifier = Modifier.align(Alignment.Center),
             style = MaterialTheme.typography.displayLarge)
+    }
+    LaunchedEffect(key1 = till) {
+        while(true) {
+            val left = till - System.currentTimeMillis()
+            if (left <= 0) onStart()
+            else {
+                val prev = countdown
+                countdown = (left/1000L).toString()
+                if (countdown != prev && prev != "") sound?.start()
+            }
+            delay(200)
+        }
     }
 }

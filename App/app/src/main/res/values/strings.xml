@@ -9,4 +9,5 @@
     <string name="title_activity_group_run_entry">GroupRunEntryActivity</string>
     <string name="title_activity_group_running_results">GroupRunningResults</string>
     <string name="title_activity_event_running">EventRunningActivity</string>
+    <string name="title_activity_event_run_results">EventRunResults</string>
 </resources>

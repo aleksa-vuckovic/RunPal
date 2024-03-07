@@ -3,6 +3,7 @@ package com.example.runpal.activities.running.solo
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.location.Location
+import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,14 +16,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
 import com.example.runpal.LoadingScreen
+import com.example.runpal.R
 import com.example.runpal.RUN_MARKER_COLORS
-import com.example.runpal.RUN_MARKER_SIZE
-import com.example.runpal.activities.results.SoloRunningResults
+import com.example.runpal.activities.results.SoloRunResults
 import com.example.runpal.activities.running.RunDataPanel
 import com.example.runpal.activities.running.RunPause
 import com.example.runpal.activities.running.RunResume
@@ -30,7 +29,6 @@ import com.example.runpal.activities.running.RunStart
 import com.example.runpal.hasLocationPermission
 import com.example.runpal.models.Run
 import com.example.runpal.ui.GoogleMapRun
-import com.example.runpal.ui.theme.MediumBlue
 import com.example.runpal.ui.theme.RunPalTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationListener
@@ -39,7 +37,6 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class SoloRunActivity : ComponentActivity() {
@@ -52,10 +49,15 @@ class SoloRunActivity : ComponentActivity() {
         }
     }
     lateinit var provider: FusedLocationProviderClient
+    var shortbeep: MediaPlayer? = null
+    var longbeep: MediaPlayer? = null
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        shortbeep = MediaPlayer.create(this, R.raw.shortbeep)
+        longbeep = MediaPlayer.create(this, R.raw.longbeep)
 
         if (!this.hasLocationPermission()) this.finish()
         provider = LocationServices.getFusedLocationProviderClient(this)
@@ -93,14 +95,17 @@ class SoloRunActivity : ComponentActivity() {
 
                             val state = vm.runState.run.state
                             if (state == Run.State.LOADING) LoadingScreen()
-                            else if (state == Run.State.READY) RunStart(onStart = vm::start)
+                            else if (state == Run.State.READY) RunStart(onStart = {
+                                vm.start()
+                                longbeep?.start()
+                            }, sound = shortbeep)
                             else if (state == Run.State.RUNNING) RunPause(onPause = vm::pause, onFinish = vm::end)
                             else if (state == Run.State.PAUSED) RunResume(onResume = vm::resume, onFinish = vm::end)
                             LaunchedEffect(key1 = state) {
                                 if (state == Run.State.ENDED) {
                                     delay(200) //giving time for the server update
                                     this@SoloRunActivity.finish()
-                                    val intent = Intent(this@SoloRunActivity, SoloRunningResults::class.java)
+                                    val intent = Intent(this@SoloRunActivity, SoloRunResults::class.java)
                                     startActivity(intent)
                                 }
                             }
@@ -115,5 +120,9 @@ class SoloRunActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         provider.removeLocationUpdates(locationListener)
+        shortbeep?.release()
+        longbeep?.release()
+        shortbeep = null
+        longbeep = null
     }
 }

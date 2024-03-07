@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import com.example.runpal.ui.theme.RunPalTheme
 
-class SoloRunningResults : ComponentActivity() {
+class SoloRunResults : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

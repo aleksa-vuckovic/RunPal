@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:name=".App"
@@ -18,12 +19,17 @@
         android:theme="@style/Theme.RunPal"
         tools:targetApi="31">
         <activity
+            android:name=".activities.results.EventRunResults"
+            android:exported="false"
+            android:label="@string/title_activity_event_run_results"
+            android:theme="@style/Theme.RunPal" />
+        <activity
             android:name=".activities.running.event.EventRunActivity"
             android:exported="false"
             android:label="@string/title_activity_event_running"
             android:theme="@style/Theme.RunPal" />
         <activity
-            android:name=".activities.results.GroupRunningResults"
+            android:name=".activities.results.GroupRunResults"
             android:exported="false"
             android:label="@string/title_activity_group_running_results"
             android:theme="@style/Theme.RunPal" />
@@ -53,7 +59,7 @@
             android:label="@string/title_activity_login"
             android:theme="@style/Theme.RunPal" />
         <activity
-            android:name=".activities.results.SoloRunningResults"
+            android:name=".activities.results.SoloRunResults"
             android:exported="false"
             android:label="@string/title_activity_solo_running_results"
             android:theme="@style/Theme.RunPal" />
