@@ -28,7 +28,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.runpal.DoubleInput
 import com.example.runpal.ImageSelector
-import com.example.runpal.LB_TO_KG
+import com.example.runpal.Units
 import com.example.runpal.borderBottom
 import com.example.runpal.ui.theme.StandardButton
 import com.example.runpal.ui.theme.StandardTextField
@@ -99,8 +99,8 @@ fun RegisterScreen(onRegister: (String, String, String, String, Double, Uri?) ->
     var weight by rememberSaveable {
         mutableStateOf(80.0)
     }
-    var imperial by rememberSaveable {
-        mutableStateOf(false)
+    var units by rememberSaveable {
+        mutableStateOf(Units.METRIC)
     }
     var profile by rememberSaveable {
         mutableStateOf<Uri?>(null)
@@ -158,10 +158,10 @@ fun RegisterScreen(onRegister: (String, String, String, String, Double, Uri?) ->
                 DoubleInput(initial = 80.0, onChange = {weight = it}, modifier = Modifier.width(150.dp))
                 Box(modifier = Modifier
                     .size(55.dp)
-                    .clickable { imperial = !imperial }
+                    .clickable { units.next }
                     .background(color = MaterialTheme.colorScheme.surfaceVariant)
                     .borderBottom(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)) {
-                    Text(text = if (imperial) "lb" else "kg",
+                    Text(text = if (units == Units.IMPERIAL) "lb" else "kg",
                         style = style,
                         modifier = Modifier.align(Alignment.Center))
                 }
@@ -176,7 +176,7 @@ fun RegisterScreen(onRegister: (String, String, String, String, Double, Uri?) ->
             ImageSelector(input = profile, onSelect = {profile = it}, Modifier.size(200.dp))
         }
 
-        StandardButton(onClick = { onRegister(email, password, name, last, if (imperial) weight* LB_TO_KG else weight, profile)})
+        StandardButton(onClick = { onRegister(email, password, name, last, units.toStandardWeightInput(weight), profile)})
          {
             Text("Register")
         }

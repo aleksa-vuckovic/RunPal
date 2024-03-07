@@ -16,6 +16,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.runpal.LoadingScreen
@@ -28,6 +32,7 @@ import com.example.runpal.activities.running.RunResume
 import com.example.runpal.activities.running.RunStart
 import com.example.runpal.hasLocationPermission
 import com.example.runpal.models.Run
+import com.example.runpal.repositories.SettingsManager
 import com.example.runpal.ui.GoogleMapRun
 import com.example.runpal.ui.theme.RunPalTheme
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -37,6 +42,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SoloRunActivity : ComponentActivity() {
@@ -51,6 +57,9 @@ class SoloRunActivity : ComponentActivity() {
     lateinit var provider: FusedLocationProviderClient
     var shortbeep: MediaPlayer? = null
     var longbeep: MediaPlayer? = null
+
+    @Inject
+    lateinit var settingsManager: SettingsManager
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,13 +85,23 @@ class SoloRunActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
 
+                    var units by remember {
+                        mutableStateOf(settingsManager.units)
+                    }
+                    var pace by remember {
+                        mutableStateOf(false)
+                    }
 
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        RunDataPanel(runState = vm.runState, modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp))
+                        RunDataPanel(runState = vm.runState,
+                            units = units, onChangeUnits = {units = units.next},
+                            pace = pace, onChangePace = {pace = !pace},
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                        )
                         Box(modifier = Modifier.fillMaxSize()) {
 
                             GoogleMapRun(

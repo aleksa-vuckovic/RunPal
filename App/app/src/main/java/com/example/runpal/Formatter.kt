@@ -25,7 +25,6 @@ object TimeFormatter: Formatter<Long> {
         else return "%02d:%02d:%02d".format(hours, mins, secs) to ""
     }
 }
-
 object LongTimeFormatter: Formatter<Long> {
     override fun format(value: Long): Pair<String, String> {
         var t = value/1000
@@ -43,7 +42,6 @@ object LongTimeFormatter: Formatter<Long> {
         else return "%d minutes".format(mins) to ""
     }
 }
-
 object UTCDateTimeFormatter: Formatter<Long> {
     override fun format(value: Long): Pair<String, String> {
         val date = Instant.ofEpochMilli(value)
@@ -111,5 +109,47 @@ object EmptyFormatter: Formatter<Double> {
         return "" to ""
     }
 }
-
+object MetricWeightFormatter: Formatter<Double> {
+    override fun format(value: Double): Pair<String, String> {
+        return value.toInt().toString() to "kg"
+    }
+}
+object ImperialWeightFormatter: Formatter<Double> {
+    override fun format(value: Double): Pair<String, String> {
+        return value.toInt().toString() to "lb"
+    }
+}
 fun Pair<String, String>.join(sep: String = ""): String = first + sep + second
+
+enum class Units(
+    val speedFormatter: Formatter<Double>,
+    val paceFormatter: Formatter<Double>,
+    val distanceFormatter: Formatter<Double>,
+    val weightFormatter: Formatter<Double>
+) {
+    METRIC(MetricSpeedFormatter,
+        MetricPaceFormatter,
+        MetricDistanceFormatter,
+        MetricWeightFormatter
+    ), IMPERIAL(ImperialSpeedFormatter,
+        ImperialPaceFormatter,
+        ImperialDistanceFormatter,
+        ImperialWeightFormatter
+    ) {
+        override fun toStandardWeightInput(value: Double) = value * LB_TO_KG
+        override fun fromStandardWeightInput(value: Double) = value / LB_TO_KG
+        override fun fromStandardDistanceInput(value: Double) = value / KM_TO_MILE * KM_TO_M
+        override val standardWeightInput = "lb"
+        override val standardDistanceInput = "mi"
+      };
+
+    val next: Units
+        get() = if (this == METRIC) IMPERIAL else METRIC
+
+    open fun toStandardWeightInput(value: Double) = value
+    open fun fromStandardWeightInput(value: Double) = value
+    open val standardWeightInput = "kg"
+
+    open fun fromStandardDistanceInput(value: Double) = value* KM_TO_M
+    open val standardDistanceInput = "km"
+}

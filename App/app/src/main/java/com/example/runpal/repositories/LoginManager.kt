@@ -28,13 +28,13 @@ class LoginManager @Inject constructor(
         //private const  val SHARED_PREFS_LOGIN_TOKEN_TIMESTAMP = "TOKEN_TIMESTAMP"
         //private const val TOKEN_DURATION = 3*24*60*60*1000L
     }
+    private fun getPrefs(): SharedPreferences {
+        return context.getSharedPreferences(SHARED_PREFS_LOGIN, Context.MODE_PRIVATE)
+    }
     /**
      * Returns the email of the currently logged in user
      * or null if none is.
      */
-    private fun getPrefs(): SharedPreferences {
-        return context.getSharedPreferences(SHARED_PREFS_LOGIN, Context.MODE_PRIVATE)
-    }
     fun currentUser(): String? {
         val prefs = getPrefs()
         return prefs.getString(SHARED_PREFS_LOGIN_EMAIL, null)

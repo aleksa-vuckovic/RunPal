@@ -13,6 +13,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -27,6 +30,7 @@ import com.example.runpal.LoadingDots
 import com.example.runpal.LoadingScreen
 import com.example.runpal.activities.home.StatsDestination
 import com.example.runpal.repositories.LoginManager
+import com.example.runpal.repositories.SettingsManager
 import com.example.runpal.restartApp
 import com.example.runpal.ui.theme.RunPalTheme
 import com.example.runpal.ui.theme.StandardTopBar
@@ -40,6 +44,8 @@ class AccountActivity : ComponentActivity() {
 
     @Inject
     lateinit var loginManager: LoginManager
+    @Inject
+    lateinit var settingsManager: SettingsManager
 
     val vm: AccountViewModel by viewModels()
 
@@ -76,9 +82,19 @@ class AccountActivity : ComponentActivity() {
 
                             composable(route = AccountDestination.argsRoute) {
 
-                                AccountScreen(user = user, onEdit = {
-                                    navController.navigate(EditDestination.argsRoute)
-                                }, modifier = Modifier.fillMaxSize())
+                                var units by remember {
+                                    mutableStateOf(settingsManager.units)
+                                }
+
+                                AccountScreen(
+                                    user = user,
+                                    onEdit = {
+                                        navController.navigate(EditDestination.argsRoute)
+                                    }, units = units,
+                                    onSelectUnits = {
+                                        settingsManager.units = it
+                                        units = it
+                                    }, modifier = Modifier.fillMaxSize())
                             }
 
                             composable(route = EditDestination.argsRoute) {

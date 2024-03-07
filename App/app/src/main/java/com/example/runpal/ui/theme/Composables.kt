@@ -6,17 +6,22 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,6 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -119,7 +125,6 @@ fun StandardNavBar(destinations: List<Destination>, curDestination: String, onCl
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StandardTopBar(onBack: (() -> Unit)? = null,
-                   onClose: (() -> Unit)? = null,
                    onRefresh: (() -> Unit)? = null,
                    onAccount: () -> Unit,
                    onLogout: () -> Unit,
@@ -132,12 +137,6 @@ fun StandardTopBar(onBack: (() -> Unit)? = null,
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back"
-                )
-            }
-            else if (onClose != null) IconButton(onClick = onClose) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close"
                 )
             }
         },
@@ -239,7 +238,8 @@ fun StandardBadge(text: String, type: BadgeType = BadgeType.INFO, fontSize: Text
 
 @Composable
 fun StandardDialog(text: String, onDismiss: () -> Unit, onOk: () -> Unit, modifier: Modifier = Modifier) {
-    Box(modifier = Modifier.fillMaxSize()
+    Box(modifier = Modifier
+        .fillMaxSize()
         .background(color = TransparentWhite),
         contentAlignment = Alignment.Center) {
         Dialog(onDismissRequest = onDismiss) {
@@ -266,6 +266,30 @@ fun StandardDialog(text: String, onDismiss: () -> Unit, onOk: () -> Unit, modifi
                     Text(text = "OK")
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun StandardSpinner(values: List<String>, selected: String, onSelect: (String) -> Unit, modifier: Modifier = Modifier) {
+    var expanded: Boolean by rememberSaveable {
+        mutableStateOf(false)
+    }
+    Box() {
+        OutlinedButton(onClick = { expanded = !expanded },
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = MaterialTheme.colorScheme.background,
+                contentColor = MaterialTheme.colorScheme.onBackground
+            )
+        ) {
+            Text(text = selected)
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(imageVector = if (expanded) Icons.Default.ExpandLess
+            else Icons.Default.ExpandMore,
+                contentDescription = "Expand")
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            for (value in values) DropdownMenuItem(text = { Text(text = value) }, onClick = { onSelect(value); expanded = false })
         }
     }
 }

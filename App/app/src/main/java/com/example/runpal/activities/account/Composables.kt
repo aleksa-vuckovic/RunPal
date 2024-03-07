@@ -36,19 +36,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.runpal.DoubleInput
 import com.example.runpal.ImageSelector
-import com.example.runpal.LB_TO_KG
+import com.example.runpal.Units
 import com.example.runpal.borderBottom
 import com.example.runpal.models.User
 import com.example.runpal.ui.theme.StandardButton
+import com.example.runpal.ui.theme.StandardSpinner
 import com.example.runpal.ui.theme.StandardTextField
 
 @Composable
-fun EditScreen(init: User, onUpdate: (String, String, Double, Uri?) -> Unit, errorMessage: String, modifier: Modifier = Modifier) {
+fun EditScreen(init: User,
+               onUpdate: (String, String, Double, Uri?) -> Unit,
+               errorMessage: String,
+               preferredUnits: Units = Units.METRIC,
+               modifier: Modifier = Modifier) {
 
     var name by rememberSaveable {
         mutableStateOf(init.name)
@@ -56,18 +61,19 @@ fun EditScreen(init: User, onUpdate: (String, String, Double, Uri?) -> Unit, err
     var last by rememberSaveable {
         mutableStateOf(init.last)
     }
-    var weight by rememberSaveable {
-        mutableStateOf(init.weight)
+    var units by rememberSaveable {
+        mutableStateOf(preferredUnits)
     }
-    var imperial by rememberSaveable {
-        mutableStateOf(false)
+    var weight by rememberSaveable {
+        mutableStateOf(units.fromStandardWeightInput(init.weight))
     }
     var profile by rememberSaveable {
         mutableStateOf<Uri?>(init.profileUri)
     }
 
     Column(
-        modifier = modifier.verticalScroll(rememberScrollState())
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
             .background(color = MaterialTheme.colorScheme.surface),
         verticalArrangement = Arrangement.spacedBy(30.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -98,15 +104,16 @@ fun EditScreen(init: User, onUpdate: (String, String, Double, Uri?) -> Unit, err
             Text("Weight", style = style, modifier = Modifier.weight(0.3f))
             Row(modifier = Modifier.weight(0.7f),
                 horizontalArrangement = Arrangement.End) {
-                DoubleInput(initial = init.weight, onChange = {weight = it}, modifier = Modifier.width(150.dp))
+                DoubleInput(initial = weight, onChange = {weight = it}, modifier = Modifier.width(150.dp))
                 Box(modifier = Modifier
                     .size(55.dp)
-                    .clickable { imperial = !imperial }
+                    .clickable { units = units.next }
                     .background(color = MaterialTheme.colorScheme.surfaceVariant)
                     .borderBottom(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)) {
-                    Text(text = if (imperial) "lb" else "kg",
+                    Text(text = units.weightFormatter.format(weight).second,
                         style = style,
-                        modifier = Modifier.align(Alignment.Center))
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
             }
         }
@@ -119,7 +126,7 @@ fun EditScreen(init: User, onUpdate: (String, String, Double, Uri?) -> Unit, err
             ImageSelector(input = profile, onSelect = {profile = it}, Modifier.size(200.dp))
         }
 
-        StandardButton(onClick = { onUpdate(name, last, if (imperial) weight* LB_TO_KG else weight, profile)})
+        StandardButton(onClick = { onUpdate(name, last, units.toStandardWeightInput(weight), profile)})
         {
             Text("Update")
         }
@@ -128,8 +135,9 @@ fun EditScreen(init: User, onUpdate: (String, String, Double, Uri?) -> Unit, err
 }
 
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
-fun AccountScreen(user: User, onEdit: () -> Unit,  modifier: Modifier) {
+fun AccountScreen(user: User, onEdit: () -> Unit, units: Units, onSelectUnits: (Units) -> Unit,  modifier: Modifier) {
 
     Box(modifier = modifier) {
         Column(
@@ -182,6 +190,15 @@ fun AccountScreen(user: User, onEdit: () -> Unit,  modifier: Modifier) {
             ) {
                 Text(text = "Weight: ${user.weight}kg", style = MaterialTheme.typography.bodyLarge)
             }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "Preferred units: ", style = MaterialTheme.typography.bodyLarge)
+                StandardSpinner(values = Units.values().map { it.name }, selected = units.name, onSelect = {onSelectUnits(Units.valueOf(it))})
+            }
 
         }
         FloatingActionButton(onClick = onEdit,
@@ -193,10 +210,4 @@ fun AccountScreen(user: User, onEdit: () -> Unit,  modifier: Modifier) {
                     contentDescription = "Edit")
         }
     }
-}
-
-@Preview
-@Composable
-fun AccountPreview() {
-    AccountScreen(user = User(), onEdit = {}, modifier = Modifier.fillMaxSize())
 }

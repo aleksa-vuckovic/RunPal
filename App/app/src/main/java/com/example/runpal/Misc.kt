@@ -9,8 +9,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.app.ActivityCompat
+import androidx.core.graphics.ColorUtils
 import com.example.runpal.activities.MainActivity
 import kotlinx.coroutines.delay
 import java.io.File
@@ -146,3 +149,18 @@ suspend fun<T> tryRepeat(reps: Long = 10, interval: (Long) -> Long = {1000L}, pr
     }
 }
 suspend fun<T> tryRepeatExp(reps: Long = 10, producer: suspend () -> T) = tryRepeat(reps = reps, interval = { 50L*exp(it.toDouble()).toLong() }, producer = producer)
+
+
+fun Color.lightness(factor: Float): Color {
+    var argb = this.toArgb()
+    val alpha = android.graphics.Color.alpha(argb)
+    val red = android.graphics.Color.red(argb)
+    val green = android.graphics.Color.green(argb)
+    val blue = android.graphics.Color.blue(argb)
+
+    val hsl = FloatArray(3)
+    ColorUtils.RGBToHSL(red, green, blue, hsl)
+    hsl[2] = factor
+    argb = ColorUtils.HSLToColor(hsl) or (alpha shl 24)
+    return Color(argb)
+}

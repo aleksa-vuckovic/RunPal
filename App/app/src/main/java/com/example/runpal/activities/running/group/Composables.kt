@@ -59,6 +59,7 @@ import com.example.runpal.KcalFormatter
 import com.example.runpal.LoadingDots
 import com.example.runpal.MetricDistanceFormatter
 import com.example.runpal.R
+import com.example.runpal.Units
 import com.example.runpal.activities.running.PanelText
 import com.example.runpal.activities.running.RunState
 import com.example.runpal.borderBottom
@@ -257,7 +258,7 @@ fun LobbyScreen(room: Room,
 }
 
 @Composable
-fun MapRanking(runStates: List<RunState>, users: List<User>) {
+fun MapRanking(runStates: List<RunState>, users: List<User>, units: Units, pace: Boolean) {
     var show by rememberSaveable {
         mutableStateOf(false)
     }
@@ -301,12 +302,13 @@ fun MapRanking(runStates: List<RunState>, users: List<User>) {
         ) {
             val data = runStates.zip(users).sortedBy { -it.first.location.distance }
             Column(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .clip(shape = RoundedCornerShape(topEnd = 10.dp))
                     .background(color = MaterialTheme.colorScheme.background)
             ) {
                 for (i in 1..data.size) {
-                    UserRankingRow(runState = data[i-1].first, user = data[i - 1].second, rank = i)
+                    UserRankingRow(runState = data[i-1].first, user = data[i - 1].second, rank = i, units = units, pace = pace)
                 }
             }
 
@@ -317,7 +319,11 @@ fun MapRanking(runStates: List<RunState>, users: List<User>) {
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
-fun UserRankingRow(runState: RunState, user: User, rank: Int) {
+fun UserRankingRow(runState: RunState,
+                   user: User,
+                   rank: Int,
+                   units: Units,
+                   pace: Boolean) {
     val bg = if (runState.run.state == Run.State.ENDED) LightRed
         else if (runState.run.state == Run.State.PAUSED) Color.LightGray
         else if (runState.run.state == Run.State.READY) LightGreen
@@ -334,19 +340,27 @@ fun UserRankingRow(runState: RunState, user: User, rank: Int) {
         Text(text = "${rank}.", style = MaterialTheme.typography.titleSmall)
         Image(painter = rememberImagePainter(data = user.profileUri),
             contentDescription = user.name,
-            modifier = Modifier.size(50.dp)
+            modifier = Modifier
+                .size(50.dp)
                 .clip(shape = RoundedCornerShape(5.dp)),
             contentScale = ContentScale.Crop)
         Text(text = user.name, style = MaterialTheme.typography.titleSmall)
         Spacer(modifier = Modifier.weight(1f))
-        PanelText(text = MetricDistanceFormatter.format(runState.location.distance),
+        PanelText(text = if (pace) units.paceFormatter.format(runState.location.speed)
+                        else units.speedFormatter.format(runState.location.speed),
+            modifier = Modifier
+                .borderRight()
+                .padding(10.dp)
+        )
+        PanelText(text = units.distanceFormatter.format(runState.location.distance),
             modifier = Modifier
                 .borderRight()
                 .padding(10.dp)
         )
         PanelText(text = KcalFormatter.format(runState.location.kcal),
             modifier = Modifier
-                .padding(10.dp))
+                .padding(10.dp)
+        )
     }
 }
 
@@ -373,7 +387,7 @@ val fakeRunState2 = object: RunState {
 @Composable
 fun Preview() {
     Box(modifier = Modifier.size(500.dp)) {
-        MapRanking(runStates = listOf(), users = listOf())
+        MapRanking(runStates = listOf(), users = listOf(), units = Units.METRIC, pace = false)
         //UserRankingRow(runState = fakeRunState, user = fakeUser, rank = 1)
     }
 }

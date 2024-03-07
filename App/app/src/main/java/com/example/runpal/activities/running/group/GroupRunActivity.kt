@@ -16,6 +16,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.runpal.LoadingScreen
@@ -28,6 +33,7 @@ import com.example.runpal.activities.running.RunPause
 import com.example.runpal.activities.running.RunResume
 import com.example.runpal.hasLocationPermission
 import com.example.runpal.models.Run
+import com.example.runpal.repositories.SettingsManager
 import com.example.runpal.ui.GoogleMapRun
 import com.example.runpal.ui.theme.RunPalTheme
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -37,10 +43,14 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
+import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class GroupRunActivity : ComponentActivity() {
 
+    @Inject
+    lateinit var settingsManager: SettingsManager
 
     val vm: GroupRunViewModel by viewModels()
     val locationListener: LocationListener = object: LocationListener {
@@ -77,13 +87,23 @@ class GroupRunActivity : ComponentActivity() {
                         if (vm.state == GroupRunViewModel.State.FAILED) finish()
                     }
 
+                    var units by remember {
+                        mutableStateOf(settingsManager.units)
+                    }
+                    var pace by remember {
+                        mutableStateOf(false)
+                    }
+
                     if (vm.state == GroupRunViewModel.State.LOADING) LoadingScreen()
                     else if (vm.state == GroupRunViewModel.State.LOADED) Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        RunDataPanel(runState = vm.runStates[0], modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp))
+                        RunDataPanel(runState = vm.runStates[0],
+                            units = units, onChangeUnits = {units = units.next},
+                            pace = pace, onChangePace = {pace = !pace},
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp))
                         Box(modifier = Modifier.fillMaxSize()) {
 
                             GoogleMapRun(
@@ -103,11 +123,11 @@ class GroupRunActivity : ComponentActivity() {
                             }, sound = shortbeep)
                             else if (state == Run.State.RUNNING) {
                                 RunPause(onPause = vm::pause, onFinish = vm::end)
-                                MapRanking(runStates = vm.runStates, users = vm.users)
+                                MapRanking(runStates = vm.runStates, users = vm.users, units = units, pace = pace)
                             }
                             else if (state == Run.State.PAUSED) {
                                 RunResume(onResume = vm::resume, onFinish = vm::end)
-                                MapRanking(runStates = vm.runStates, users = vm.users)
+                                MapRanking(runStates = vm.runStates, users = vm.users, units = units, pace = pace)
                             }
                             LaunchedEffect(key1 = state) {
                                 if (state == Run.State.ENDED) {

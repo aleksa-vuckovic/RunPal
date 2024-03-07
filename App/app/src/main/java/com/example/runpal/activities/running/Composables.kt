@@ -45,6 +45,7 @@ import com.example.runpal.MetricSpeedFormatter
 import com.example.runpal.ProgressFloatingButton
 import com.example.runpal.R
 import com.example.runpal.TimeFormatter
+import com.example.runpal.Units
 import com.example.runpal.borderRight
 import com.example.runpal.timeAsState
 import com.example.runpal.ui.theme.TransparentWhite
@@ -73,25 +74,24 @@ fun PanelText(text: Pair<String,String>, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun RunDataPanel(runState: RunState, modifier: Modifier = Modifier) {
-    var imperial by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var pace by rememberSaveable {
-        mutableStateOf(false)
-    }
+fun RunDataPanel(runState: RunState,
+                 units: Units,
+                 onChangeUnits: () -> Unit,
+                 pace: Boolean,
+                 onChangePace: () -> Unit,
+                 modifier: Modifier = Modifier) {
+
 
     Column(modifier = modifier) {
         Row(modifier = Modifier
             .weight(1f)
             .fillMaxWidth()) {
-            PanelText(text = if (imperial) ImperialDistanceFormatter.format(runState.location.distance)
-            else MetricDistanceFormatter.format(runState.location.distance),
+            PanelText(text = units.distanceFormatter.format(runState.location.distance),
                 modifier = Modifier
                     .fillMaxSize()
                     .borderRight(1.dp, Color.LightGray)
                     .weight(1f)
-                    .clickable { imperial = !imperial }
+                    .clickable { onChangeUnits() }
                     .padding(vertical = 20.dp)
             )
             PanelText(text = KcalFormatter.format(runState.location.kcal),
@@ -109,15 +109,13 @@ fun RunDataPanel(runState: RunState, modifier: Modifier = Modifier) {
         Row(modifier = Modifier
             .weight(1f)
             .fillMaxWidth()) {
-            PanelText(text = if (pace && imperial) ImperialPaceFormatter.format(runState.location.speed)
-            else if (pace && !imperial) MetricPaceFormatter.format(runState.location.speed)
-            else if (!pace && imperial) ImperialSpeedFormatter.format(runState.location.speed)
-            else MetricSpeedFormatter.format(runState.location.speed),
+            PanelText(text = if (pace) units.paceFormatter.format(runState.location.speed)
+                        else units.speedFormatter.format(runState.location.speed),
                 modifier = Modifier
                     .fillMaxSize()
                     .borderRight(1.dp, Color.LightGray)
                     .weight(1f)
-                    .clickable { pace = !pace }
+                    .clickable { onChangePace() }
                     .padding(vertical = 20.dp))
             PanelText(text = TimeFormatter.format(runState.run.running),
                 modifier = Modifier

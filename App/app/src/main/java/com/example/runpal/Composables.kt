@@ -58,19 +58,6 @@ import com.example.runpal.ui.theme.TransparentWhite
 import kotlinx.coroutines.delay
 import java.lang.Float.min
 
-fun Color.lightness(factor: Float): Color {
-    var argb = this.toArgb()
-    val alpha = alpha(argb)
-    val red = red(argb)
-    val green = green(argb)
-    val blue = blue(argb)
-
-    val hsl = FloatArray(3)
-    ColorUtils.RGBToHSL(red, green, blue, hsl)
-    hsl[2] = factor
-    argb = ColorUtils.HSLToColor(hsl) or (alpha shl 24)
-    return Color(argb)
-}
 
 @Composable
 fun Modifier.borderRight(strokeWidth: Dp = 1.dp, color: Color = Color.Black): Modifier {
