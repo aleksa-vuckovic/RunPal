@@ -110,4 +110,8 @@ class ServerModule {
     @Singleton
     @Provides
     fun provideRoomApi(@AuthorizedRetrofit retrofit: Retrofit): RoomApi = retrofit.create((RoomApi::class.java))
+
+    @Singleton
+    @Provides
+    fun provideEventApi(@AuthorizedRetrofit retrofit: Retrofit): EventApi = retrofit.create((EventApi::class.java))
 }

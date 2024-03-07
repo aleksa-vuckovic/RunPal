@@ -18,6 +18,11 @@
         android:theme="@style/Theme.RunPal"
         tools:targetApi="31">
         <activity
+            android:name=".activities.running.event.EventRunActivity"
+            android:exported="false"
+            android:label="@string/title_activity_event_running"
+            android:theme="@style/Theme.RunPal" />
+        <activity
             android:name=".activities.results.GroupRunningResults"
             android:exported="false"
             android:label="@string/title_activity_group_running_results"

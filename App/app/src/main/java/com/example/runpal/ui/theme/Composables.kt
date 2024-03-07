@@ -1,10 +1,20 @@
 package com.example.runpal.ui.theme
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.DropdownMenu
@@ -30,10 +40,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.example.runpal.Destination
 import com.example.runpal.lightness
 
@@ -55,7 +73,12 @@ fun StandardButton(onClick: () -> Unit, modifier: Modifier = Modifier, content: 
 }
 
 @Composable
-fun StandardTextField(value: String, onChange: (String) -> Unit, visualTransformation: VisualTransformation = VisualTransformation.None, modifier: Modifier = Modifier) {
+fun StandardTextField(value: String,
+                      onChange: (String) -> Unit,
+                      visualTransformation: VisualTransformation = VisualTransformation.None,
+                      minLines: Int = 1,
+                      enabled: Boolean = true,
+                      modifier: Modifier = Modifier) {
 
     TextField(value = value, onValueChange = onChange, modifier = modifier,
         colors = TextFieldDefaults.colors(
@@ -64,9 +87,12 @@ fun StandardTextField(value: String, onChange: (String) -> Unit, visualTransform
             unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface,
             focusedIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant,
             unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-            focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+            focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            disabledTextColor = MaterialTheme.colorScheme.onSurface
         ),
-        visualTransformation = visualTransformation
+        visualTransformation = visualTransformation,
+        minLines = minLines,
+        enabled = enabled
     )
 }
 
@@ -92,21 +118,38 @@ fun StandardNavBar(destinations: List<Destination>, curDestination: String, onCl
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StandardTopBar(onBack: () -> Unit, onAccount: () -> Unit, onLogout: () -> Unit, title: String = "") {
+fun StandardTopBar(onBack: (() -> Unit)? = null,
+                   onClose: (() -> Unit)? = null,
+                   onRefresh: (() -> Unit)? = null,
+                   onAccount: () -> Unit,
+                   onLogout: () -> Unit,
+                   title: String = "") {
     //val height = 50.dp
     TopAppBar(
         title = { Text(text = title)},
         navigationIcon = {
-            IconButton(onClick = onBack) {
+            if (onBack != null) IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back"
+                )
+            }
+            else if (onClose != null) IconButton(onClick = onClose) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close"
                 )
             }
         },
         actions = {
             var expanded by remember {
                 mutableStateOf(false)
+            }
+            if (onRefresh != null) IconButton(onClick = onRefresh) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "Refresh"
+                )
             }
 
             IconButton(onClick = {expanded = !expanded}) {
@@ -163,6 +206,69 @@ fun StandardOutlinedTextField(value: String,
     )
 }
 
+enum class BadgeType {
+    DANGER,
+    INFO,
+    SUCCESS
+}
+@Composable
+fun StandardBadge(text: String, type: BadgeType = BadgeType.INFO, fontSize: TextUnit? = null) {
+    var font = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
+    if (fontSize != null) font = font.copy(fontSize = fontSize)
+
+    val bg = if (type == BadgeType.DANGER) LightRed
+            else if (type == BadgeType.INFO) LightBlue
+            else LightGreen
+    Box(modifier = Modifier
+        .shadow(elevation = 1.dp, shape = RoundedCornerShape(8.dp))
+        .clip(shape = RoundedCornerShape(8.dp))
+        .background(color = bg)
+        .padding(5.dp)
+
+
+        ,
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = text,
+            style = font,
+            textAlign = TextAlign.Center
+        )
+    }
+
+}
+
+@Composable
+fun StandardDialog(text: String, onDismiss: () -> Unit, onOk: () -> Unit, modifier: Modifier = Modifier) {
+    Box(modifier = Modifier.fillMaxSize()
+        .background(color = TransparentWhite),
+        contentAlignment = Alignment.Center) {
+        Dialog(onDismissRequest = onDismiss) {
+            Column(
+                modifier = modifier
+                    .width(300.dp)
+                    .height(200.dp)
+                    .clip(shape = RoundedCornerShape(5.dp))
+                    .background(color = MaterialTheme.colorScheme.background)
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        shape = RoundedCornerShape(2.dp)
+                    )
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceAround
+            ) {
+                Text(
+                    text = text,
+                    textAlign = TextAlign.Center
+                )
+                StandardButton(onClick = onOk) {
+                    Text(text = "OK")
+                }
+            }
+        }
+    }
+}
 
 
 

@@ -90,7 +90,7 @@ fun Modifier.borderRight(strokeWidth: Dp, color: Color): Modifier {
     }
 }
 @Composable
-fun Modifier.borderBottom(strokeWidth: Dp, color: Color): Modifier {
+fun Modifier.borderBottom(strokeWidth: Dp = 1.dp, color: Color = Color.Black): Modifier {
     val density = LocalDensity.current
     val strokeWidthPx = density.run { strokeWidth.toPx() }
 

@@ -5,6 +5,7 @@ import userRouter from './routers/userRouter'
 import path from 'path'
 import runRouter from './routers/runRouter'
 import roomRouter from './routers/roomRouter'
+import eventRouter from './routers/eventRouter'
 
 mongoose.connect("mongodb+srv://aleksavuckovic77:nintendowii@iepproba.yn7bmhq.mongodb.net/runpal")
 mongoose.connection.once('open', async () => {
@@ -22,5 +23,6 @@ app.use("/user", userRouter)
 app.use("/run", runRouter)
 app.use('/uploads', express.static(path.join(__dirname, "..", "uploads")));
 app.use("/room", roomRouter)
+app.use("/event", eventRouter)
 const port = process.env.PORT || 4000;
 app.listen(port, () => console.log("Express server running on " + port + "."))

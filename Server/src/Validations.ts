@@ -142,4 +142,16 @@ export class Validation {
         } else output.path = []
         return "ok"
     }
+
+    static event(input: any, output: any, jwt: any): string {
+        if (!input || !input.name || !input.time) return "Name and time must not be empty."
+        output.name = input.name
+        output.time = parseInt(input.time)
+        if (isNaN(output.time)) return "Invalid time format."
+        if (output.time < Date.now()) return "The event start must be in the future."
+        if (input.description) output.description = input.description
+        else output.description = ""
+        output.followers = [jwt.email]
+        return "ok"
+    }
 }

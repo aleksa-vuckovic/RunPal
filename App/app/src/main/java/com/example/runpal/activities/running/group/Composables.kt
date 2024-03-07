@@ -181,7 +181,7 @@ fun LobbyScreen(room: Room,
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
                                 text = "${user.name} ${user.last}",
-                                style = MaterialTheme.typography.titleSmall
+                                style = MaterialTheme.typography.labelLarge
                             )
                         }
 

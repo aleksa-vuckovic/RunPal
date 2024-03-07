@@ -129,6 +129,11 @@ fun Context.hasLocationPermission(): Boolean {
 }
 
 
+fun limitText(text: String, max: Int = 300): String {
+    if (text.length < max) return text
+    return text.subSequence(0, max).toString() + "..."
+}
+
 
 suspend fun<T> tryRepeat(reps: Long = 10, interval: (Long) -> Long = {1000L}, producer: suspend () -> T): T {
     var i = 1L

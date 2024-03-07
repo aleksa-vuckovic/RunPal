@@ -1,5 +1,10 @@
 package com.example.runpal
 
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+
 /**
  * Converts a measured value to a String pair.
  * The first string is the formatted number,
@@ -18,6 +23,32 @@ object TimeFormatter: Formatter<Long> {
 
         if (hours == 0L) return "%02d:%02d".format(mins, secs) to ""
         else return "%02d:%02d:%02d".format(hours, mins, secs) to ""
+    }
+}
+
+object LongTimeFormatter: Formatter<Long> {
+    override fun format(value: Long): Pair<String, String> {
+        var t = value/1000
+        val secs = t%60
+        t/=60
+        val mins = t%60
+        t/=60
+        val hours = t%24
+        val days = t/24
+
+        if (days > 1L) return "%d days".format(days)  to ""
+        else if (days == 1L) return "1 day %d hours".format(hours) to ""
+        else if (hours > 1L) return "%d hours %d minutes".format(hours, mins) to ""
+        else if (hours == 1L) return "1 hour %d minutes".format(mins) to ""
+        else return "%d minutes".format(mins) to ""
+    }
+}
+
+object UTCDateTimeFormatter: Formatter<Long> {
+    override fun format(value: Long): Pair<String, String> {
+        val date = Instant.ofEpochMilli(value)
+        val formatted = ZonedDateTime.ofInstant(date, ZoneId.of("UTC")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+        return (formatted + " UTC") to ""
     }
 }
 object MetricDistanceFormatter: Formatter<Double> {

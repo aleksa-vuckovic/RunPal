@@ -22,6 +22,7 @@ const val RUN_MARKER_SIZE: Int = 100
 const val DEFAULT_ZOOM: Float = 15f
 const val RUN_ID_KEY: String = "RUN_ID"
 const val ROOM_ID_KEY: String = "ROOM_ID"
+const val EVENT_ID_KEY: String = "EVENT_ID"
 //const val SERVER_ADDRESS = "https://run-pal-server-f256155400de.herokuapp.com/"
 //const val SERVER_ADDRESS = "http://127.0.0.1:4000/"
 //const val SERVER_ADDRESS = "http://10.174.9.184:4000/"
