@@ -46,6 +46,7 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -63,12 +64,15 @@ import androidx.compose.ui.unit.sp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.runpal.DEFAULT_PROFILE_URI
+import com.example.runpal.DoubleInput
 import com.example.runpal.UTCDateTimeFormatter
 import com.example.runpal.ImageSelector
 import com.example.runpal.LoadingScreen
 import com.example.runpal.LongTimeFormatter
 import com.example.runpal.R
+import com.example.runpal.Units
 import com.example.runpal.borderBottom
+import com.example.runpal.join
 import com.example.runpal.limitText
 import com.example.runpal.models.Event
 import com.example.runpal.ui.theme.BadgeType
@@ -292,13 +296,22 @@ fun EventsScreen(followedEvents: List<Event>,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateEventScreen(onCreate: (String, String, Long?, Uri?) -> Unit, errorMessage: String, modifier: Modifier = Modifier) {
+fun CreateEventScreen(onCreate: (String, String, Long?, Double, Uri?) -> Unit,
+                      errorMessage: String,
+                      preferredUnits: Units,
+                      modifier: Modifier = Modifier) {
 
     var name by rememberSaveable {
         mutableStateOf("")
     }
     var description by rememberSaveable {
         mutableStateOf("")
+    }
+    var distance by rememberSaveable {
+        mutableStateOf(0.0)
+    }
+    var units by remember {
+        mutableStateOf(preferredUnits)
     }
     val time = rememberTimePickerState(initialHour = 12, initialMinute = 0, is24Hour = true)
     var timeDialog by rememberSaveable {
@@ -338,6 +351,27 @@ fun CreateEventScreen(onCreate: (String, String, Long?, Uri?) -> Unit, errorMess
                 minLines = 4,
                 modifier = Modifier.weight(0.7f))
         }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("Distance", style = style, modifier = Modifier.weight(0.3f))
+            Row(modifier = Modifier.weight(0.7f),
+                horizontalArrangement = Arrangement.End) {
+                DoubleInput(initial = distance, onChange = {distance = it}, modifier = Modifier.width(150.dp))
+                Box(modifier = Modifier
+                    .size(55.dp)
+                    .clickable { units = units.next }
+                    .background(color = MaterialTheme.colorScheme.surfaceVariant)
+                    .borderBottom(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)) {
+                    Text(text = units.standardDistanceInput,
+                        style = style,
+                        modifier = Modifier.align(Alignment.Center))
+                }
+            }
+        }
+
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -380,7 +414,7 @@ fun CreateEventScreen(onCreate: (String, String, Long?, Uri?) -> Unit, errorMess
             ImageSelector(input = image, onSelect = {image = it}, Modifier.size(200.dp))
         }
 
-        StandardButton(onClick = { onCreate(name, description, selectedTime(), image)})
+        StandardButton(onClick = { onCreate(name, description, selectedTime(), units.fromStandardDistanceInput(distance), image)})
         {
             Text("Create")
         }
@@ -404,7 +438,7 @@ fun EventStatus(event: Event, textColor: Color) {
 }
 
 @Composable
-fun EventScreen(event: Event, onJoin: () -> Unit, onFollow: () -> Unit, onUnfollow: () -> Unit, modifier: Modifier = Modifier) {
+fun EventScreen(event: Event, onJoin: () -> Unit, onFollow: () -> Unit, onUnfollow: () -> Unit, units: Units = Units.METRIC, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
     ) {
@@ -455,6 +489,9 @@ fun EventScreen(event: Event, onJoin: () -> Unit, onFollow: () -> Unit, onUnfoll
                 .padding(20.dp)
         ) {
             Text(text = event.description,
+                modifier = Modifier.padding(20.dp),
+                color = MaterialTheme.colorScheme.onSurface)
+            Text(text = "Distance: ${units.distanceFormatter.format(event.distance).join()}",
                 modifier = Modifier.padding(20.dp),
                 color = MaterialTheme.colorScheme.onSurface)
             Row(

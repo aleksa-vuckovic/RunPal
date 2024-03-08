@@ -127,6 +127,7 @@ export class DB {
                 description: "$description",
                 image: "$image",
                 time: "$time",
+                distance: "$distance",
                 followers: {
                     $size: "$followers"
                 },

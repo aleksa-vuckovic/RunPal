@@ -96,6 +96,7 @@ class EventRunViewModel @Inject constructor(
     fun updateLocation(loc: Location) {
         _runState.update(loc)
         mapState.adjustCamera(_runState.location)
+        if (_runState.location.distance >= event.distance) end()
     }
     fun start() = _runState.start()
 

@@ -29,6 +29,7 @@ interface EventApi {
     suspend fun create(@Part("name") name: String,
                        @Part("description") description: String? = null,
                        @Part("time") time: Long,
+                       @Part("distance") distance: Double,
                        @Part image: MultipartBody.Part?): GenericResponse<String>
 
 

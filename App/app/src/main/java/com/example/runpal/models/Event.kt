@@ -16,6 +16,7 @@ data class Event(
     val description: String = "",
     var image: String = "",
     val time: Long = 0L,
+    val distance: Double = 0.0,
     val followers: Long = 0L,
     val following: Boolean = false
 ) {

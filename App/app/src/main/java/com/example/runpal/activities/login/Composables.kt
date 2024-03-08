@@ -158,10 +158,10 @@ fun RegisterScreen(onRegister: (String, String, String, String, Double, Uri?) ->
                 DoubleInput(initial = 80.0, onChange = {weight = it}, modifier = Modifier.width(150.dp))
                 Box(modifier = Modifier
                     .size(55.dp)
-                    .clickable { units.next }
+                    .clickable { units = units.next }
                     .background(color = MaterialTheme.colorScheme.surfaceVariant)
                     .borderBottom(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)) {
-                    Text(text = if (units == Units.IMPERIAL) "lb" else "kg",
+                    Text(text = units.standardWeightInput,
                         style = style,
                         modifier = Modifier.align(Alignment.Center))
                 }
@@ -176,7 +176,7 @@ fun RegisterScreen(onRegister: (String, String, String, String, Double, Uri?) ->
             ImageSelector(input = profile, onSelect = {profile = it}, Modifier.size(200.dp))
         }
 
-        StandardButton(onClick = { onRegister(email, password, name, last, units.toStandardWeightInput(weight), profile)})
+        StandardButton(onClick = { onRegister(email, password, name, last, units.fromStandardWeightInput(weight), profile)})
          {
             Text("Register")
         }

@@ -18,6 +18,10 @@ const eventSchema = new mongoose.Schema({
         type: Number,
         require: true
     },
+    distance: {
+        type: Number,
+        require: true
+    },
     followers: {
         type: Array<String>,
         require: true,

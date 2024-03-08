@@ -1,9 +1,11 @@
 package com.example.runpal
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -13,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import com.example.runpal.activities.MainActivity
 import kotlinx.coroutines.delay
@@ -131,6 +134,12 @@ fun Context.hasLocationPermission(): Boolean {
     ) == PackageManager.PERMISSION_GRANTED
 }
 
+fun Context.hasNotificationPermission(): Boolean {
+    if (Build.VERSION.SDK_INT >= 33) return ContextCompat.checkSelfPermission(
+        this, Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+    else return true
+}
 
 fun limitText(text: String, max: Int = 300): String {
     if (text.length < max) return text

@@ -1,21 +1,15 @@
 package com.example.runpal.activities.home
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -24,13 +18,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -38,6 +27,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
+import com.example.runpal.EVENT_DEEP_LINK_URI
 import com.example.runpal.EVENT_ID_KEY
 import com.example.runpal.ErrorScreen
 import com.example.runpal.LoadingScreen
@@ -47,11 +38,12 @@ import com.example.runpal.activities.running.event.EventRunActivity
 import com.example.runpal.activities.running.group.GroupRunEntryActivity
 import com.example.runpal.activities.running.solo.SoloRunActivity
 import com.example.runpal.hasLocationPermission
+import com.example.runpal.hasNotificationPermission
 import com.example.runpal.models.Run
 import com.example.runpal.repositories.LoginManager
+import com.example.runpal.repositories.SettingsManager
 import com.example.runpal.restartApp
 import com.example.runpal.ui.theme.RunPalTheme
-import com.example.runpal.ui.theme.StandardButton
 import com.example.runpal.ui.theme.StandardDialog
 import com.example.runpal.ui.theme.StandardNavBar
 import com.example.runpal.ui.theme.StandardTopBar
@@ -67,16 +59,22 @@ class HomeActivity : ComponentActivity() {
 
     @Inject
     lateinit var loginManager: LoginManager
+    @Inject
+    lateinit var settingsManager: SettingsManager
 
     var startIntent: Intent? = null
-    val launcher =  registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
+    val locLauncher =  registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
         if (granted.size == 2 && this@HomeActivity.startIntent != null) startActivity(this@HomeActivity.startIntent)
     }
+    val notifLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted -> }
 
     var refresh by mutableStateOf(false)
 
+    @SuppressLint("InlinedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!this.hasNotificationPermission()) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
 
         setContent {
             RunPalTheme {
@@ -125,12 +123,12 @@ class HomeActivity : ComponentActivity() {
                                         startIntent = Intent(this@HomeActivity, SoloRunActivity::class.java)
                                         startIntent?.putExtra(RUN_ID_KEY, Run.UNKNOWN_ID)
                                         if (hasLocationPermission()) startActivity(startIntent)
-                                        else launcher.launch(PERMISSIONS)
+                                        else locLauncher.launch(PERMISSIONS)
                                     },
                                     onGroupRun = {
                                         startIntent = Intent(this@HomeActivity, GroupRunEntryActivity::class.java)
                                         if (hasLocationPermission()) startActivity(startIntent)
-                                        else launcher.launch(PERMISSIONS)
+                                        else locLauncher.launch(PERMISSIONS)
                                     },
                                     onEvent = { navController.navigate(EventsDestination.argsRoute)},
                                     modifier = Modifier.fillMaxSize())
@@ -175,10 +173,11 @@ class HomeActivity : ComponentActivity() {
 
                                 Box(modifier = Modifier.fillMaxSize()) {
                                     CreateEventScreen(
-                                        onCreate = { name, desc, time, image ->
-                                            vm.create(name, desc, time, image)
+                                        onCreate = { name, desc, time, distance, image ->
+                                            vm.create(name, desc, time, distance, image)
                                         },
                                         errorMessage = vm.error,
+                                        preferredUnits = settingsManager.units,
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .padding(20.dp))
@@ -192,9 +191,10 @@ class HomeActivity : ComponentActivity() {
                                 }
                                 
                             }
-                            composable(route = EventDestination.argsRoute, arguments = listOf(
-                                navArgument(name = EventDestination.arg) {type = NavType.StringType}
-                            )) {
+                            composable(route = EventDestination.argsRoute,
+                                arguments = listOf(
+                                    navArgument(name = EventDestination.arg) {type = NavType.StringType}
+                                ), deepLinks = listOf( navDeepLink{ uriPattern= EVENT_DEEP_LINK_URI + "{${EVENT_ID_KEY}}"; action=Intent.ACTION_VIEW})) {
 
                                 val vm: EventViewModel = hiltViewModel()
 
@@ -213,10 +213,11 @@ class HomeActivity : ComponentActivity() {
                                         startIntent = Intent(this@HomeActivity, EventRunActivity::class.java)
                                         startIntent?.putExtra(EVENT_ID_KEY, vm.event._id)
                                         if (hasLocationPermission()) startActivity(startIntent)
-                                        else launcher.launch(PERMISSIONS)
+                                        else locLauncher.launch(PERMISSIONS)
                                     },
                                     onFollow = vm::follow,
-                                    onUnfollow = vm::unfollow
+                                    onUnfollow = vm::unfollow,
+                                    units = settingsManager.units
                                 )
                             }
                         }

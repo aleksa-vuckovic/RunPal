@@ -33,11 +33,12 @@ class ServerEventRepository @Inject constructor(
      *
      * @return The created event _id.
      */
-    suspend fun create(name: String, description: String? = null, time: Long, image: Uri? = null): String {
+    suspend fun create(name: String, description: String? = null, time: Long, distance: Double, image: Uri? = null): String {
         val response = eventApi.create(
             name = name,
             description = description,
             time = time,
+            distance = distance,
             image = image?.getBitmap(context.contentResolver)?.toMultipartPart(fieldName = "image", fileName = "image.png")
         )
         if (response.message != "ok") throw ServerException(response.message)

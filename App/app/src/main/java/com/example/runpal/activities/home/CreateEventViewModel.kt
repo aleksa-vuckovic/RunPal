@@ -30,7 +30,7 @@ class CreateEventViewModel @Inject constructor(
         get() = _error.value
 
 
-    fun create(name: String, description: String, time: Long?, image: Uri?) {
+    fun create(name: String, description: String, time: Long?, distance: Double, image: Uri?) {
         if (time == null) {
             _error.value = "Time must be specified."
             return
@@ -38,7 +38,7 @@ class CreateEventViewModel @Inject constructor(
         _state.value = State.WAITING
         viewModelScope.launch {
             try {
-                serverEventRepository.create(name = name, description = description, time = time, image = image)
+                serverEventRepository.create(name = name, description = description, time = time, distance = distance, image = image)
                 _state.value = State.SUCCESS
             } catch(e: ServerException) {
                 _error.value = e.message ?: ""

@@ -65,7 +65,7 @@ fun EditScreen(init: User,
         mutableStateOf(preferredUnits)
     }
     var weight by rememberSaveable {
-        mutableStateOf(units.fromStandardWeightInput(init.weight))
+        mutableStateOf(units.toStandardWeightInput(init.weight))
     }
     var profile by rememberSaveable {
         mutableStateOf<Uri?>(init.profileUri)
@@ -110,7 +110,7 @@ fun EditScreen(init: User,
                     .clickable { units = units.next }
                     .background(color = MaterialTheme.colorScheme.surfaceVariant)
                     .borderBottom(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)) {
-                    Text(text = units.weightFormatter.format(weight).second,
+                    Text(text = units.standardWeightInput,
                         style = style,
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -126,7 +126,7 @@ fun EditScreen(init: User,
             ImageSelector(input = profile, onSelect = {profile = it}, Modifier.size(200.dp))
         }
 
-        StandardButton(onClick = { onUpdate(name, last, units.toStandardWeightInput(weight), profile)})
+        StandardButton(onClick = { onUpdate(name, last, units.fromStandardWeightInput(weight), profile)})
         {
             Text("Update")
         }

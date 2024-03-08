@@ -136,8 +136,8 @@ enum class Units(
         ImperialDistanceFormatter,
         ImperialWeightFormatter
     ) {
-        override fun toStandardWeightInput(value: Double) = value * LB_TO_KG
-        override fun fromStandardWeightInput(value: Double) = value / LB_TO_KG
+        override fun toStandardWeightInput(value: Double) = value / LB_TO_KG
+        override fun fromStandardWeightInput(value: Double) = value * LB_TO_KG
         override fun fromStandardDistanceInput(value: Double) = value / KM_TO_MILE * KM_TO_M
         override val standardWeightInput = "lb"
         override val standardDistanceInput = "mi"
