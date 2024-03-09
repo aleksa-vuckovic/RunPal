@@ -4,6 +4,7 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,6 +18,7 @@ import com.example.runpal.repositories.run.CombinedRunRepository
 import com.example.runpal.repositories.user.CombinedUserRepository
 import com.example.runpal.tryRepeat
 import com.example.runpal.ui.PathChartDataset
+import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
@@ -40,6 +42,8 @@ class GroupRunResultsViewModel @Inject constructor(
     private val _kcalDatasets = mutableStateOf(listOf<PathChartDataset>())
     private val _altitudeDatasets = mutableStateOf(listOf<PathChartDataset>())
     private val _distanceDatasets = mutableStateOf(listOf<PathChartDataset>())
+    private val _mapMins = mutableStateOf(listOf<LatLng>())
+    private val _mapMaxs = mutableStateOf(listOf<LatLng>())
 
     val state: State
         get() = _state.value
@@ -55,6 +59,10 @@ class GroupRunResultsViewModel @Inject constructor(
         get() = _altitudeDatasets.value
     val distanceDatasets: List<PathChartDataset>
         get() = _distanceDatasets.value
+    val mapMins: List<LatLng>
+        get() = _mapMins.value
+    val mapMaxs: List<LatLng>
+        get() = _mapMaxs.value
 
 
     val roomID: String = savedStateHandle[ROOM_ID_KEY]!!
@@ -74,6 +82,8 @@ class GroupRunResultsViewModel @Inject constructor(
                 val kcalDatasets = mutableListOf<PathChartDataset>()
                 val altitudeDatasets = mutableListOf<PathChartDataset>()
                 val distanceDatasets = mutableListOf<PathChartDataset>()
+                val mapMins = mutableListOf<LatLng>()
+                val mapMaxs = mutableListOf<LatLng>()
 
                 for (email in room.members) {
                     val user = tryRepeat { userRepository.getUser(email) }
@@ -82,12 +92,18 @@ class GroupRunResultsViewModel @Inject constructor(
                     val kcalDataset = PathChartDataset(path = run.path, xValue = {it.time.toDouble()}, yValue = {it.kcal})
                     val altitudeDataset = PathChartDataset(path = run.path, xValue = {it.time.toDouble()}, yValue = {it.altitude})
                     val distanceDataset = PathChartDataset(path = run.path, xValue = {it.time.toDouble()}, yValue = {it.distance})
+                    val minLat = run.path.minOf { it.latitude }
+                    val maxLat = run.path.maxOf { it.latitude }
+                    val minLng = run.path.minOf { it.longitude }
+                    val maxLng = run.path.maxOf { it.longitude }
                     users.add(user)
                     runs.add(run)
                     speedDatasets.add(speedDataset)
                     kcalDatasets.add(kcalDataset)
                     altitudeDatasets.add(altitudeDataset)
                     distanceDatasets.add(distanceDataset)
+                    mapMins.add(LatLng(minLat, minLng))
+                    mapMaxs.add(LatLng(maxLat, maxLng))
                 }
 
                 _users.value = users
@@ -96,6 +112,8 @@ class GroupRunResultsViewModel @Inject constructor(
                 _kcalDatasets.value = kcalDatasets
                 _altitudeDatasets.value = altitudeDatasets
                 _distanceDatasets.value = distanceDatasets
+                _mapMins.value = mapMins
+                _mapMaxs.value = mapMaxs
                 _state.value = State.LOADED
             } catch(e: ServerException) {
                 e.printStackTrace()

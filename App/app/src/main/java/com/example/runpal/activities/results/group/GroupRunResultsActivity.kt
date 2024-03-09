@@ -16,8 +16,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
@@ -27,9 +30,14 @@ import androidx.navigation.compose.rememberNavController
 import com.example.runpal.ErrorScreen
 import com.example.runpal.KcalFormatter
 import com.example.runpal.LoadingScreen
+import com.example.runpal.LocalDateTimeFormatter
+import com.example.runpal.RUN_MARKER_COLORS
+import com.example.runpal.TimeFormatter
 import com.example.runpal.activities.account.AccountActivity
+import com.example.runpal.activities.results.GeneralResults
 import com.example.runpal.activities.results.PathChartAndPanel
 import com.example.runpal.activities.results.UserSelection
+import com.example.runpal.activities.results.solo.SoloRunResultsViewModel
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.repositories.SettingsManager
 import com.example.runpal.restartApp
@@ -78,7 +86,7 @@ class GroupRunResultsActivity : ComponentActivity() {
                             )
                         },
                         bottomBar = {
-                            StandardNavBar(
+                            if (vm.state == GroupRunResultsViewModel.State.LOADED) StandardNavBar(
                                 destinations = bottomBarDestinations,
                                 curRoute = curRoute,
                                 onClick = {navController.navigate(it.argsRoute)}
@@ -116,7 +124,8 @@ class GroupRunResultsActivity : ComponentActivity() {
                                     )
                                     Column(modifier = Modifier
                                         .fillMaxWidth()
-                                        .verticalScroll(rememberScrollState())) {
+                                        .verticalScroll(rememberScrollState())
+                                        .padding(10.dp)) {
                                         PathChartAndPanel(
                                             title = "Speed",
                                             datasets = vm.speedDatasets,
@@ -161,7 +170,33 @@ class GroupRunResultsActivity : ComponentActivity() {
                             }
 
                             composable(route = ResultsDestination.argsRoute) {
-                                Text(text = "TO DO")
+                                var selected by remember{ mutableStateOf(0) }
+                                Column(
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    UserSelection(
+                                        users = vm.users,
+                                        selected = List(vm.users.size) {it == selected},
+                                        onSelect = {selected = it},
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    GeneralResults(
+                                        runData = vm.runs[selected],
+                                        color = RUN_MARKER_COLORS[selected],
+                                        mapMin = vm.mapMins[selected],
+                                        mapMax = vm.mapMaxs[selected],
+                                        values = listOf(
+                                            "Total distance" to units.distanceFormatter.format(vm.distanceDatasets[selected].maxY),
+                                            "Start time" to (if (vm.runs[selected].run.start != null) LocalDateTimeFormatter.format(vm.runs[selected].run.start!!) else "TBD" to ""),
+                                            "Running time" to TimeFormatter.format(vm.runs[selected].run.running),
+                                            "Finish time" to (if (vm.runs[selected].run.end != null) LocalDateTimeFormatter.format(vm.runs[selected].run.end!!) else "TBD" to ""),
+                                            "Avg pace" to units.paceFormatter.format(vm.speedDatasets[selected].avgY),
+                                            "Max pace" to units.paceFormatter.format(vm.speedDatasets[selected].maxY),
+                                            "Total kcal" to KcalFormatter.format(vm.kcalDatasets[selected].maxY)
+                                        ),
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
                             }
 
                             composable(route = RankingDestination.argsRoute) {

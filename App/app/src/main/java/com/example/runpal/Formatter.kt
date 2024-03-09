@@ -1,6 +1,7 @@
 package com.example.runpal
 
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -47,6 +48,12 @@ object UTCDateTimeFormatter: Formatter<Long> {
         val date = Instant.ofEpochMilli(value)
         val formatted = ZonedDateTime.ofInstant(date, ZoneId.of("UTC")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
         return (formatted + " UTC") to ""
+    }
+}
+object LocalDateTimeFormatter: Formatter<Long> {
+    override fun format(value: Long): Pair<String, String> {
+        val date = Instant.ofEpochMilli(value)
+        return LocalDateTime.ofInstant(date, ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) to ""
     }
 }
 object MetricDistanceFormatter: Formatter<Double> {

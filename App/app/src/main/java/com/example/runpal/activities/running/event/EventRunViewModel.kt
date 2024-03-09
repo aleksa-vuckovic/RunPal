@@ -12,7 +12,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.runpal.DEFAULT_ZOOM
 import com.example.runpal.EVENT_ID_KEY
-import com.example.runpal.MapState
+import com.example.runpal.activities.running.MapState
 import com.example.runpal.R
 import com.example.runpal.RUN_MARKER_COLORS
 import com.example.runpal.RUN_MARKER_SIZE
@@ -20,7 +20,6 @@ import com.example.runpal.ServerException
 import com.example.runpal.activities.running.LocalRunState
 import com.example.runpal.activities.running.LocalRunStateFactory
 import com.example.runpal.activities.running.RunState
-import com.example.runpal.activities.running.group.GroupRunViewModel
 import com.example.runpal.getMarkerBitmap
 import com.example.runpal.models.Event
 import com.example.runpal.models.Run

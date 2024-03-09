@@ -27,7 +27,11 @@ import androidx.navigation.compose.rememberNavController
 import com.example.runpal.ErrorScreen
 import com.example.runpal.KcalFormatter
 import com.example.runpal.LoadingScreen
+import com.example.runpal.LocalDateTimeFormatter
+import com.example.runpal.RUN_MARKER_COLORS
+import com.example.runpal.TimeFormatter
 import com.example.runpal.activities.account.AccountActivity
+import com.example.runpal.activities.results.GeneralResults
 import com.example.runpal.activities.results.PathChartAndPanel
 import com.example.runpal.activities.results.UserSelection
 import com.example.runpal.repositories.LoginManager
@@ -80,7 +84,7 @@ class SoloRunResultsActivity : ComponentActivity() {
                             )
                         },
                         bottomBar = {
-                            StandardNavBar(
+                            if (vm.state == SoloRunResultsViewModel.State.LOADED) StandardNavBar(
                                 destinations = bottomBarDestinations,
                                 curRoute = curRoute,
                                 onClick = {navController.navigate(it.argsRoute)}
@@ -103,7 +107,8 @@ class SoloRunResultsActivity : ComponentActivity() {
 
                                 Column(modifier = Modifier
                                     .fillMaxWidth()
-                                    .verticalScroll(rememberScrollState())) {
+                                    .verticalScroll(rememberScrollState())
+                                    .padding(10.dp)) {
                                     PathChartAndPanel(
                                         title = "Speed",
                                         datasets = listOf(vm.speedDataset),
@@ -146,7 +151,26 @@ class SoloRunResultsActivity : ComponentActivity() {
                             }
 
                             composable(route = ResultsDestination.argsRoute) {
-                                Text(text = "TO DO")
+                                Column(
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    GeneralResults(
+                                        runData = vm.run,
+                                        color = RUN_MARKER_COLORS[0],
+                                        mapMin = vm.mapMin,
+                                        mapMax = vm.mapMax,
+                                        values = listOf(
+                                            "Total distance" to units.distanceFormatter.format(vm.distanceDataset.maxY),
+                                            "Start time" to (if (vm.run.run.start != null) LocalDateTimeFormatter.format(vm.run.run.start!!) else "TBD" to ""),
+                                            "Running time" to TimeFormatter.format(vm.run.run.running),
+                                            "Finish time" to (if (vm.run.run.end != null) LocalDateTimeFormatter.format(vm.run.run.end!!) else "TBD" to ""),
+                                            "Avg pace" to units.paceFormatter.format(vm.speedDataset.avgY),
+                                            "Max pace" to units.paceFormatter.format(vm.speedDataset.maxY),
+                                            "Total kcal" to KcalFormatter.format(vm.kcalDataset.maxY)
+                                        ),
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
                             }
                         }
                     }

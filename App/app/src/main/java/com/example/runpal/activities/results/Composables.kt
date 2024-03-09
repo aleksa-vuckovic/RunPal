@@ -17,26 +17,43 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import com.example.runpal.DEFAULT_ZOOM
 import com.example.runpal.Formatter
+import com.example.runpal.GoogleMapPath
 import com.example.runpal.RUN_MARKER_COLORS
+import com.example.runpal.Units
 import com.example.runpal.activities.running.PanelText
 import com.example.runpal.borderBottom
+import com.example.runpal.models.RunData
 import com.example.runpal.models.User
 import com.example.runpal.ui.AxesOptions
 import com.example.runpal.ui.PathChart
 import com.example.runpal.ui.PathChartDataset
 import com.example.runpal.ui.PathChartOptions
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.CameraPositionState
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.rememberCameraPositionState
+import kotlin.math.log2
 
 @Composable
 fun PathChartAndPanel(
@@ -85,12 +102,13 @@ fun PathChartAndPanel(
         if (cumulative) Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.2f),
+                .weight(0.2f)
+                .padding(10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Total", style = MaterialTheme.typography.labelLarge)
-            Text(text = main.maxY.toString(), style = MaterialTheme.typography.labelLarge)
+            Text(text = "Total", style = MaterialTheme.typography.labelLarge, modifier = Modifier.fillMaxHeight(0.5f))
+            PanelText(text = axesOptions.yLabel.format(main.maxY), modifier = Modifier.fillMaxHeight(0.5f))
         }
         else Row(
             modifier = Modifier
@@ -121,12 +139,13 @@ fun PathChartAndPanel(
 fun UserSelection(users: List<User>, selected: List<Boolean>, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.horizontalScroll(rememberScrollState())
+            .padding(bottom = 4.dp)
     ) {
         for (i in users.indices) {
             Column(modifier = Modifier
                 .borderBottom(
                     color = if (selected[i]) RUN_MARKER_COLORS[i].copy(alpha = 0.7f) else MaterialTheme.colorScheme.background,
-                    strokeWidth = 10.dp
+                    strokeWidth = 8.dp
                 )
                 .clickable { onSelect(i) }
                 .padding(10.dp),
@@ -144,4 +163,93 @@ fun UserSelection(users: List<User>, selected: List<Boolean>, onSelect: (Int) ->
             }
         }
     }
+}
+
+
+@Composable
+fun GoogleMapRunResult(run: RunData,
+                       color: Color,
+                       cameraPositionState: CameraPositionState,
+                       modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier) {
+        GoogleMap(
+            modifier = Modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState
+        ) {
+            GoogleMapPath(pathPoints = run.path, color = color)
+        }
+    }
+}
+
+@Composable
+fun GeneralResults(runData: RunData,
+                   color: Color,
+                   mapMin: LatLng,
+                   mapMax: LatLng,
+                   values: List<Pair<String, Pair<String, String>>>,
+                   modifier: Modifier = Modifier
+) {
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(
+            LatLng((mapMin.latitude + mapMax.latitude) / 2, (mapMin.longitude + mapMax.longitude) /2),
+            DEFAULT_ZOOM)
+    }
+    val density = LocalDensity.current
+    Column(
+        modifier = modifier.verticalScroll(rememberScrollState())
+    ) {
+        GoogleMapRunResult(
+            run = runData,
+            color = color,
+            cameraPositionState = cameraPositionState,
+            modifier = Modifier
+                .padding(20.dp)
+                .fillMaxWidth()
+                .height(300.dp)
+                .clip(shape = RoundedCornerShape(10.dp))
+                .onSizeChanged {
+                    cameraPositionState.position = CameraPosition.fromLatLngZoom(
+                        LatLng((mapMin.latitude + mapMax.latitude) / 2, (mapMin.longitude + mapMax.longitude) / 2),
+                        zoomToFit(
+                            latSpan = mapMax.latitude - mapMin.latitude,
+                            height = it.height,
+                            lngSpan = mapMax.longitude - mapMin.longitude,
+                            width = it.width,
+                            density = density
+                        )
+                    )
+                })
+
+        for (value in values) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .borderBottom()
+                    .padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = value.first, style = MaterialTheme.typography.labelMedium)
+                PanelText(text = value.second, modifier = Modifier.height(50.dp))
+            }
+        }
+    }
+}
+
+
+fun zoomToFit(latSpan: Double, height: Int, lngSpan: Double, width: Int, density: Density): Float {
+    val heightDp = density.run { height.toDp() }
+    val widthDp = density.run { width.toDp() }
+
+    //at zoom N, 360 lat/lng degrees cover 256*2^N dp
+    //find N such that latSpan is covered with heightDp
+    //256*2^N/360*latSpan = heightDp*0.8 (leave some empty space)
+    //2^N = heightDp*0.8*360/256/latSpan
+
+    val zoomLat = log2(heightDp.value*0.8f*360f/256f/latSpan.toFloat())
+    val zoomLng = log2(widthDp.value*0.8f*360f/256f/lngSpan.toFloat())
+    val max = 20f
+
+    return minOf(max, zoomLat, zoomLng)
 }

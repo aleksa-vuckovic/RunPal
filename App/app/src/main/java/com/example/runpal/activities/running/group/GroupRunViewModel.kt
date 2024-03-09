@@ -4,15 +4,13 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.location.Location
 import android.widget.Toast
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.runpal.DEFAULT_ZOOM
-import com.example.runpal.MapState
+import com.example.runpal.activities.running.MapState
 import com.example.runpal.R
 import com.example.runpal.ROOM_ID_KEY
 import com.example.runpal.RUN_MARKER_COLORS
@@ -32,18 +30,11 @@ import com.example.runpal.repositories.ServerRoomRepository
 import com.example.runpal.repositories.user.CombinedUserRepository
 import com.example.runpal.tryRepeat
 import com.example.runpal.tryRepeatExp
-import com.example.runpal.ui.theme.LightGreen
-import com.example.runpal.ui.theme.LightPurple
-import com.example.runpal.ui.theme.LightRed
-import com.example.runpal.ui.theme.LightYelow
-import com.example.runpal.ui.theme.MediumBlue
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

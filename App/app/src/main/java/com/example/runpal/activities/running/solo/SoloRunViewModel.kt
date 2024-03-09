@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.runpal.DEFAULT_ZOOM
 import com.example.runpal.activities.running.LocalRunState
-import com.example.runpal.MapState
+import com.example.runpal.activities.running.MapState
 import com.example.runpal.R
 import com.example.runpal.RUN_ID_KEY
 import com.example.runpal.RUN_MARKER_COLORS

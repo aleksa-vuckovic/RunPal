@@ -46,7 +46,7 @@ class PathChartDataset(
     val yValue: (PathPoint) -> Double
 ) {
     companion object {
-        val EMPTY: PathChartDataset = PathChartDataset(path = listOf(), xValue = {0.0}, yValue = {0.0})
+        val EMPTY: PathChartDataset = PathChartDataset(path = listOf(PathPoint.NONE), xValue = {0.0}, yValue = {0.0})
     }
 
     val minX: Double
@@ -97,7 +97,8 @@ class ChartConfig(val datasets: List<PathChartDataset>,
         val spanYData = maxY-minY
         spanY = if (spanYData * axes.yExpandFactor < axes.ySpanMin) axes.ySpanMin else spanYData*axes.yExpandFactor
         originX = minX
-        originY = minY - (spanY-spanYData)/2
+        //Keeping y values positive
+        originY = if (minY - (spanY-spanYData)/2 < 0) 0.0 else minY - (spanY-spanYData)/2
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.example.runpal
+package com.example.runpal.activities.running
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf

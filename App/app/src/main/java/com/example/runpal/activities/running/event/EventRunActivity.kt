@@ -27,6 +27,7 @@ import com.example.runpal.LoadingScreen
 import com.example.runpal.R
 import com.example.runpal.RUN_MARKER_COLORS
 import com.example.runpal.activities.results.event.EventRunResultsActivity
+import com.example.runpal.activities.running.GoogleMapRun
 import com.example.runpal.activities.running.RunCountown
 import com.example.runpal.activities.running.RunDataPanel
 import com.example.runpal.activities.running.RunPause
@@ -34,7 +35,6 @@ import com.example.runpal.activities.running.RunResume
 import com.example.runpal.hasLocationPermission
 import com.example.runpal.models.Run
 import com.example.runpal.repositories.SettingsManager
-import com.example.runpal.ui.GoogleMapRun
 import com.example.runpal.ui.theme.RunPalTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationListener

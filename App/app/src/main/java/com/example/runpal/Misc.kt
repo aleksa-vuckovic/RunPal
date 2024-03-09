@@ -38,9 +38,9 @@ interface Destination {
  */
 fun<T> binarySearch(data: List<T>, value: (T) -> Float, target: Float): T? {
     var i = 0
-    var j = data.size
-    if (j == 0) return null
-    if (j == 1) return data[0]
+    var j = data.size - 1
+    if (j < 0) return null
+    if (j == 0) return data[0]
 
     while (j - i > 1) {
         val k = (i + j) / 2

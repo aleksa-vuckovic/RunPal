@@ -53,8 +53,18 @@ import androidx.compose.ui.unit.toSize
 import androidx.core.graphics.ColorUtils
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import com.example.runpal.models.PathPoint
+import com.example.runpal.models.toLatLng
+import com.example.runpal.ui.theme.DarkPink
+import com.example.runpal.ui.theme.DarkPurple
 import com.example.runpal.ui.theme.StandardTextField
 import com.example.runpal.ui.theme.TransparentWhite
+import com.example.runpal.ui.theme.YellowGreen
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.Polyline
 import kotlinx.coroutines.delay
 import java.lang.Float.min
 
@@ -277,4 +287,32 @@ fun ErrorScreen(message: String) {
         contentAlignment = Alignment.Center) {
         Text(text = message, style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center)
     }
+}
+
+@Composable
+fun PathEndMarker(latLng: LatLng, color: Color) {
+    val desc = remember(color) {
+        val res =
+            if (color == DarkPink) R.drawable.darkpink
+            else if (color == DarkPurple) R.drawable.darkpurple
+            else if (color == Color.Green) R.drawable.green
+            else if (color == Color.Red) R.drawable.red
+            else if (color == YellowGreen) R.drawable.yellowgreen
+            else R.drawable.darkblue
+        BitmapDescriptorFactory.fromResource(res)
+    }
+    Marker(
+        state = MarkerState(position = latLng),
+        icon = desc,
+        anchor = Offset(0.5f, 0.5f)
+    )
+}
+
+@Composable
+fun GoogleMapPath(pathPoints: List<PathPoint>, startColor: Color = Color.Green, color: Color, endColor: Color = Color.Red) {
+    for (i in 0..pathPoints.size-2) {
+        if (pathPoints[i].end || pathPoints[i+1].end) PathEndMarker(latLng = pathPoints[i+1].toLatLng(), color = if (i == pathPoints.size - 2) endColor else color)
+        if (!pathPoints[i].end) Polyline(points = listOf(pathPoints[i].toLatLng(), pathPoints[i+1].toLatLng()), color = color, width = 10f, visible = true)
+    }
+    if (pathPoints.isNotEmpty()) PathEndMarker(latLng = pathPoints[0].toLatLng(), color = startColor)
 }
