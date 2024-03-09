@@ -2,14 +2,46 @@ import { ObjectId } from 'mongodb'
 import mongoose from 'mongoose'
 
 const pathPointSchema = new mongoose.Schema({
-    latitude: Number,
-    longitude: Number,
-    altitude: Number,
-    time: Number,
-    end: Boolean,
-    speed: Number,
-    distance: Number,
-    kcal: Number
+    latitude: {
+        type: Number,
+        default: 0,
+        required: true
+    },
+    longitude: {
+        type: Number,
+        default: 0,
+        required: true
+    },
+    altitude: {
+        type: Number,
+        default: 0,
+        required: true
+    },
+    time: {
+        type: Number,
+        default: 0,
+        required: true
+    },
+    end: {
+        type: Boolean,
+        default: false,
+        required: true
+    },
+    speed: {
+        type: Number,
+        default: 0,
+        required: true
+    },
+    distance: {
+        type: Number,
+        default: 0,
+        required: true
+    },
+    kcal: {
+        type: Number,
+        default: 0,
+        required: true
+    },
 }, {
     _id: false
 })
@@ -31,7 +63,7 @@ const runSchema = new mongoose.Schema({
     },
     running: {
         type: Number,
-        require: true,
+        required: true,
         default: 0
     },
     end: {
@@ -45,7 +77,8 @@ const runSchema = new mongoose.Schema({
     },
     location: {
         type: pathPointSchema,
-        default: null
+        required: true,
+        default: () => ({})
     },
     path: {
         type: [pathPointSchema],

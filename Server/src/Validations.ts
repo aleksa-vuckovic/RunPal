@@ -70,7 +70,16 @@ export class Validation {
             output.room = new ObjectId(input.room)
         }
 
-        output.location = null
+        output.location = {
+            latitude: 0,
+            longitude: 0,
+            altitude: 0,
+            time: 0,
+            end: false,
+            speed: 0,
+            distance: 0,
+            kcal: 0
+        }
         output.path = []
 
         return "ok"

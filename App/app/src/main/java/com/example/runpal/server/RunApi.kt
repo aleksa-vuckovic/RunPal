@@ -17,8 +17,8 @@ interface RunApi {
     suspend fun getUpdate(@Query("user") user: String, @Query("id") id: Long? = null,
                           @Query("room") room: String? = null, @Query("event") event: String? = null,
                           @Query("since") since: Long = 0) : GenericResponse<RunData>
-
-
+    @GET("run/all")
+    suspend fun getAll(@Query("until") until: Long, @Query("limit") limit: Int): GenericResponse<List<RunData>>
 
 
 }

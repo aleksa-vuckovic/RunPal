@@ -28,7 +28,7 @@ class PositionFilter(private val avgCount: Int = 10, private val rate: Int = 3, 
     fun filter(cur: PathPoint): PathPoint? {
         cur.latitude = latFilter.filter(cur.latitude)
         cur.longitude = lngFilter.filter(cur.longitude)
-        cur.altitude = altFilter.filter(cur.altitude)
+        cur.altitude = if (cur.altitude == 0.0) buffer[i].altitude else altFilter.filter(cur.altitude)
 
 
         var pass = true

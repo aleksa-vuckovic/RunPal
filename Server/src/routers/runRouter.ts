@@ -15,5 +15,8 @@ runRouter.route("/update").post(async (req: express.Request, res: express.Respon
 runRouter.route("/getupdate").get(async (req: express.Request, res: express.Response) => {
     new RunController().getUpdate(req, res)
 })
+runRouter.route("/all").get(async (req: express.Request, res: express.Response) => {
+    new RunController().all(req, res)
+})
 
 export default runRouter

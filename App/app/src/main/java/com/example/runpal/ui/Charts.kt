@@ -1,6 +1,5 @@
 package com.example.runpal.ui
 
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -46,7 +45,7 @@ class PathChartDataset(
     val yValue: (PathPoint) -> Double
 ) {
     companion object {
-        val EMPTY: PathChartDataset = PathChartDataset(path = listOf(PathPoint.NONE), xValue = {0.0}, yValue = {0.0})
+        val EMPTY: PathChartDataset = PathChartDataset(path = listOf(PathPoint.INIT), xValue = {0.0}, yValue = {0.0})
     }
 
     val minX: Double

@@ -49,11 +49,13 @@ data class PathPoint(
 
     companion object {
         /**
-         * Represents an unknown path point
-         * and is used as the initial path point in a run state.
+         * Used as the initial location in a run state.
+         * (No location data, and zero distance,sped,kcal).
          */
-        val NONE = PathPoint()
+        val INIT = PathPoint()
     }
+    fun isInit(): Boolean = time == 0L
+
 }
 
 fun Location.toPathPoint(): PathPoint = PathPoint(latitude, longitude, altitude, time, false)

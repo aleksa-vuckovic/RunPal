@@ -35,7 +35,9 @@ import com.example.runpal.LoadingScreen
 import com.example.runpal.ROOM_ID_KEY
 import com.example.runpal.RUN_ID_KEY
 import com.example.runpal.activities.account.AccountActivity
+import com.example.runpal.activities.results.event.EventRunResultsActivity
 import com.example.runpal.activities.results.group.GroupRunResultsActivity
+import com.example.runpal.activities.results.solo.SoloRunResultsActivity
 import com.example.runpal.activities.running.event.EventRunActivity
 import com.example.runpal.activities.running.group.GroupRunEntryActivity
 import com.example.runpal.activities.running.solo.SoloRunActivity
@@ -76,11 +78,15 @@ class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (!this.hasNotificationPermission()) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        val units = settingsManager.units
 
+        if (!this.hasNotificationPermission()) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+/*
         val intent = Intent(this, GroupRunResultsActivity::class.java)
         intent.putExtra(ROOM_ID_KEY, "65e9fb296b3027751da74aca")
         startActivity(intent)
+
+ */
 
         setContent {
             RunPalTheme {
@@ -95,6 +101,7 @@ class HomeActivity : ComponentActivity() {
                     Scaffold(
                         topBar = {
                             StandardTopBar(
+                                title = destinationMap[curDestination]?.title,
                                 onBack = { if(!navController.popBackStack()) finish() },
                                 onAccount = { startActivity(Intent(this@HomeActivity, AccountActivity::class.java)) },
                                 onLogout = {
@@ -106,7 +113,7 @@ class HomeActivity : ComponentActivity() {
                         },
                         bottomBar = {
                             StandardNavBar(
-                                destinations = destinations,
+                                destinations = navBarDestinations,
                                 curRoute = curDestination,
                                 onClick = {
                                     if (curDestination != it.argsRoute) navController.navigate(it.argsRoute)
@@ -120,7 +127,13 @@ class HomeActivity : ComponentActivity() {
                             modifier = Modifier.padding(it)) {
                             
                             composable(route = HistoryDestination.argsRoute) {
-                                Text(text = "TODO")
+                                HistoryScreen(onClick = {
+                                    val intent: Intent
+                                    if (it.room != null) intent = Intent(this@HomeActivity, GroupRunResultsActivity::class.java).apply { putExtra(ROOM_ID_KEY, it.room) }
+                                    else if (it.event != null) intent = Intent(this@HomeActivity, EventRunResultsActivity::class.java).apply { putExtra(EVENT_ID_KEY, it.event)}
+                                    else intent = Intent(this@HomeActivity, SoloRunResultsActivity::class.java).apply { putExtra(RUN_ID_KEY, it.id) }
+                                    startActivity(intent)
+                                }, units = units)
                             }
 
                             composable(route = MenuDestination.argsRoute) {
@@ -183,7 +196,7 @@ class HomeActivity : ComponentActivity() {
                                             vm.create(name, desc, time, distance, image)
                                         },
                                         errorMessage = vm.error,
-                                        preferredUnits = settingsManager.units,
+                                        preferredUnits = units,
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .padding(20.dp))
@@ -223,7 +236,7 @@ class HomeActivity : ComponentActivity() {
                                     },
                                     onFollow = vm::follow,
                                     onUnfollow = vm::unfollow,
-                                    units = settingsManager.units
+                                    units = units
                                 )
                             }
                         }

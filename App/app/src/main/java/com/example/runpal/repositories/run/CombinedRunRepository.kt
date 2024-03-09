@@ -1,12 +1,11 @@
 package com.example.runpal.repositories.run
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import com.example.runpal.NotFound
+import com.example.runpal.R
 import com.example.runpal.ServerException
 import com.example.runpal.models.Run
-import com.example.runpal.models.RunInfo
 import com.example.runpal.models.RunData
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.room.Sync
@@ -149,9 +148,16 @@ class CombinedRunRepository @Inject constructor(
 
     }
 
-    override suspend fun getRunInfos(user: String): List<RunInfo> {
-        TODO("Not yet implemented")
+    override suspend fun getRuns(until: Long, limit: Int): List<RunData> {
+        try {
+            return serverRunRepository.getRuns(until, limit)
+        } catch(e: ServerException) {
+            e.printStackTrace()
+        }
+        catch(e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "No internet.", Toast.LENGTH_SHORT).show()
+        }
+        return localRunRepository.getRuns(until, limit)
     }
-
-
 }

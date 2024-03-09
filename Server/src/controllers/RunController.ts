@@ -67,5 +67,16 @@ export class RunController {
         return
     }
 
+    all = async(req: express.Request, res: express.Response) => {
+        let until = parseInt(req.query.until as string)
+        let limit = parseInt(req.query.limit as string)
+        if (isNaN(until) || isNaN(limit)) {
+            res.json({message: "Invalid query parameter data."})
+            return
+        }
+        let ret = await DB.getRuns(req.jwt.email, until, limit)
+        res.json({message: "ok", data: ret})
+    }
+
 
 }

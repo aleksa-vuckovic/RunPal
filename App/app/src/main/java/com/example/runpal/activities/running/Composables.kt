@@ -35,13 +35,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.example.runpal.GoogleMapPath
 import com.example.runpal.KcalFormatter
 import com.example.runpal.ProgressFloatingButton
-import com.example.runpal.R
 import com.example.runpal.TimeFormatter
 import com.example.runpal.Units
 import com.example.runpal.borderRight
@@ -274,7 +272,7 @@ fun GoogleMapRun(runStates: List<RunState>,
             for (i in runStates.indices) {
                 GoogleMapPath(pathPoints = runStates[i].path, color = colors[i])
                 val loc = runStates[i].location
-                if (loc != PathPoint.NONE) Marker(
+                if (!loc.isInit()) Marker(
                     state = MarkerState(position = loc.toLatLng()),
                     icon = markers[i],
                     anchor = Offset(0.5f, 0.5f)

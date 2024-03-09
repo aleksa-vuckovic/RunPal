@@ -1,6 +1,7 @@
 package com.example.runpal.activities.home
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -32,6 +34,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SportsScore
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ElevatedButton
@@ -44,6 +47,7 @@ import androidx.compose.material3.TimeInput
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,25 +65,33 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.runpal.DEFAULT_PROFILE_URI
+import com.example.runpal.DateOnlyFormatter
 import com.example.runpal.DoubleInput
 import com.example.runpal.UTCDateTimeFormatter
 import com.example.runpal.ImageSelector
 import com.example.runpal.LoadingScreen
 import com.example.runpal.LongTimeFormatter
 import com.example.runpal.R
+import com.example.runpal.TimeFormatter
 import com.example.runpal.Units
+import com.example.runpal.activities.running.PanelText
 import com.example.runpal.borderBottom
 import com.example.runpal.join
 import com.example.runpal.limitText
 import com.example.runpal.models.Event
+import com.example.runpal.models.PathPoint
+import com.example.runpal.models.Run
+import com.example.runpal.models.RunData
 import com.example.runpal.ui.theme.BadgeType
 import com.example.runpal.ui.theme.LightGreen
 import com.example.runpal.ui.theme.StandardBadge
 import com.example.runpal.ui.theme.StandardButton
 import com.example.runpal.ui.theme.StandardTextField
+import kotlinx.coroutines.delay
 
 @Composable
 fun HomeButton(icon: ImageVector, text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
@@ -531,26 +543,77 @@ fun EventScreen(event: Event, onJoin: () -> Unit, onFollow: () -> Unit, onUnfoll
 }
 
 
+@Composable
+fun RunInfo(runData: RunData, onClick: () -> Unit, units: Units, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .shadow(elevation = 5.dp, shape = RoundedCornerShape(10.dp))
+            .clip(shape = RoundedCornerShape(10.dp))
+            .background(color = MaterialTheme.colorScheme.surface)
+            .clickable { onClick() }
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = DateOnlyFormatter.format(runData.run.start!!).first, style = MaterialTheme.typography.labelMedium)
+        Spacer(modifier = Modifier.width(10.dp))
+        if (runData.run.room != null) StandardBadge(text = "group", type = BadgeType.INFO)
+        else if (runData.run.event != null) StandardBadge(text = "event", type = BadgeType.SUCCESS)
+        Spacer(modifier = Modifier.weight(1f))
+        PanelText(text = TimeFormatter.format(runData.run.running), modifier = Modifier
+            .padding(10.dp))
+        PanelText(text = units.distanceFormatter.format(runData.location.distance), modifier = Modifier
+            .padding(10.dp))
+    }
+}
+
+@Composable
+fun HistoryScreen(onClick: (Run) -> Unit, units: Units) {
+    val vm: HistoryViewModel = hiltViewModel()
+    LazyColumn(
+        modifier = Modifier.background(color = MaterialTheme.colorScheme.background)
+            .padding(20.dp),
+        state = rememberLazyListState()
+    ) {
+        items(vm.runs) {
+            RunInfo(runData = it, onClick = { onClick(it.run) }, units = units, modifier = Modifier.padding(20.dp))
+        }
+        if (!vm.end) item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.size(50.dp))
+                LaunchedEffect(key1 = vm.runs) {
+                    vm.more()
+                }
+            }
+        }
+    }
+}
+
 
 //////////////////////////Previews
 
 @Preview
 @Composable
 fun PreviewHomeButton() {
-    val event = Event(name = "Belgrade marathon",
-        image = DEFAULT_PROFILE_URI.toString(),
-        description = "This is going to be a really really great marathon".repeat(10),
-        followers = 123,
-        following = false,
-        time = System.currentTimeMillis() + 150*60*1000
-    )
+    val runData = RunData(run = Run(start = System.currentTimeMillis(), running = 34*60000, event =""), location = PathPoint(distance = 1256.0))
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        RunInfo(runData = runData, onClick = { }, units = Units.METRIC,
+            modifier = Modifier
+                .padding(20.dp)
+                .fillMaxWidth())
+        RunInfo(runData = runData, onClick = { }, units = Units.METRIC,
+            modifier = Modifier
+                .padding(20.dp)
+                .fillMaxWidth())
+    }
 
-    EventScreen(
-        event = event,
-        onJoin = { /*TODO*/ },
-        onFollow = { /*TODO*/ },
-        onUnfollow = { /*TODO*/ },
-        modifier = Modifier.fillMaxSize())
 
 
     

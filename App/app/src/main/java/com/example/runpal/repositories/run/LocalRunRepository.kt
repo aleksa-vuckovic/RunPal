@@ -1,9 +1,10 @@
 package com.example.runpal.repositories.run
 
 import com.example.runpal.NotFound
+import com.example.runpal.models.PathPoint
 import com.example.runpal.models.Run
-import com.example.runpal.models.RunInfo
 import com.example.runpal.models.RunData
+import com.example.runpal.repositories.LoginManager
 import com.example.runpal.room.PathDao
 import com.example.runpal.room.RunDao
 import com.example.runpal.room.toPath
@@ -12,7 +13,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class LocalRunRepository @Inject constructor (val runDao: RunDao, val pathDao: PathDao):
+class LocalRunRepository @Inject constructor (
+    private val runDao: RunDao,
+    private val pathDao: PathDao,
+    private val loginManager: LoginManager
+):
     RunRepository {
     override suspend fun create(run: Run) {
         runDao.insert(run)
@@ -45,8 +50,16 @@ class LocalRunRepository @Inject constructor (val runDao: RunDao, val pathDao: P
         return ret
     }
 
-    override suspend fun getRunInfos(user: String): List<RunInfo> {
-        TODO("Not yet implemented")
+    override suspend fun getRuns(until: Long, limit: Int): List<RunData> {
+        val user = loginManager.currentUser()!!
+        val runs = runDao.all(user, until, limit)
+        val ret = mutableListOf<RunData>()
+        for (run in runs) {
+            val loc = pathDao.last(user, run.id)
+            if (loc == null) ret.add(RunData(run = run, location = PathPoint.INIT))
+            else ret.add(RunData(run = run, location = loc.toPathPoint()))
+        }
+        return ret
     }
 
 }

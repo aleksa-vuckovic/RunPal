@@ -2,8 +2,6 @@ package com.example.runpal.activities.running
 
 import android.content.Context
 import android.location.Location
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -55,7 +53,7 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
                                                  private val userRepository: UserRepository
 ): RunState {
     private val _run = mutableStateOf(Run.LOADING)
-    private val _location = mutableStateOf(PathPoint.NONE)
+    private val _location = mutableStateOf(PathPoint.INIT)
     private val _path: SnapshotStateList<PathPoint> = SnapshotStateList()
     private var userWeight: Double = 80.0
 
@@ -72,7 +70,6 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
                     event = run.event
                 )
                 _run.value = existingData.run
-                _location.value = existingData.location ?: _location.value
                 _path.addAll(existingData.path)
                 pause()
             } catch(e: Exception) {
@@ -119,7 +116,7 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
         val runUpdate = RunData(run = _run.value, location = cur)
 
         val prev = _location.value
-        if (prev != PathPoint.NONE) {
+        if (!prev.isInit()) {
             cur.distance = prev.distance
             cur.kcal = prev.kcal
             val distanceDifference = prev.distance(cur)
@@ -198,7 +195,7 @@ class NonlocalRunState @AssistedInject constructor (
     @ApplicationContext val context: Context
 ): RunState {
     private val _run = mutableStateOf(Run.LOADING)
-    private val _location: MutableState<PathPoint> = mutableStateOf(PathPoint.NONE)
+    private val _location: MutableState<PathPoint> = mutableStateOf(PathPoint.INIT)
     private val _path: SnapshotStateList<PathPoint> = SnapshotStateList()
 
     private var lastFetch: Long = 0L
@@ -222,7 +219,7 @@ class NonlocalRunState @AssistedInject constructor (
                         since = lastFetch
                     )
                     _run.value = update.run
-                    _location.value = update.location ?: _location.value
+                    _location.value = update.location
                     _path.addAll(update.path)
                     if (update.path.size > 0) lastFetch = update.path.last().time
                 } catch(_: Exception) { }

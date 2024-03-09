@@ -2,7 +2,6 @@ package com.example.runpal.repositories.run
 
 import com.example.runpal.ServerException
 import com.example.runpal.models.Run
-import com.example.runpal.models.RunInfo
 import com.example.runpal.models.RunData
 import com.example.runpal.server.RunApi
 import javax.inject.Inject
@@ -32,8 +31,10 @@ class ServerRunRepository @Inject constructor(private val runApi: RunApi): RunRe
         else return ret.data!!
     }
 
-    override suspend fun getRunInfos(user: String): List<RunInfo> {
-        TODO("Not yet implemented")
+    override suspend fun getRuns(until: Long, limit: Int): List<RunData> {
+        val response = runApi.getAll(until = until, limit = limit)
+        if (response.message != "ok") throw ServerException(response.message)
+        else return response.data!!
     }
 
 }

@@ -184,4 +184,39 @@ export class DB {
         if (ret.matchedCount > 0) return "ok"
         else return "Event does not exist."
     }
+
+    static async getRuns(user: string, until: number, limit: number) {
+        let ret = await runModel.aggregate([
+            {
+                $match: {
+                    user: user,
+                    end: {$ne: null},
+                    start: {$lt: until}
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    run: {
+                        id: "$id",
+                        user: "$user",
+                        room: "$room",
+                        event: "$event",
+                        start: "$start",
+                        running: "$running",
+                        end: "$end"
+                    },
+                    location: "$location",
+                    path: []
+                }
+            },
+            {
+                $sort: {"run.start": -1}
+            },
+            {
+                $limit: limit
+            }
+        ])
+        return ret
+    }
 }

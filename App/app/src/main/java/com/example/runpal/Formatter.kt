@@ -56,6 +56,12 @@ object LocalDateTimeFormatter: Formatter<Long> {
         return LocalDateTime.ofInstant(date, ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) to ""
     }
 }
+object DateOnlyFormatter: Formatter<Long> {
+    override fun format(value: Long): Pair<String, String> {
+        val date = Instant.ofEpochMilli(value)
+        return LocalDateTime.ofInstant(date, ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) to ""
+    }
+}
 object MetricDistanceFormatter: Formatter<Double> {
     override fun format(value: Double): Pair<String, String> {
         if (value < 1000) return value.toInt().toString() to "m"
@@ -65,7 +71,7 @@ object MetricDistanceFormatter: Formatter<Double> {
 object ImperialDistanceFormatter: Formatter<Double> {
     override fun format(value: Double): Pair<String, String> {
         val miles = value/1000 * KM_TO_MILE
-        if (miles >= 1) return "%.2f".format(miles) to "mi"
+        if (miles >= 0.5) return "%.2f".format(miles) to "mi"
         val feet = (miles* MILE_TO_FT).toInt()
         return "%d".format(feet) to "ft"
     }

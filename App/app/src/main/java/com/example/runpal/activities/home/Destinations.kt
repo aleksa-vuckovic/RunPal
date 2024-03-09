@@ -31,7 +31,15 @@ object StatsDestination: Destination {
     override val title: String = "Stats"
 }
 
-val destinations = listOf(HistoryDestination, MenuDestination, StatsDestination)
+val navBarDestinations = listOf(HistoryDestination, MenuDestination, StatsDestination)
+val destinationMap = mapOf(
+    HistoryDestination.argsRoute to HistoryDestination,
+    MenuDestination.argsRoute to MenuDestination,
+    StatsDestination.argsRoute to StatsDestination,
+    EventsDestination.argsRoute to EventsDestination,
+    EventDestination.argsRoute to EventDestination,
+    CreateEventDestination.argsRoute to CreateEventDestination
+)
 
 
 object EventsDestination: Destination {

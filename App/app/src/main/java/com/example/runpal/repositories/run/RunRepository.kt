@@ -1,7 +1,6 @@
 package com.example.runpal.repositories.run
 
 import com.example.runpal.models.Run
-import com.example.runpal.models.RunInfo
 import com.example.runpal.models.RunData
 
 
@@ -36,8 +35,11 @@ interface RunRepository {
 
 
     /**
-     * Get all all RunInfo objects for each run of the
-     * specified user, sorted from newest to oldest.
+     * Get run data for each finished run of the
+     * current user, sorted from newest to oldest,
+     * before 'until' and limit to 'limit' entries.
+     * (This is to accommodate loading data in batches)
+     * Not including path.
      */
-    suspend fun getRunInfos(user: String): List<RunInfo>
+    suspend fun getRuns(until: Long, limit: Int): List<RunData>
 }
