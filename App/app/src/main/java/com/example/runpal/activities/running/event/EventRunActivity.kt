@@ -15,20 +15,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.runpal.EVENT_ID_KEY
 import com.example.runpal.LoadingScreen
 import com.example.runpal.R
 import com.example.runpal.RUN_MARKER_COLORS
-import com.example.runpal.activities.results.EventRunResults
+import com.example.runpal.activities.results.event.EventRunResultsActivity
 import com.example.runpal.activities.running.RunCountown
 import com.example.runpal.activities.running.RunDataPanel
 import com.example.runpal.activities.running.RunPause
@@ -126,8 +124,10 @@ class EventRunActivity : ComponentActivity() {
                             LaunchedEffect(key1 = state) {
                                 if (state == Run.State.ENDED) {
                                     delay(200) //giving time for the server update
+                                    val eventID = intent.getStringExtra(EVENT_ID_KEY)
                                     this@EventRunActivity.finish()
-                                    val intent = Intent(this@EventRunActivity, EventRunResults::class.java)
+                                    val intent = Intent(this@EventRunActivity, EventRunResultsActivity::class.java)
+                                    intent.putExtra(EVENT_ID_KEY, eventID)
                                     startActivity(intent)
                                 }
                             }

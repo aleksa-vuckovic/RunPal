@@ -24,8 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.runpal.LoadingScreen
 import com.example.runpal.R
+import com.example.runpal.RUN_ID_KEY
 import com.example.runpal.RUN_MARKER_COLORS
-import com.example.runpal.activities.results.SoloRunResults
+import com.example.runpal.activities.results.solo.SoloRunResultsActivity
 import com.example.runpal.activities.running.RunDataPanel
 import com.example.runpal.activities.running.RunPause
 import com.example.runpal.activities.running.RunResume
@@ -123,8 +124,10 @@ class SoloRunActivity : ComponentActivity() {
                             LaunchedEffect(key1 = state) {
                                 if (state == Run.State.ENDED) {
                                     delay(200) //giving time for the server update
+                                    val runID = vm.runState.run.id
                                     this@SoloRunActivity.finish()
-                                    val intent = Intent(this@SoloRunActivity, SoloRunResults::class.java)
+                                    val intent = Intent(this@SoloRunActivity, SoloRunResultsActivity::class.java)
+                                    intent.putExtra(RUN_ID_KEY, runID)
                                     startActivity(intent)
                                 }
                             }

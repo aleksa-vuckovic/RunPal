@@ -32,8 +32,10 @@ import com.example.runpal.EVENT_DEEP_LINK_URI
 import com.example.runpal.EVENT_ID_KEY
 import com.example.runpal.ErrorScreen
 import com.example.runpal.LoadingScreen
+import com.example.runpal.ROOM_ID_KEY
 import com.example.runpal.RUN_ID_KEY
 import com.example.runpal.activities.account.AccountActivity
+import com.example.runpal.activities.results.group.GroupRunResultsActivity
 import com.example.runpal.activities.running.event.EventRunActivity
 import com.example.runpal.activities.running.group.GroupRunEntryActivity
 import com.example.runpal.activities.running.solo.SoloRunActivity
@@ -76,6 +78,10 @@ class HomeActivity : ComponentActivity() {
 
         if (!this.hasNotificationPermission()) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
 
+        val intent = Intent(this, GroupRunResultsActivity::class.java)
+        intent.putExtra(ROOM_ID_KEY, "65e9fb296b3027751da74aca")
+        startActivity(intent)
+
         setContent {
             RunPalTheme {
                 // A surface container using the 'background' color from the theme
@@ -101,7 +107,7 @@ class HomeActivity : ComponentActivity() {
                         bottomBar = {
                             StandardNavBar(
                                 destinations = destinations,
-                                curDestination = curDestination,
+                                curRoute = curDestination,
                                 onClick = {
                                     if (curDestination != it.argsRoute) navController.navigate(it.argsRoute)
                                 }

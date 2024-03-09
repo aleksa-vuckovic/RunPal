@@ -65,12 +65,11 @@ fun PanelText(text: Pair<String,String>, modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.labelLarge)
         Text(
             text = text.second,
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+            style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.graphicsLayer {
                 this.translationY = subscriptOffset
             })
     }
-
 }
 
 @Composable

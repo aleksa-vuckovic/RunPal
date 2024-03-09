@@ -1,5 +1,6 @@
 package com.example.runpal.ui
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,93 +28,94 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.toSize
+import com.example.runpal.EmptyFormatter
 import com.example.runpal.Formatter
 import com.example.runpal.binarySearch
 import com.example.runpal.models.PathPoint
 import com.example.runpal.join
-import kotlin.math.max
-import kotlin.math.min
 
+
+/**
+ * Represents one dataset (one run)
+ * and provides the minimuma, maxima and average.
+ * (The average is only calculated for the Y value)
+ */
+class PathChartDataset(
+    val path: List<PathPoint>,
+    val xValue: (PathPoint) -> Double,
+    val yValue: (PathPoint) -> Double
+) {
+    companion object {
+        val EMPTY: PathChartDataset = PathChartDataset(path = listOf(), xValue = {0.0}, yValue = {0.0})
+    }
+
+    val minX: Double
+    val maxX: Double
+    val minY: Double
+    val maxY: Double
+    val avgY: Double
+
+
+    init {
+        minX = path.minOf(xValue)
+        maxX = path.maxOf(xValue)
+        minY = path.minOf(yValue)
+        maxY = path.maxOf(yValue)
+        var t = 0.0
+        var p = 0.0
+        for (i in 0..path.size-2)
+            if (!path[i+1].end) {val dt = path[i+1].time-path[i].time; t+=dt; p+=dt*(yValue(path[i]) + yValue(path[i+1]))/2; }
+        if (t > 0.0) avgY = p/t
+        else avgY = 0.0
+    }
+}
 
 
 /**
  * This class is used for calculating the range of values presented on the chart,
- * an retrieving the relative position of a value on the corresponding chart axis.
+ * an mapping values to chart coordinates based on the value range, chartSize,
+ * chartOffset and axes options.
  */
-class ChartData(val minX: Double, val maxX: Double, val minY: Double, val maxY: Double) {
+class ChartConfig(val datasets: List<PathChartDataset>,
+                  val axes: AxesOptions,
+                  val chartSize: Size,
+                  val chartOffset: Size
+) {
 
-    companion object {
-        final val Empty: ChartData = ChartData(0.0, 0.0, 0.0, 0.0)
+    val originX: Double
+    val originY: Double
+    val spanX: Double
+    val spanY: Double
+
+    init {
+        val minX = datasets.minOf { it.minX }
+        val maxX = datasets.maxOf { it.maxX }
+        val minY = datasets.minOf { it.minY }
+        val maxY = datasets.maxOf { it.maxY }
+
+        spanX = maxX - minX
+        val spanYData = maxY-minY
+        spanY = if (spanYData * axes.yExpandFactor < axes.ySpanMin) axes.ySpanMin else spanYData*axes.yExpandFactor
+        originX = minX
+        originY = minY - (spanY-spanYData)/2
     }
-
-    val spanX: Double = maxX - minX
-    val spanY: Double = (maxY - minY) * 1.1
-    val originX: Double = minX
-    val originY: Double = minY
-
-    /**
-     * The dataset must not be empty.
-     * For empty datasets, use ChartData.Empty.
-     */
-    constructor(path: List<PathPoint>,
-                xValue: (PathPoint) -> Double,
-                yValue: (PathPoint) -> Double) :
-            this(path.minOf { xValue(it) },
-                path.maxOf { xValue(it) },
-                path.minOf { yValue(it) },
-                path.maxOf { yValue(it) }
-                )
-
-    /**
-     * Returns the relative position of x on the x axis
-     * as a Double between 0.0 and 1.0.
-     */
-    fun mapX(x: Double): Double {
-        if (spanX == 0.0) return 0.0
-        else return (x - originX) / spanX
-    }
-    /**
-     * Returns the relative position of y on the y axis
-     * as a Double between 0.0 and 1.0.
-     */
-    fun mapY(y: Double): Double {
-        if (spanY == 0.0) return 0.0
-        else return (y - originY) / spanY
-    }
-
-    operator fun plus(data: ChartData): ChartData {
-        if (this === Empty) return data
-        else if (data === Empty) return data
-        else return ChartData(
-            min(this.minX, data.minX),
-            max(this.maxX, data.maxX),
-            min(this.minY, data.maxY),
-            max(this.maxY, data.maxY)
-        )
-    }
-}
-/**
- * This class uses ChartData, the chart size and offset, to map
- * data points to actual canvas coordinates.
- */
-class ChartConfiguration(val chartData: ChartData,
-                         val chartSize: Size,
-                         val chartOffset: Size
-    ) {
 
     /**
      * @return The horizontal canvas coordinate
      * corresponding to value x.
      */
     fun mapX(x: Double): Float {
-        return chartData.mapX(x).toFloat()*chartSize.width + chartOffset.width
+        if (spanX == 0.0) return 0f
+        return ((x-originX)/spanX).toFloat()*chartSize.width + chartOffset.width
     }
     /**
-     * @return The horizontal canvas coordinate
+     * @return The vertical canvas coordinate
      * corresponding to value y.
      */
     fun mapY(y: Double): Float {
-        return chartSize.height - chartData.mapY(y).toFloat()*chartSize.height
+        val t = chartSize.height
+        if (spanY == 0.0) return t
+        else return t - t * ((y - originY) / spanY).toFloat()
     }
     /**
      * @return The canvas Offset
@@ -141,48 +143,63 @@ class ChartConfiguration(val chartData: ChartData,
      * @return The canvas Offset
      * corresponding to the chart origin.
      */
-    fun chartOrigin() = Offset(chartOffset.width, chartSize.height)
+    val chartOrigin = Offset(chartOffset.width, chartSize.height)
+    val chartTopLeft = Offset(chartOffset.width, 0f)
+    val chartTopRight = Offset(chartOffset.width + chartSize.width,  0f)
+    val chartBottomRight = Offset(chartOffset.width + chartSize.width, chartSize.height)
 }
 
-class PathLineChartDataset(val path: List<PathPoint>,
-                           val xValue: (PathPoint) -> Double,
-                           val yValue: (PathPoint) -> Double) {
-    val chartData = ChartData(path, xValue, yValue)
-}
-class PathLineChartOptions(
+/**
+ * Options for a single dataset.
+ */
+class PathChartOptions(
     val color: Color = Color.Black,
     val shade: Boolean = false,
     val width: Float = 3f,
     val markers: Boolean = false,
     val markerLabel: Formatter<Double>? = null,
-    val markerLabelStyle: TextStyle = TextStyle.Default
+    val markerLabelStyle: TextStyle = TextStyle.Default,
+    val show: Boolean = true
 )
-class AxesOptions(
-    val xLabel: Formatter<Double>? = null,
-    val yLabel: Formatter<Double>? = null,
+
+/**
+ * Axis options for the entire chart.
+ *
+ * @param yExpandFactor Specifies the expansion factor for the y axis span,
+ * relative to the y value span of the dataset. This is to prevent the curve from hitting
+ * the very top and bottom of the chart. This value should be equal to or greater than 1.
+ * @param ySpanMin The minimum span of the y axis. If the span calculated using yExpandFactor
+ * is less than this, then the span will be expanded to fit this value.
+ */
+data class AxesOptions(
+    val xLabel: Formatter<Double> = EmptyFormatter,
+    val yLabel: Formatter<Double> = EmptyFormatter,
     val labelStyle: TextStyle = TextStyle.Default,
     val xTickCount: Int = 0,
     val yTickCount: Int = 0,
+    val yExpandFactor: Double = 1.1,
+    val ySpanMin: Double = 3.0
 )
 
 @Composable
-private fun PathChartLine(data: PathLineChartDataset,
-                          options: PathLineChartOptions,
-                          chartConfiguration: ChartConfiguration,
+private fun PathChartLine(data: PathChartDataset,
+                          options: PathChartOptions,
+                          chartConfig: ChartConfig,
                           touchPositionState: State<Offset>
                   ) {
+    if (!options.show) return
+    if (data.path.size < 2) return
     val textMeasurer = rememberTextMeasurer()
-    val chartOrigin = chartConfiguration.chartOrigin()
-    val bounds = remember(chartConfiguration) {
+    val chartOrigin = chartConfig.chartOrigin
+    val bounds = remember(chartConfig) {
         Path().apply {
-            moveTo(chartConfiguration.chartOffset.width, 0f)
-            relativeLineTo(dx = chartConfiguration.chartSize.width, dy = 0f)
-            relativeLineTo(dx = 0f, dy = chartConfiguration.chartSize.height)
-            relativeLineTo(dx = -chartConfiguration.chartSize.width, dy = 0f)
+            moveTo(chartConfig.chartTopLeft.x, chartConfig.chartTopLeft.y)
+            lineTo(chartConfig.chartTopRight.x, chartConfig.chartTopRight.y)
+            lineTo(chartConfig.chartBottomRight.x, chartConfig.chartBottomRight.y)
+            lineTo(chartConfig.chartOrigin.x, chartConfig.chartOrigin.y)
             close()
         }
     }
-    if (data.path.size < 2) return
     Canvas(modifier = Modifier.fillMaxSize()) {
         clipPath(
             path = bounds,
@@ -194,8 +211,8 @@ private fun PathChartLine(data: PathLineChartDataset,
                     val startY = data.yValue(data.path[i])
                     val endX = data.xValue(data.path[i + 1])
                     val endY = data.yValue(data.path[i + 1])
-                    val start = chartConfiguration.map(startX, startY)
-                    val end = chartConfiguration.map(endX, endY)
+                    val start = chartConfig.map(startX, startY)
+                    val end = chartConfig.map(endX, endY)
                     if (options.shade) {
                         val path = Path().apply {
                             moveTo(start.x, start.y)
@@ -227,11 +244,11 @@ private fun PathChartLine(data: PathLineChartDataset,
         if (options.markers && touchPositionState.value != Offset.Zero) {
             val touch = touchPositionState.value
             val point =
-                binarySearch(data.path, { chartConfiguration.mapX(data.xValue(it)) }, touch.x)
+                binarySearch(data.path, { chartConfig.mapX(data.xValue(it)) }, touch.x)
             if (point == null) return@Canvas
             val selectedX = data.xValue(point)
             val selectedY = data.yValue(point)
-            val selected = chartConfiguration.map(selectedX, selectedY)
+            val selected = chartConfig.map(selectedX, selectedY)
             drawLine(
                 color = options.color,
                 start = selected.copy(x = chartOrigin.x),
@@ -256,34 +273,26 @@ private fun PathChartLine(data: PathLineChartDataset,
     }
 }
 @Composable
-fun PathChart(datasets: List<PathLineChartDataset>,
-              options: List<PathLineChartOptions>,
-              axes: AxesOptions,
+fun PathChart(datasets: List<PathChartDataset>,
+              options: List<PathChartOptions>,
+              axesOptions: AxesOptions,
               modifier: Modifier = Modifier) {
 
     var size by remember {
         mutableStateOf(Size(0f, 0f))
     }
-    val chartOffset = remember {
-        Size(90f, 45f)
-    }
+    val chartOffset = Size(90f, 45f)
     val chartSize = remember(size) {
         size.copy(width = size.width - chartOffset.width, height = size.height - chartOffset.height)
     }
-    val chartData = remember(datasets) {
-        var res = ChartData.Empty
-        for (dataset in datasets) res += dataset.chartData
-        res
-    }
-    val chartConfiguration = remember(size, datasets) {
-        ChartConfiguration(chartData, chartSize, chartOffset)
+    val chartConfig = remember(datasets, axesOptions, size) {
+        ChartConfig(datasets = datasets, axes = axesOptions, chartSize = chartSize, chartOffset = chartOffset)
     }
     val textMeasurer = rememberTextMeasurer()
 
     val touchPosition = remember {
         mutableStateOf(Offset.Zero)
     }
-
     Box(modifier = modifier
         .onSizeChanged { size = it.toSize() }
         .pointerInput(Unit) {
@@ -312,44 +321,45 @@ fun PathChart(datasets: List<PathLineChartDataset>,
         }) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             //drawing the axes
-            val chartOrigin = chartConfiguration.chartOrigin()
+            val chartOrigin = chartConfig.chartOrigin
             drawLine(color = Color.Black, strokeWidth = 1f, start = chartOrigin, end = chartOrigin.copy(y = 0f))
             drawLine(color = Color.Black, strokeWidth = 1f, start = chartOrigin, end = chartOrigin.copy(x = size.width))
 
             //drawing the ticks and labels
-            if (axes.xTickCount!= 0 && axes.xLabel != null) {
-                val stepX = (chartData.maxX-chartData.minX) / axes.xTickCount
-                for (i in 0..axes.xTickCount) {
-                    val x = (chartData.originX + i*stepX)
-                    val pos = chartConfiguration.mapTickX(x)
+            if (axesOptions.xTickCount!= 0 && axesOptions.xLabel != null) {
+                val stepX = chartConfig.spanX / axesOptions.xTickCount
+                for (i in 0..axesOptions.xTickCount) {
+                    val x = chartConfig.originX + i*stepX
+                    val pos = chartConfig.mapTickX(x)
                     drawLine(color = Color.Black, strokeWidth = 10f, start = pos, end = pos.copy(y = pos.y + 6f))
 
 
-                    val label = axes.xLabel.format(x).join()
-                    val text = textMeasurer.measure(label, axes.labelStyle)
+                    val label = axesOptions.xLabel.format(x).join()
+                    val text = textMeasurer.measure(label, axesOptions.labelStyle)
                     drawText(text, topLeft = pos.copy(x = pos.x - text.size.width/2, y = pos.y+6f))
                 }
             }
-            if (axes.yTickCount != 0 && axes.yLabel != null) {
-                val stepY = (chartData.maxY-chartData.minY) / axes.yTickCount
-                for (i in 0..axes.yTickCount) {
-                    val y = (chartData.originY + i*stepY)
-                    val pos = chartConfiguration.mapTickY(y)
+            if (axesOptions.yTickCount != 0 && axesOptions.yLabel != null) {
+                val stepY = chartConfig.spanY / axesOptions.yTickCount
+                for (i in 0..axesOptions.yTickCount) {
+                    val y = chartConfig.originY + i*stepY
+                    val pos = chartConfig.mapTickY(y)
                     drawLine(color = Color.Black, strokeWidth = 10f, start = pos, end = pos.copy(x = pos.x - 5f))
 
-                    val label = axes.yLabel.format(y).join()
-                    val text = textMeasurer.measure(label, axes.labelStyle)
-                    drawText(text, topLeft = pos.copy(x = pos.x - chartOffset.width, y = pos.y - (if(i!=axes.yTickCount) text.size.height/2  else 0)))
+                    val label = axesOptions.yLabel.format(y).join()
+                    val text = textMeasurer.measure(label, axesOptions.labelStyle)
+                    drawText(text, topLeft = pos.copy(x = pos.x - chartOffset.width, y = pos.y - (if(i!=axesOptions.yTickCount) text.size.height/2  else 0)))
                 }
             }
         }
 
         //Draw the lines
-        for (i in 0..datasets.size - 1) {
+        //for (i in datasets.size - 1 downTo 0) {
+        for (i in 0 .. datasets.size - 1) {
             PathChartLine(
                 data = datasets[i],
                 options = options[i],
-                chartConfiguration = chartConfiguration,
+                chartConfig = chartConfig,
                 touchPositionState = touchPosition
             )
         }

@@ -1,6 +1,7 @@
 package com.example.runpal
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -24,14 +25,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class EventReminderReceiver @Inject constructor(
-    private val eventRepository: ServerEventRepository
-) : BroadcastReceiver() {
+class EventReminderReceiver : BroadcastReceiver() {
 
+    @Inject
+    lateinit var eventRepository: ServerEventRepository
+
+    @SuppressLint("MissingPermission")
     override fun onReceive(context: Context, intent: Intent) {
 
         if (!context.hasNotificationPermission()) return
-        Log.d("RECEIVER", "Receiver active.")
         val manager = NotificationManagerCompat.from(context)
         val channel = NotificationChannelCompat.Builder(REMINDER_CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH)
             .setName("Event reminders")
@@ -65,9 +67,7 @@ class EventReminderReceiver @Inject constructor(
                         getPendingIntent(EVENT_VIEW_REQUEST_CODE, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                     }
                     notification.setContentIntent(deepLinkPendingIntent)
-                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
-                        manager.notify(REMINDER_NOTIFICATION_ID, notification.build())
-                    else Log.d("RECEIVER", "No PERMISIION!!")
+                    manager.notify(REMINDER_NOTIFICATION_ID, notification.build())
                 }
             } catch(e: Exception) {e.printStackTrace()}
         }

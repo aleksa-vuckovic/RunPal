@@ -11,11 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Refresh
@@ -103,13 +101,13 @@ fun StandardTextField(value: String,
 }
 
 @Composable
-fun StandardNavBar(destinations: List<Destination>, curDestination: String, onClick: (Destination) -> Unit) {
+fun StandardNavBar(destinations: List<Destination>, curRoute: String, onClick: (Destination) -> Unit) {
     NavigationBar(
 
     ) {
         for (dest in destinations)
             NavigationBarItem(
-                selected = curDestination == dest.argsRoute,
+                selected = curRoute == dest.argsRoute,
                 onClick = {onClick(dest)},
                 icon = {
                     if (dest.icon != null) Icon(imageVector = dest.icon!!, contentDescription = dest.title)
@@ -128,10 +126,10 @@ fun StandardTopBar(onBack: (() -> Unit)? = null,
                    onRefresh: (() -> Unit)? = null,
                    onAccount: () -> Unit,
                    onLogout: () -> Unit,
-                   title: String = "") {
+                   title: String? = null) {
     //val height = 50.dp
     TopAppBar(
-        title = { Text(text = title)},
+        title = { Text(text = title ?: "")},
         navigationIcon = {
             if (onBack != null) IconButton(onClick = onBack) {
                 Icon(

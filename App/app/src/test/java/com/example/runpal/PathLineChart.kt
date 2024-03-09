@@ -12,8 +12,8 @@ import androidx.compose.ui.unit.dp
 import com.example.runpal.models.PathPoint
 import com.example.runpal.ui.AxesOptions
 import com.example.runpal.ui.PathChart
-import com.example.runpal.ui.PathLineChartDataset
-import com.example.runpal.ui.PathLineChartOptions
+import com.example.runpal.ui.PathChartDataset
+import com.example.runpal.ui.PathChartOptions
 import com.example.runpal.ui.theme.MediumBlue
 import com.example.runpal.ui.theme.Pink
 
@@ -39,15 +39,15 @@ val path3 = List<PathPoint>(100) {
 }
 
 @Composable
-fun PathLineChartTest() {
+fun PathChartTest() {
     val datasets = remember {
         listOf(
-            PathLineChartDataset(
+            PathChartDataset(
                 path = path2,
                 xValue = {it.time.toDouble()},
                 yValue = {it.altitude}
             ),
-            PathLineChartDataset(
+            PathChartDataset(
                 path = path3,
                 xValue = {it.time.toDouble()},
                 yValue = {it.altitude}
@@ -57,7 +57,7 @@ fun PathLineChartTest() {
     val labelStyle = MaterialTheme.typography.labelSmall
     val options = remember {
         listOf(
-            PathLineChartOptions(
+            PathChartOptions(
                 color = MediumBlue,
                 shade = true,
                 width = 15f,
@@ -65,7 +65,7 @@ fun PathLineChartTest() {
                 markerLabel = AltitudeFormatter,
                 markerLabelStyle = labelStyle
             ),
-            PathLineChartOptions(
+            PathChartOptions(
                 color = Pink,
                 shade = true,
                 width = 10f,
@@ -89,7 +89,7 @@ fun PathLineChartTest() {
         PathChart(
             datasets = datasets,
             options = options,
-            axes = axes,
+            axesOptions = axes,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(500.dp)

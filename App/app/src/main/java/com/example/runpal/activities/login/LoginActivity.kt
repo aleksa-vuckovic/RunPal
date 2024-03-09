@@ -57,7 +57,7 @@ class LoginActivity : ComponentActivity() {
 
                     Scaffold(
                         bottomBar = {
-                            StandardNavBar(destinations = destinations, curDestination = curDestination, onClick = {
+                            StandardNavBar(destinations = destinations, curRoute = curDestination, onClick = {
                                 if (curDestination != it.argsRoute) navController.navigate(it.argsRoute)
                             })
                         },
