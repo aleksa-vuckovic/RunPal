@@ -20,5 +20,7 @@ interface RunApi {
     @GET("run/all")
     suspend fun getAll(@Query("until") until: Long, @Query("limit") limit: Int): GenericResponse<List<RunData>>
 
+    @GET("run/since")
+    suspend fun getSince(@Query("since") since: Long): GenericResponse<List<RunData>>
 
 }

@@ -11,9 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.runpal.models.PathPoint
 import com.example.runpal.ui.AxesOptions
-import com.example.runpal.ui.PathChart
+import com.example.runpal.ui.Chart
 import com.example.runpal.ui.PathChartDataset
-import com.example.runpal.ui.PathChartOptions
+import com.example.runpal.ui.ChartOptions
 import com.example.runpal.ui.theme.MediumBlue
 import com.example.runpal.ui.theme.Pink
 
@@ -43,12 +43,12 @@ fun PathChartTest() {
     val datasets = remember {
         listOf(
             PathChartDataset(
-                path = path2,
+                data = path2,
                 xValue = {it.time.toDouble()},
                 yValue = {it.altitude}
             ),
             PathChartDataset(
-                path = path3,
+                data = path3,
                 xValue = {it.time.toDouble()},
                 yValue = {it.altitude}
             ),
@@ -57,7 +57,7 @@ fun PathChartTest() {
     val labelStyle = MaterialTheme.typography.labelSmall
     val options = remember {
         listOf(
-            PathChartOptions(
+            ChartOptions(
                 color = MediumBlue,
                 shade = true,
                 width = 15f,
@@ -65,7 +65,7 @@ fun PathChartTest() {
                 markerLabel = AltitudeFormatter,
                 markerLabelStyle = labelStyle
             ),
-            PathChartOptions(
+            ChartOptions(
                 color = Pink,
                 shade = true,
                 width = 10f,
@@ -86,7 +86,7 @@ fun PathChartTest() {
 
     Column(modifier = Modifier.fillMaxSize()) {
 
-        PathChart(
+        Chart(
             datasets = datasets,
             options = options,
             axesOptions = axes,

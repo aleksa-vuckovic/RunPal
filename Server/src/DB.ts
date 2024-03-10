@@ -220,6 +220,38 @@ export class DB {
         return ret
     }
 
+    static async getRunsSince(user: string, since: number) {
+        let ret = await runModel.aggregate([
+            {
+                $match: {
+                    user: user,
+                    end: {$ne: null},
+                    start: {$gte: since}
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    run: {
+                        id: "$id",
+                        user: "$user",
+                        room: "$room",
+                        event: "$event",
+                        start: "$start",
+                        running: "$running",
+                        end: "$end"
+                    },
+                    location: "$location",
+                    path: []
+                }
+            },
+            {
+                $sort: {"run.start": 1}
+            }
+        ])
+        return ret
+    }
+
     static async eventRanking(eventID: string): Promise<Array<any>> {
         let event = await eventModel.findOne({_id: new ObjectId(eventID)})
         if (event == null) return []

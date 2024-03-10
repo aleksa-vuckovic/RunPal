@@ -37,4 +37,10 @@ class ServerRunRepository @Inject constructor(private val runApi: RunApi): RunRe
         else return response.data!!
     }
 
+    override suspend fun getRunsSince(since: Long): List<RunData> {
+        val response = runApi.getSince(since)
+        if (response.message != "ok") throw ServerException(response.message)
+        else return response.data!!
+    }
+
 }

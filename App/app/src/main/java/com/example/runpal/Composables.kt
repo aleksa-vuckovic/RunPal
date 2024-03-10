@@ -1,9 +1,5 @@
 package com.example.runpal
 
-import android.graphics.Color.alpha
-import android.graphics.Color.blue
-import android.graphics.Color.green
-import android.graphics.Color.red
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,7 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -26,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +35,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -50,7 +45,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import androidx.core.graphics.ColorUtils
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.runpal.models.PathPoint
@@ -67,6 +61,7 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import kotlinx.coroutines.delay
 import java.lang.Float.min
+import kotlin.math.sqrt
 
 
 @Composable
@@ -315,4 +310,48 @@ fun GoogleMapPath(pathPoints: List<PathPoint>, startColor: Color = Color.Green, 
         if (!pathPoints[i].end) Polyline(points = listOf(pathPoints[i].toLatLng(), pathPoints[i+1].toLatLng()), color = color, width = 10f, visible = true)
     }
     if (pathPoints.isNotEmpty()) PathEndMarker(latLng = pathPoints[0].toLatLng(), color = startColor)
+}
+
+
+@Composable
+fun risingDoubleAsState(target: Double): State<Double> {
+    val cur = rememberSaveable {
+        mutableStateOf(0.0)
+    }
+    LaunchedEffect(key1 = target) {
+        val time = 2000
+        val start = System.currentTimeMillis()
+        while(true) {
+            delay(20)
+            val x = (System.currentTimeMillis() - start).toDouble()/time
+            val t = sqrt(x)
+            if (t >= 1) {
+                cur.value = target
+                break
+            }
+            else cur.value = t*target
+        }
+    }
+    return cur
+}
+@Composable
+fun risingLongAsState(target: Long): State<Long> {
+    val cur = rememberSaveable {
+        mutableStateOf(0L)
+    }
+    LaunchedEffect(key1 = target) {
+        val time = 2000
+        val start = System.currentTimeMillis()
+        while(true) {
+            delay(20)
+            val x = (System.currentTimeMillis() - start).toDouble()/time
+            val t = sqrt(x)
+            if (t >= 1) {
+                cur.value = target
+                break
+            }
+            else cur.value = (t*target).toLong()
+        }
+    }
+    return cur
 }

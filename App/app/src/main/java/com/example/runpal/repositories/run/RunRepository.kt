@@ -42,4 +42,14 @@ interface RunRepository {
      * Not including path.
      */
     suspend fun getRuns(until: Long, limit: Int): List<RunData>
+
+    /**
+     * Get run data for each finished run of the
+     * current user, sorted from oldest to newest,
+     * starting from since and up until the current moment.
+     * Not including path.
+     *
+     * @param since The UNIX timestamp which is the start of the target interval.
+     */
+    suspend fun getRunsSince(since: Long): List<RunData>
 }

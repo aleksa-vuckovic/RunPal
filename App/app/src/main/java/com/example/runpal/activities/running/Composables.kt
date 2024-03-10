@@ -37,9 +37,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.example.runpal.GoogleMapPath
 import com.example.runpal.KcalFormatter
+import com.example.runpal.LongTimeFormatter
 import com.example.runpal.ProgressFloatingButton
 import com.example.runpal.TimeFormatter
 import com.example.runpal.Units
@@ -56,19 +58,22 @@ import com.example.runpal.R
 
 
 @Composable
-fun PanelText(text: Pair<String,String>, modifier: Modifier = Modifier) {
+fun PanelText(text: Pair<String,String>,
+              bigStyle: TextStyle = MaterialTheme.typography.labelLarge,
+              smallStyle: TextStyle = MaterialTheme.typography.labelSmall,
+              modifier: Modifier = Modifier) {
     var subscriptOffset: Float
-    LocalDensity.current.run { subscriptOffset = MaterialTheme.typography.labelLarge.fontSize.toPx() / 2 }
+    LocalDensity.current.run { subscriptOffset = bigStyle.fontSize.toPx() / 2 }
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
         Text(text = text.first,
-            style = MaterialTheme.typography.labelLarge)
+            style = bigStyle)
         Text(
             text = text.second,
-            style = MaterialTheme.typography.labelSmall,
+            style = smallStyle,
             modifier = Modifier.graphicsLayer {
                 this.translationY = subscriptOffset
             })
@@ -250,8 +255,12 @@ fun RunCountown(till: Long, onStart: () -> Unit, sound: MediaPlayer? = null) {
             if (left <= 0) onStart()
             else {
                 val prev = countdown
-                countdown = (left/1000L).toString()
-                if (countdown != prev && prev != "") sound?.start()
+                if (left > 10*60*1000) countdown = LongTimeFormatter.format(left).first
+                else if (left > 60*1000) countdown = TimeFormatter.format(left).first
+                else {
+                    countdown = (left/1000L).toString()
+                    if (countdown != prev && prev != "") sound?.start()
+                }
             }
             delay(200)
         }

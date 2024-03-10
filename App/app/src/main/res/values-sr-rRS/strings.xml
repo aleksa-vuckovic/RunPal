@@ -96,4 +96,8 @@
     <string name="pause">Pauza</string>
     <string name="resume">Nastavi</string>
     <string name="events">Događaji</string>
+    <string name="best_run">Najbolja trka</string>
+    <string name="average_run">Prosečna trka</string>
+    <string name="longest_run">Najduža trka</string>
+    <string name="total_running_time">Ukupno vreme trčanja</string>
 </resources>

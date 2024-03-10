@@ -156,7 +156,7 @@ class HomeActivity : ComponentActivity() {
                             }
 
                             composable(route = StatsDestination.argsRoute) {
-                                Text(text = "TODO")
+                                StatsScreen(units = units)
                             }
 
                             composable(route = EventsDestination.argsRoute) {

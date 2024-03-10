@@ -78,5 +78,15 @@ export class RunController {
         res.json({message: "ok", data: ret})
     }
 
+    since = async(req: express.Request, res: express.Response) => {
+        let since = parseInt(req.query.since as string)
+        if (isNaN(since)) {
+            res.json({message: "Invalid query parameter data."})
+            return
+        }
+        let ret = await DB.getRunsSince(req.jwt.email, since)
+        res.json({message: "ok", data: ret})
+    }
+
 
 }

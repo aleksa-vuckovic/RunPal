@@ -1,10 +1,10 @@
 package com.example.runpal.activities.home
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -60,7 +60,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -69,7 +68,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import com.example.runpal.DEFAULT_PROFILE_URI
 import com.example.runpal.DateOnlyFormatter
 import com.example.runpal.DoubleInput
 import com.example.runpal.UTCDateTimeFormatter
@@ -80,6 +78,7 @@ import com.example.runpal.R
 import com.example.runpal.TimeFormatter
 import com.example.runpal.Units
 import com.example.runpal.activities.running.PanelText
+import com.example.runpal.risingDoubleAsState
 import com.example.runpal.borderBottom
 import com.example.runpal.join
 import com.example.runpal.limitText
@@ -87,12 +86,20 @@ import com.example.runpal.models.Event
 import com.example.runpal.models.PathPoint
 import com.example.runpal.models.Run
 import com.example.runpal.models.RunData
+import com.example.runpal.risingLongAsState
+import com.example.runpal.ui.AxesOptions
+import com.example.runpal.ui.Chart
+import com.example.runpal.ui.ChartDataset
+import com.example.runpal.ui.ChartOptions
+import com.example.runpal.ui.ChartType
 import com.example.runpal.ui.theme.BadgeType
 import com.example.runpal.ui.theme.LightGreen
+import com.example.runpal.ui.theme.MediumBlue
 import com.example.runpal.ui.theme.StandardBadge
 import com.example.runpal.ui.theme.StandardButton
+import com.example.runpal.ui.theme.StandardSpinner
+import com.example.runpal.ui.theme.StandardStatRow
 import com.example.runpal.ui.theme.StandardTextField
-import kotlinx.coroutines.delay
 
 @Composable
 fun HomeButton(icon: ImageVector, text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
@@ -591,6 +598,105 @@ fun HistoryScreen(onClick: (Run) -> Unit, units: Units) {
                 LaunchedEffect(key1 = vm.runs) {
                     vm.more()
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun StatsScreen(units: Units) {
+    val vm: StatsViewModel = hiltViewModel()
+
+    if (vm.state == StatsViewModel.State.LOADING) LoadingScreen()
+    else {
+        var selected by rememberSaveable {
+            mutableStateOf(vm.options[0])
+        }
+        val totalKm by risingDoubleAsState(target = vm.totalKm[selected]!!)
+        val totalTime by risingLongAsState(target = vm.totalTime[selected]!!)
+        val dataset = ChartDataset(data = vm.runData[selected]!!, xValue={it.run.start!!.toDouble()}, yValue={it.location.distance})
+        val options = ChartOptions(
+            color = MediumBlue,
+            width = vm.chartWidthMap[selected]!!,
+            markers = true,
+            markerLabel = units.distanceFormatter,
+            show = true,
+            type = ChartType.SCATTER
+        )
+        val axesOptions = AxesOptions(
+            yLabel = units.distanceFormatter,
+            yTickCount = 5,
+            xExpandFactor = 1.2,
+            yExpandFactor = 1.4,
+            xSpanMin = 24*60*60*1000.0
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            StandardSpinner(values = vm.options, selected = selected, onSelect = {selected = it})
+            Spacer(modifier = Modifier.height(20.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Text(
+                    text = stringResource(id = R.string.total_distance),
+                    style = MaterialTheme.typography.displaySmall,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+                PanelText(
+                    text = units.distanceFormatter.format(totalKm),
+                    bigStyle = MaterialTheme.typography.displayLarge,
+                    smallStyle = MaterialTheme.typography.displaySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .borderBottom()
+                        .padding(10.dp)
+                )
+                StandardStatRow(
+                    name = stringResource(id = R.string.best_run),
+                    value = units.distanceFormatter.format(vm.bestKm[selected]!!)
+                )
+                StandardStatRow(
+                    name = stringResource(id = R.string.average_run),
+                    value = units.distanceFormatter.format(vm.avgKm[selected]!!)
+                )
+
+                Spacer(modifier = Modifier.height(30.dp))
+                Chart(
+                    datasets = listOf(dataset),
+                    options = listOf(options),
+                    axesOptions = axesOptions,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(400.dp)
+                )
+                Spacer(modifier = Modifier.height(30.dp))
+
+                Text(
+                    text = stringResource(id = R.string.total_running_time),
+                    style = MaterialTheme.typography.displaySmall,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+                PanelText(
+                    text = LongTimeFormatter.format(totalTime),
+                    bigStyle = MaterialTheme.typography.displayLarge,
+                    smallStyle = MaterialTheme.typography.displaySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .borderBottom()
+                        .padding(10.dp)
+                )
+                StandardStatRow(
+                    name = stringResource(id = R.string.longest_run),
+                    value = TimeFormatter.format(vm.longestTime[selected]!!)
+                )
             }
         }
     }

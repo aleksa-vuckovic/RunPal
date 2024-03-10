@@ -95,4 +95,8 @@
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>
     <string name="events">Events</string>
+    <string name="best_run">Best run</string>
+    <string name="average_run">Average run</string>
+    <string name="longest_run">Longest run</string>
+    <string name="total_running_time">Total running time</string>
 </resources>

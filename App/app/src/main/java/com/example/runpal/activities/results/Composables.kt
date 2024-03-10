@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,11 +21,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -37,18 +34,16 @@ import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.runpal.DEFAULT_ZOOM
-import com.example.runpal.Formatter
 import com.example.runpal.GoogleMapPath
 import com.example.runpal.RUN_MARKER_COLORS
-import com.example.runpal.Units
 import com.example.runpal.activities.running.PanelText
 import com.example.runpal.borderBottom
 import com.example.runpal.models.RunData
 import com.example.runpal.models.User
 import com.example.runpal.ui.AxesOptions
-import com.example.runpal.ui.PathChart
+import com.example.runpal.ui.Chart
 import com.example.runpal.ui.PathChartDataset
-import com.example.runpal.ui.PathChartOptions
+import com.example.runpal.ui.ChartOptions
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
@@ -56,6 +51,7 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlin.math.log2
 import com.example.runpal.R
+import com.example.runpal.ui.theme.StandardStatRow
 
 @Composable
 fun PathChartAndPanel(
@@ -67,12 +63,12 @@ fun PathChartAndPanel(
     modifier: Modifier = Modifier) {
 
     if (datasets.isEmpty()) return
-    val options: MutableList<PathChartOptions> = mutableListOf()
+    val options: MutableList<ChartOptions> = mutableListOf()
     val selectedCount = selected.count{it}
     var main: PathChartDataset = datasets[0]
     for (i in datasets.indices) {
         options.add(
-            PathChartOptions(
+            ChartOptions(
                 color = RUN_MARKER_COLORS[i],
                 shade = selectedCount == 1,
                 width = 15f,
@@ -94,7 +90,7 @@ fun PathChartAndPanel(
                 .background(color = MaterialTheme.colorScheme.surface)
                 .padding(10.dp),
             color = MaterialTheme.colorScheme.onSurface)
-        PathChart(datasets = datasets,
+        Chart(datasets = datasets,
             options = options,
             axesOptions = axesOptions,
             modifier = Modifier
@@ -228,17 +224,7 @@ fun GeneralResults(runData: RunData,
                 })
 
         for (value in values) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .borderBottom()
-                    .padding(10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = value.first, style = MaterialTheme.typography.labelMedium)
-                PanelText(text = value.second, modifier = Modifier.height(50.dp))
-            }
+            StandardStatRow(name = value.first, value = value.second)
         }
     }
 }

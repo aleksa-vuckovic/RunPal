@@ -62,4 +62,15 @@ class LocalRunRepository @Inject constructor (
         return ret
     }
 
+    override suspend fun getRunsSince(since: Long): List<RunData> {
+        val user = loginManager.currentUser()!!
+        val runs = runDao.allSince(user, since)
+        val ret = mutableListOf<RunData>()
+        for (run in runs) {
+            val loc = pathDao.last(user, run.id)
+            if (loc == null) ret.add(RunData(run = run, location = PathPoint.INIT))
+            else ret.add(RunData(run = run, location = loc.toPathPoint()))
+        }
+        return ret
+    }
 }

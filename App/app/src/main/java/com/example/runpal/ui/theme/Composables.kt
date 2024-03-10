@@ -6,8 +6,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -60,6 +62,8 @@ import androidx.compose.ui.window.Dialog
 import com.example.runpal.Destination
 import com.example.runpal.lightness
 import com.example.runpal.R
+import com.example.runpal.activities.running.PanelText
+import com.example.runpal.borderBottom
 
 
 @Composable
@@ -291,6 +295,21 @@ fun StandardSpinner(values: List<String>, selected: String, onSelect: (String) -
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             for (value in values) DropdownMenuItem(text = { Text(text = value) }, onClick = { onSelect(value); expanded = false })
         }
+    }
+}
+
+@Composable
+fun StandardStatRow(name: String, value: Pair<String, String>) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .borderBottom()
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = name, style = MaterialTheme.typography.labelMedium)
+        PanelText(text = value, modifier = Modifier.height(50.dp))
     }
 }
 

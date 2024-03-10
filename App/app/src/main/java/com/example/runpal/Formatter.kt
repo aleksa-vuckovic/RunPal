@@ -36,11 +36,9 @@ object LongTimeFormatter: Formatter<Long> {
         val hours = t%24
         val days = t/24
 
-        if (days > 1L) return "%d days".format(days)  to ""
-        else if (days == 1L) return "1 day %d hours".format(hours) to ""
-        else if (hours > 1L) return "%d hours %d minutes".format(hours, mins) to ""
-        else if (hours == 1L) return "1 hour %d minutes".format(mins) to ""
-        else return "%d minutes".format(mins) to ""
+        if (days >= 1L) return "%dd %dh".format(days,hours)  to ""
+        else if (hours >= 1L) return "%dh %dmin".format(hours, mins) to ""
+        else return "%dmin".format(mins) to ""
     }
 }
 object UTCDateTimeFormatter: Formatter<Long> {

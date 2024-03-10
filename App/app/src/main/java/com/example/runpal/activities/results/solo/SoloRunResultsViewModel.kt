@@ -75,10 +75,10 @@ class SoloRunResultsViewModel @Inject constructor(
             try {
                 _user.value = tryRepeat { userRepository.getUser(email) }
                 _run.value = tryRepeat { runRepository.getUpdate(user = email, id = runID) }
-                _speedDataset.value = PathChartDataset(path = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.speed})
-                _kcalDataset.value = PathChartDataset(path = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.kcal})
-                _altitudeDataset.value = PathChartDataset(path = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.altitude})
-                _distanceDataset.value = PathChartDataset(path = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.distance})
+                _speedDataset.value = PathChartDataset(data = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.speed})
+                _kcalDataset.value = PathChartDataset(data = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.kcal})
+                _altitudeDataset.value = PathChartDataset(data = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.altitude})
+                _distanceDataset.value = PathChartDataset(data = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.distance})
                 val minLat = _run.value.path.minOf { it.latitude }
                 val maxLat = _run.value.path.maxOf { it.latitude }
                 val minLng = _run.value.path.minOf { it.longitude }

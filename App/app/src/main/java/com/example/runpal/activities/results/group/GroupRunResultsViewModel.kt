@@ -2,13 +2,10 @@ package com.example.runpal.activities.results.group
 
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.runpal.ROOM_ID_KEY
 import com.example.runpal.ServerException
 import com.example.runpal.models.RunData
@@ -89,10 +86,10 @@ class GroupRunResultsViewModel @Inject constructor(
                 for (email in room.members) {
                     val user = tryRepeat { userRepository.getUser(email) }
                     val run = tryRepeat { runRepository.getUpdate(user = email, id = null, room = roomID) }
-                    val speedDataset = PathChartDataset(path = run.path, xValue = {it.time.toDouble()}, yValue = {it.speed})
-                    val kcalDataset = PathChartDataset(path = run.path, xValue = {it.time.toDouble()}, yValue = {it.kcal})
-                    val altitudeDataset = PathChartDataset(path = run.path, xValue = {it.time.toDouble()}, yValue = {it.altitude})
-                    val distanceDataset = PathChartDataset(path = run.path, xValue = {it.time.toDouble()}, yValue = {it.distance})
+                    val speedDataset = PathChartDataset(data = run.path, xValue = {it.time.toDouble()}, yValue = {it.speed})
+                    val kcalDataset = PathChartDataset(data = run.path, xValue = {it.time.toDouble()}, yValue = {it.kcal})
+                    val altitudeDataset = PathChartDataset(data = run.path, xValue = {it.time.toDouble()}, yValue = {it.altitude})
+                    val distanceDataset = PathChartDataset(data = run.path, xValue = {it.time.toDouble()}, yValue = {it.distance})
                     val minLat = run.path.minOf { it.latitude }
                     val maxLat = run.path.maxOf { it.latitude }
                     val minLng = run.path.minOf { it.longitude }

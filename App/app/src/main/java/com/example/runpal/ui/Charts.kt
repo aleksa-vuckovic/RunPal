@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -32,38 +33,52 @@ import com.example.runpal.Formatter
 import com.example.runpal.binarySearch
 import com.example.runpal.models.PathPoint
 import com.example.runpal.join
+import com.example.runpal.lightness
 
 
 /**
- * Represents one dataset (one run)
- * and provides the minimuma, maxima and average.
- * (The average is only calculated for the Y value)
+ * Represents one data set of T's mapped to Doubles.
+ * Calculates min,max and avg values.
  */
-class PathChartDataset(
-    val path: List<PathPoint>,
-    val xValue: (PathPoint) -> Double,
-    val yValue: (PathPoint) -> Double
+open class ChartDataset<T>(
+    val data: List<T>,
+    val xValue: (T) -> Double,
+    val yValue: (T) -> Double
 ) {
-    companion object {
-        val EMPTY: PathChartDataset = PathChartDataset(path = listOf(PathPoint.INIT), xValue = {0.0}, yValue = {0.0})
-    }
-
     val minX: Double
     val maxX: Double
     val minY: Double
     val maxY: Double
-    val avgY: Double
-
+    open val avgY: Double
 
     init {
-        minX = path.minOf(xValue)
-        maxX = path.maxOf(xValue)
-        minY = path.minOf(yValue)
-        maxY = path.maxOf(yValue)
+        minX = data.minOf(xValue)
+        maxX = data.maxOf(xValue)
+        minY = data.minOf(yValue)
+        maxY = data.maxOf(yValue)
+        avgY = data.sumOf(yValue) / data.size
+    }
+}
+
+
+/**
+ * A ChartDataset specific to paths, since the average in a path
+ * must take into account the time as well.
+ */
+class PathChartDataset(
+    data: List<PathPoint>,
+    xValue: (PathPoint) -> Double,
+    yValue: (PathPoint) -> Double
+): ChartDataset<PathPoint>(data, xValue, yValue) {
+    companion object {
+        val EMPTY: PathChartDataset = PathChartDataset(data = listOf(PathPoint.INIT), xValue = {0.0}, yValue = {0.0})
+    }
+    override val avgY: Double
+    init {
         var t = 0.0
         var p = 0.0
-        for (i in 0..path.size-2)
-            if (!path[i+1].end) {val dt = path[i+1].time-path[i].time; t+=dt; p+=dt*(yValue(path[i]) + yValue(path[i+1]))/2; }
+        for (i in 0..data.size-2)
+            if (!data[i+1].end) {val dt = data[i+1].time-data[i].time; t+=dt; p+=dt*(yValue(data[i]) + yValue(data[i+1]))/2; }
         if (t > 0.0) avgY = p/t
         else avgY = 0.0
     }
@@ -75,7 +90,7 @@ class PathChartDataset(
  * an mapping values to chart coordinates based on the value range, chartSize,
  * chartOffset and axes options.
  */
-class ChartConfig(val datasets: List<PathChartDataset>,
+class ChartConfig(val datasets: List<ChartDataset<*>>,
                   val axes: AxesOptions,
                   val chartSize: Size,
                   val chartOffset: Size
@@ -92,12 +107,20 @@ class ChartConfig(val datasets: List<PathChartDataset>,
         val minY = datasets.minOf { it.minY }
         val maxY = datasets.maxOf { it.maxY }
 
-        spanX = maxX - minX
-        val spanYData = maxY-minY
-        spanY = if (spanYData * axes.yExpandFactor < axes.ySpanMin) axes.ySpanMin else spanYData*axes.yExpandFactor
-        originX = minX
-        //Keeping y values positive
-        originY = if (minY - (spanY-spanYData)/2 < 0) 0.0 else minY - (spanY-spanYData)/2
+        val spanX = (maxX-minX)*axes.xExpandFactor
+        if (spanX < axes.xSpanMin) this.spanX = axes.xSpanMin
+        else this.spanX = spanX
+        val originX = minX - (spanX-(maxX-minX))/2
+        if (originX < 0.0) this.originX = 0.0
+        else this.originX = originX
+
+
+        val spanY = (maxY-minY)*axes.yExpandFactor
+        if (spanY < axes.ySpanMin) this.spanY = axes.ySpanMin
+        else this.spanY = spanY
+        val originY = minY - (spanY-(maxY-minY))/2
+        if (originY < 0.0) this.originY = 0.0
+        else this.originY = originY
     }
 
     /**
@@ -149,17 +172,22 @@ class ChartConfig(val datasets: List<PathChartDataset>,
     val chartBottomRight = Offset(chartOffset.width + chartSize.width, chartSize.height)
 }
 
+enum class ChartType {
+    LINE, SCATTER
+}
+
 /**
  * Options for a single dataset.
  */
-class PathChartOptions(
+class ChartOptions(
     val color: Color = Color.Black,
     val shade: Boolean = false,
     val width: Float = 3f,
     val markers: Boolean = false,
     val markerLabel: Formatter<Double>? = null,
     val markerLabelStyle: TextStyle = TextStyle.Default,
-    val show: Boolean = true
+    val show: Boolean = true,
+    val type: ChartType = ChartType.LINE
 )
 
 /**
@@ -177,40 +205,33 @@ data class AxesOptions(
     val labelStyle: TextStyle = TextStyle.Default,
     val xTickCount: Int = 0,
     val yTickCount: Int = 0,
+    val xExpandFactor: Double = 1.0,
+    val xSpanMin: Double = 0.0,
     val yExpandFactor: Double = 1.1,
-    val ySpanMin: Double = 3.0
+    val ySpanMin: Double = 3.0,
 )
 
 @Composable
-private fun PathChartLine(data: PathChartDataset,
-                          options: PathChartOptions,
-                          chartConfig: ChartConfig,
-                          touchPositionState: State<Offset>
+private fun PathChartLine(dataset: PathChartDataset,
+                         options: ChartOptions,
+                         chartConfig: ChartConfig,
+                         touchPositionState: State<Offset>,
+                          bounds: Path
                   ) {
     if (!options.show) return
-    if (data.path.size < 2) return
     val textMeasurer = rememberTextMeasurer()
     val chartOrigin = chartConfig.chartOrigin
-    val bounds = remember(chartConfig) {
-        Path().apply {
-            moveTo(chartConfig.chartTopLeft.x, chartConfig.chartTopLeft.y)
-            lineTo(chartConfig.chartTopRight.x, chartConfig.chartTopRight.y)
-            lineTo(chartConfig.chartBottomRight.x, chartConfig.chartBottomRight.y)
-            lineTo(chartConfig.chartOrigin.x, chartConfig.chartOrigin.y)
-            close()
-        }
-    }
     Canvas(modifier = Modifier.fillMaxSize()) {
         clipPath(
             path = bounds,
             clipOp = ClipOp.Intersect
         ) {
-            for (i in 0..data.path.size - 2) {
-                if (!data.path[i].end) {
-                    val startX = data.xValue(data.path[i])
-                    val startY = data.yValue(data.path[i])
-                    val endX = data.xValue(data.path[i + 1])
-                    val endY = data.yValue(data.path[i + 1])
+            for (i in 0..dataset.data.size - 2) {
+                if (!dataset.data[i].end) {
+                    val startX = dataset.xValue(dataset.data[i])
+                    val startY = dataset.yValue(dataset.data[i])
+                    val endX = dataset.xValue(dataset.data[i + 1])
+                    val endY = dataset.yValue(dataset.data[i + 1])
                     val start = chartConfig.map(startX, startY)
                     val end = chartConfig.map(endX, endY)
                     if (options.shade) {
@@ -225,7 +246,7 @@ private fun PathChartLine(data: PathChartDataset,
                             path = path,
                             brush = Brush.verticalGradient(
                                 colors = listOf(
-                                    options.color.copy(alpha = 0.8f),
+                                    options.color.copy(alpha = 0.7f),
                                     options.color.copy(alpha = 0f)
                                 )
                             )
@@ -244,10 +265,10 @@ private fun PathChartLine(data: PathChartDataset,
         if (options.markers && touchPositionState.value != Offset.Zero) {
             val touch = touchPositionState.value
             val point =
-                binarySearch(data.path, { chartConfig.mapX(data.xValue(it)) }, touch.x)
+                binarySearch(dataset.data, { chartConfig.mapX(dataset.xValue(it)) }, touch.x)
             if (point == null) return@Canvas
-            val selectedX = data.xValue(point)
-            val selectedY = data.yValue(point)
+            val selectedX = dataset.xValue(point)
+            val selectedY = dataset.yValue(point)
             val selected = chartConfig.map(selectedX, selectedY)
             drawLine(
                 color = options.color,
@@ -272,11 +293,77 @@ private fun PathChartLine(data: PathChartDataset,
         }
     }
 }
+
 @Composable
-fun PathChart(datasets: List<PathChartDataset>,
-              options: List<PathChartOptions>,
-              axesOptions: AxesOptions,
-              modifier: Modifier = Modifier) {
+private fun <T> ScatterChart(dataset: ChartDataset<T>,
+                             options: ChartOptions,
+                             chartConfig: ChartConfig,
+                             touchPositionState: State<Offset>,
+                             bounds: Path
+) {
+    if (!options.show) return
+    val textMeasurer = rememberTextMeasurer()
+    val chartOrigin = chartConfig.chartOrigin
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        clipPath(
+            path = bounds,
+            clipOp = ClipOp.Intersect
+        ) {
+            for (i in 0..dataset.data.size - 1) {
+                val startX = dataset.xValue(dataset.data[i])
+                val startY = dataset.yValue(dataset.data[i])
+                val start = chartConfig.map(startX, startY)
+                drawCircle(
+                    color = options.color,
+                    radius = options.width,
+                    center = start
+                )
+            }
+
+            if (options.markers && touchPositionState.value != Offset.Zero) {
+                val touch = touchPositionState.value
+                val point =
+                    binarySearch(dataset.data, { chartConfig.mapX(dataset.xValue(it)) }, touch.x)
+                if (point == null) return@Canvas
+                val selectedX = dataset.xValue(point)
+                val selectedY = dataset.yValue(point)
+                val selected = chartConfig.map(selectedX, selectedY)
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(options.color, options.color.copy(alpha = 0.3f)),
+                        center = selected,
+                        radius = options.width * 2
+                    ),
+                    radius = options.width * 3,
+                    center = selected
+                )
+
+                if (options.markerLabel != null) {
+                    val label = options.markerLabel.format(selectedY).join()
+                    val text = textMeasurer.measure(label, options.markerLabelStyle)
+                    val topLeftText = Offset(
+                        selected.x - text.size.width / 2,
+                        selected.y - text.size.height - options.width * 4
+                    )
+                    val pad = 10f
+                    val topLeftRect = Offset(topLeftText.x - pad, topLeftText.y - pad)
+                    drawRoundRect(
+                        color = options.color.lightness(0.8f),
+                        topLeft = topLeftRect,
+                        size = Size(text.size.width + 2 * pad, text.size.height + 2 * pad),
+                        cornerRadius = CornerRadius(pad, pad)
+                    )
+                    drawText(text, topLeft = topLeftText)
+                }
+            }
+        }
+    }
+}
+@Composable
+fun Chart(datasets: List<ChartDataset<*>>,
+          options: List<ChartOptions>,
+          axesOptions: AxesOptions,
+          modifier: Modifier = Modifier) {
 
     var size by remember {
         mutableStateOf(Size(0f, 0f))
@@ -352,16 +439,33 @@ fun PathChart(datasets: List<PathChartDataset>,
                 }
             }
         }
-
+        val bounds = remember(chartConfig) {
+            Path().apply {
+                moveTo(chartConfig.chartTopLeft.x, chartConfig.chartTopLeft.y)
+                lineTo(chartConfig.chartTopRight.x, chartConfig.chartTopRight.y)
+                lineTo(chartConfig.chartBottomRight.x, chartConfig.chartBottomRight.y)
+                lineTo(chartConfig.chartOrigin.x, chartConfig.chartOrigin.y)
+                close()
+            }
+        }
         //Draw the lines
         //for (i in datasets.size - 1 downTo 0) {
         for (i in 0 .. datasets.size - 1) {
-            PathChartLine(
-                data = datasets[i],
+            if (options[i].type == ChartType.SCATTER) ScatterChart(
+                dataset = datasets[i],
                 options = options[i],
                 chartConfig = chartConfig,
-                touchPositionState = touchPosition
+                touchPositionState = touchPosition,
+                bounds = bounds
             )
+            else PathChartLine(
+                dataset = datasets[i] as PathChartDataset,
+                options = options[i],
+                chartConfig = chartConfig,
+                touchPositionState = touchPosition,
+                bounds = bounds
+            )
+
         }
     }
 }

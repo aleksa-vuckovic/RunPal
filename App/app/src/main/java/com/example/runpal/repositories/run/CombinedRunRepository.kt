@@ -127,7 +127,7 @@ class CombinedRunRepository @Inject constructor(
                     throw e
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    Toast.makeText(context, "No internet connection.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show()
                     throw e
                 }
             }
@@ -141,7 +141,7 @@ class CombinedRunRepository @Inject constructor(
                 throw e
             } catch (e: Exception) {
                 e.printStackTrace()
-                Toast.makeText(context, "No internet connection.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show()
                 throw e
             }
         }
@@ -156,8 +156,21 @@ class CombinedRunRepository @Inject constructor(
         }
         catch(e: Exception) {
             e.printStackTrace()
-            Toast.makeText(context, "No internet.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show()
         }
         return localRunRepository.getRuns(until, limit)
+    }
+
+    override suspend fun getRunsSince(since: Long): List<RunData> {
+        try {
+            return serverRunRepository.getRunsSince(since)
+        } catch(e: ServerException) {
+            e.printStackTrace()
+        }
+        catch(e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, context.getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show()
+        }
+        return localRunRepository.getRunsSince(since)
     }
 }
