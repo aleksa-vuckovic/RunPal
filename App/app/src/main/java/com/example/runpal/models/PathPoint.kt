@@ -51,8 +51,15 @@ data class PathPoint(
         /**
          * Used as the initial location in a run state.
          * (No location data, and zero distance,sped,kcal).
+         * NOTE: The location data in an init path point is invalid, HOWEVER the distance and kcal data are.
          */
         val INIT = PathPoint()
+
+        /**
+         * Use when recovering a run state, so the path point does represent an unknown location,
+         * but still holds the accumulated run data.
+         */
+        fun init(distance: Double, kcal: Double) = PathPoint(distance = distance, kcal = kcal)
     }
     fun isInit(): Boolean = time == 0L
 

@@ -241,7 +241,15 @@ fun StandardBadge(text: String, type: BadgeType = BadgeType.INFO, fontSize: Text
 }
 
 @Composable
-fun StandardDialog(text: String, onDismiss: () -> Unit, onOk: () -> Unit, modifier: Modifier = Modifier) {
+fun StandardDialog(
+    text: String,
+    onDismiss: () -> Unit,
+    onYes: () -> Unit,
+    onNo: (() -> Unit)? = null,
+    yesText: String = "OK",
+    noText: String? = null,
+    modifier: Modifier = Modifier
+) {
     Box(modifier = Modifier
         .fillMaxSize()
         .background(color = TransparentWhite),
@@ -251,12 +259,12 @@ fun StandardDialog(text: String, onDismiss: () -> Unit, onOk: () -> Unit, modifi
                 modifier = modifier
                     .width(300.dp)
                     .height(200.dp)
-                    .clip(shape = RoundedCornerShape(5.dp))
+                    .clip(shape = RoundedCornerShape(10.dp))
                     .background(color = MaterialTheme.colorScheme.background)
                     .border(
                         width = 1.dp,
                         color = MaterialTheme.colorScheme.onBackground,
-                        shape = RoundedCornerShape(2.dp)
+                        shape = RoundedCornerShape(10.dp)
                     )
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -266,9 +274,18 @@ fun StandardDialog(text: String, onDismiss: () -> Unit, onOk: () -> Unit, modifi
                     text = text,
                     textAlign = TextAlign.Center
                 )
-                StandardButton(onClick = onOk) {
-                    Text(text = stringResource(id = R.string.ok))
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (onNo != null) StandardButton(onClick = onNo) {
+                        Text(text = noText ?: "")
+                    }
+                    StandardButton(onClick = onYes) {
+                        Text(text = yesText)
+                    }
                 }
+
             }
         }
     }

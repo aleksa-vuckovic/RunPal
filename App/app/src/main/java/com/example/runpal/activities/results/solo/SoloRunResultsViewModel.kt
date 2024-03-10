@@ -14,7 +14,7 @@ import com.example.runpal.repositories.LoginManager
 import com.example.runpal.repositories.run.CombinedRunRepository
 import com.example.runpal.repositories.user.CombinedUserRepository
 import com.example.runpal.tryRepeat
-import com.example.runpal.ui.PathChartDataset
+import com.example.runpal.PathChartDataset
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext

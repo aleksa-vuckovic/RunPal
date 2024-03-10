@@ -21,4 +21,7 @@ interface PathDao {
     @Query("delete from path")
     suspend fun deleteAll()
 
+    @Query("delete from path where user = :user and runId = :runId")
+    suspend fun deleteAllForRun(user: String, runId: Long)
+
 }

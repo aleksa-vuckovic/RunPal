@@ -86,7 +86,23 @@ export class RunController {
         }
         let ret = await DB.getRunsSince(req.jwt.email, since)
         res.json({message: "ok", data: ret})
+        return 
     }
 
+    unfinished = async(req: express.Request, res: express.Response) => {
+        let ret = await DB.unfinishedRun(req.jwt.email)
+        res.json({message: "ok", data: ret})
+        return 
+    }
+
+    delete = async(req: express.Request, res: express.Response) => {
+        let runId = parseInt(req.params.id)
+        if (isNaN(runId)) {
+            res.json({message: "Invalid run id."})
+            return
+        }
+        let ret = await DB.deleteRun(req.jwt.email, runId)
+        res.json({message: ret})
+    }
 
 }

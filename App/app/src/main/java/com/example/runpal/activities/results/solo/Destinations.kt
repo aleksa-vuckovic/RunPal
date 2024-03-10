@@ -12,8 +12,8 @@ object ChartsDestination: Destination {
     override val argsRoute: String = "charts"
     override val baseRoute: String = "charts"
     override val icon: ImageVector = Icons.Default.AreaChart
-    override val label: Int = R.string.distance
-    override val title: Int = R.string.distance
+    override val label: Int = R.string.details
+    override val title: Int = R.string.details
 }
 
 object ResultsDestination: Destination {

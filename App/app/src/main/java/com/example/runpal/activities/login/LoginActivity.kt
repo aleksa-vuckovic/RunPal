@@ -2,6 +2,7 @@ package com.example.runpal.activities.login
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,11 +16,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.runpal.R
 import com.example.runpal.ServerException
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.activities.home.HomeActivity
@@ -81,11 +84,14 @@ class LoginActivity : ComponentActivity() {
                                         } catch (e: ServerException) {
                                             error = e.message ?: ""
                                         } catch (e: Exception) {
+                                            Toast.makeText(this@LoginActivity, this@LoginActivity.getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show()
                                             e.printStackTrace()
                                         }
                                     }
                                 }, errorMessage = error,
-                                    modifier = Modifier.fillMaxSize().padding(20.dp))
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(20.dp))
                             }
                             composable(route = RegisterDestination.argsRoute) {
                                 var error by remember {

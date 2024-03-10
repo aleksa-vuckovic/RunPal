@@ -40,10 +40,10 @@ import com.example.runpal.activities.running.PanelText
 import com.example.runpal.borderBottom
 import com.example.runpal.models.RunData
 import com.example.runpal.models.User
-import com.example.runpal.ui.AxesOptions
-import com.example.runpal.ui.Chart
-import com.example.runpal.ui.PathChartDataset
-import com.example.runpal.ui.ChartOptions
+import com.example.runpal.AxesOptions
+import com.example.runpal.Chart
+import com.example.runpal.PathChartDataset
+import com.example.runpal.ChartOptions
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState

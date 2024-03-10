@@ -16,7 +16,8 @@ class App: Application() {
 
     override fun onCreate() {
         super.onCreate()
-        MapsInitializer.initialize(applicationContext)
+        //MapsInitializer.initialize(applicationContext)
+        MapsInitializer.initialize(applicationContext, MapsInitializer.Renderer.LATEST, {})
 
         val reminderIntent = Intent(this, EventReminderReceiver::class.java)
         reminderIntent.action = ACTION_DAILY_REMINDER

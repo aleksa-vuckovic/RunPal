@@ -38,6 +38,15 @@ export class DB {
         if (ret.modifiedCount > 0) return "ok"
         else return "Database error."
     }
+    private static runProjection = {
+        id: "$id",
+        user: "$user",
+        room: "$room",
+        event: "$event",
+        start: "$start",
+        running: "$running",
+        end: "$end"
+    }
     static async getRunUpdate(match: any, since: number): Promise<any> {
         let ret = await runModel.aggregate([
             {
@@ -46,15 +55,7 @@ export class DB {
             {
                 $project: {
                     _id: 0,
-                    run: {
-                        id: "$id",
-                        user: "$user",
-                        room: "$room",
-                        event: "$event",
-                        start: "$start",
-                        running: "$running",
-                        end: "$end"
-                    },
+                    run: DB.runProjection,
                     location: "$location",
                     path: {
                         $filter: {
@@ -197,15 +198,7 @@ export class DB {
             {
                 $project: {
                     _id: 0,
-                    run: {
-                        id: "$id",
-                        user: "$user",
-                        room: "$room",
-                        event: "$event",
-                        start: "$start",
-                        running: "$running",
-                        end: "$end"
-                    },
+                    run: DB.runProjection,
                     location: "$location",
                     path: []
                 }
@@ -232,15 +225,7 @@ export class DB {
             {
                 $project: {
                     _id: 0,
-                    run: {
-                        id: "$id",
-                        user: "$user",
-                        room: "$room",
-                        event: "$event",
-                        start: "$start",
-                        running: "$running",
-                        end: "$end"
-                    },
+                    run: DB.runProjection,
                     location: "$location",
                     path: []
                 }
@@ -250,6 +235,39 @@ export class DB {
             }
         ])
         return ret
+    }
+
+    static async unfinishedRun(user: string): Promise<any> {
+        let ret = await runModel.aggregate([
+            {
+                $match: {
+                    user: user,
+                    end: {$eq: null}
+                }
+            },
+            {
+                $sort: {"start": -1}
+            },
+            {
+                $limit: 1
+            },
+            {
+                $project: {
+                    _id: 0,
+                    run: DB.runProjection,
+                    location: "$location",
+                    path: []
+                }
+            }
+        ])
+        if (ret.length > 0) return ret[0]
+        else return null
+    }
+
+
+    static async deleteRun(user: String, runId: number): Promise<string> {
+        let ret = await runModel.deleteOne({user: user, id: runId})
+        return "ok"
     }
 
     static async eventRanking(eventID: string): Promise<Array<any>> {

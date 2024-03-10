@@ -34,7 +34,7 @@ import com.example.runpal.activities.results.PathChartAndPanel
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.repositories.SettingsManager
 import com.example.runpal.restartApp
-import com.example.runpal.ui.AxesOptions
+import com.example.runpal.AxesOptions
 import com.example.runpal.ui.theme.RunPalTheme
 import com.example.runpal.ui.theme.StandardNavBar
 import com.example.runpal.ui.theme.StandardTopBar

@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -87,11 +86,11 @@ import com.example.runpal.models.PathPoint
 import com.example.runpal.models.Run
 import com.example.runpal.models.RunData
 import com.example.runpal.risingLongAsState
-import com.example.runpal.ui.AxesOptions
-import com.example.runpal.ui.Chart
-import com.example.runpal.ui.ChartDataset
-import com.example.runpal.ui.ChartOptions
-import com.example.runpal.ui.ChartType
+import com.example.runpal.AxesOptions
+import com.example.runpal.Chart
+import com.example.runpal.ChartDataset
+import com.example.runpal.ChartOptions
+import com.example.runpal.ChartType
 import com.example.runpal.ui.theme.BadgeType
 import com.example.runpal.ui.theme.LightGreen
 import com.example.runpal.ui.theme.MediumBlue

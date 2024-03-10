@@ -21,6 +21,7 @@ class LocalRunRepository @Inject constructor (
     RunRepository {
     override suspend fun create(run: Run) {
         runDao.insert(run)
+        pathDao.insert(PathPoint.INIT.toPath(run.user, run.id))
     }
 
     override suspend fun update(runData: RunData) {
@@ -46,7 +47,7 @@ class LocalRunRepository @Inject constructor (
         if (run == null) throw NotFound("Run not found in local database.")
 
         val path = pathDao.get(run.user, run.id, since).map { it.toPathPoint() }
-        val ret = RunData(run = run, path = path)
+        val ret = RunData(run = run, path = path, location = path.lastOrNull() ?: PathPoint.INIT)
         return ret
     }
 
@@ -72,5 +73,16 @@ class LocalRunRepository @Inject constructor (
             else ret.add(RunData(run = run, location = loc.toPathPoint()))
         }
         return ret
+    }
+
+    override suspend fun unfinished(): RunData? {
+        val user = loginManager.currentUser()!!
+        val run = runDao.unfinished(user) ?: return null
+        val loc = pathDao.last(user, run.id)
+        return RunData(run = run, location = loc!!.toPathPoint())
+    }
+
+    override suspend fun delete(runId: Long) {
+        runDao.delete(loginManager.currentUser()!!, runId)
     }
 }

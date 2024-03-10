@@ -43,4 +43,15 @@ class ServerRunRepository @Inject constructor(private val runApi: RunApi): RunRe
         else return response.data!!
     }
 
+    override suspend fun unfinished(): RunData? {
+        val response = runApi.unfinished()
+        if (response.message != "ok") throw ServerException(response.message)
+        else return response.data!!
+    }
+
+    override suspend fun delete(runId: Long) {
+        val response = runApi.delete(runId)
+        if (response.message != "ok") throw ServerException(response.message)
+    }
+
 }

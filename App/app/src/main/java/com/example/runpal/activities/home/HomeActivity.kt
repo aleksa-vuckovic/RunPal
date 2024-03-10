@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -33,6 +33,7 @@ import com.example.runpal.EVENT_DEEP_LINK_URI
 import com.example.runpal.EVENT_ID_KEY
 import com.example.runpal.ErrorScreen
 import com.example.runpal.LoadingScreen
+import com.example.runpal.LocalDateTimeFormatter
 import com.example.runpal.ROOM_ID_KEY
 import com.example.runpal.RUN_ID_KEY
 import com.example.runpal.activities.account.AccountActivity
@@ -55,6 +56,11 @@ import com.example.runpal.ui.theme.StandardTopBar
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.example.runpal.R
+import com.example.runpal.activities.running.group.GroupRunActivity
+import com.example.runpal.join
+import com.example.runpal.models.RunData
+import com.example.runpal.repositories.run.CombinedRunRepository
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
@@ -67,6 +73,8 @@ class HomeActivity : ComponentActivity() {
     lateinit var loginManager: LoginManager
     @Inject
     lateinit var settingsManager: SettingsManager
+    @Inject
+    lateinit var runRepository: CombinedRunRepository
 
     var startIntent: Intent? = null
     val locLauncher =  registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
@@ -75,20 +83,18 @@ class HomeActivity : ComponentActivity() {
     val notifLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted -> }
 
     var refresh by mutableStateOf(false)
+    var unfinished by mutableStateOf<RunData?>(null)
 
     @SuppressLint("InlinedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val units = settingsManager.units
-
         if (!this.hasNotificationPermission()) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-/*
-        val intent = Intent(this, GroupRunResultsActivity::class.java)
-        intent.putExtra(ROOM_ID_KEY, "65e9fb296b3027751da74aca")
-        startActivity(intent)
 
- */
+        lifecycleScope.launch {
+            unfinished = runRepository.unfinished()
+        }
 
         setContent {
             RunPalTheme {
@@ -207,7 +213,7 @@ class HomeActivity : ComponentActivity() {
                                         StandardDialog(
                                             text = stringResource(id = R.string.your_event_is_public),
                                             onDismiss = { navController.popBackStack() },
-                                            onOk = {navController.popBackStack()})
+                                            onYes = {navController.popBackStack()})
                                     }
                                 }
                                 
@@ -242,6 +248,34 @@ class HomeActivity : ComponentActivity() {
                                 )
                             }
                         }
+                    }
+                    if (unfinished != null) {
+                        StandardDialog(
+                            text = "Do you want to continue the run (${
+                                units.distanceFormatter.format(
+                                    unfinished!!.location.distance
+                                ).join()
+                            })" +
+                                    " started at ${LocalDateTimeFormatter.format(unfinished!!.run.start!!).join()}?",
+                            onDismiss = {
+                                val run = unfinished!!.run
+                                unfinished = null
+                                lifecycleScope.launch { runRepository.delete(run.id); }
+                            }, onYes = {
+                                val intent: Intent
+                                val run = unfinished!!.run
+                                unfinished = null
+                                if (run.room != null) intent = Intent(this@HomeActivity, GroupRunActivity::class.java).apply { putExtra(ROOM_ID_KEY, run.room) }
+                                else if (run.event != null) intent = Intent(this@HomeActivity, EventRunActivity::class.java).apply { putExtra(EVENT_ID_KEY, run.event)}
+                                else intent = Intent(this@HomeActivity, SoloRunActivity::class.java).apply { putExtra(RUN_ID_KEY, run.id) }
+                                startActivity(intent)
+                            }, onNo = {
+                                val run = unfinished!!.run
+                                unfinished = null
+                                lifecycleScope.launch { runRepository.delete(run.id); }
+                            },
+                            yesText = "Yes",
+                            noText = "No")
                     }
                 }
             }

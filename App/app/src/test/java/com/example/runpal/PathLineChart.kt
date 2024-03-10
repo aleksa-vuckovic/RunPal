@@ -10,10 +10,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.runpal.models.PathPoint
-import com.example.runpal.ui.AxesOptions
-import com.example.runpal.ui.Chart
-import com.example.runpal.ui.PathChartDataset
-import com.example.runpal.ui.ChartOptions
 import com.example.runpal.ui.theme.MediumBlue
 import com.example.runpal.ui.theme.Pink
 

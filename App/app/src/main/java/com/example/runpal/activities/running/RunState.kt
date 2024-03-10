@@ -2,6 +2,7 @@ package com.example.runpal.activities.running
 
 import android.content.Context
 import android.location.Location
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -12,6 +13,7 @@ import com.example.runpal.kcalExpenditure
 import com.example.runpal.models.Run
 import com.example.runpal.models.RunData
 import com.example.runpal.models.toPathPoint
+import com.example.runpal.repositories.run.CombinedRunRepository
 import com.example.runpal.repositories.run.RunRepository
 import com.example.runpal.repositories.user.UserRepository
 import dagger.assisted.Assisted
@@ -49,7 +51,7 @@ interface RunState {
 class LocalRunState @AssistedInject constructor (@Assisted run: Run,
                                                  @Assisted private val scope: CoroutineScope,
                                                  @Assisted updateInterval: Long,
-                                                 private val runRepository: RunRepository,
+                                                 private val runRepository: CombinedRunRepository,
                                                  private val userRepository: UserRepository
 ): RunState {
     private val _run = mutableStateOf(Run.LOADING)
@@ -69,7 +71,9 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
                     room = run.room,
                     event = run.event
                 )
+                Log.d("GOT EXISTING UPDATE", "Location distance = " + existingData.location.distance.toString() + " , time = " + existingData.location.time.toString())
                 _run.value = existingData.run
+                _location.value = PathPoint.init(distance = existingData.location.distance, kcal = existingData.location.kcal)
                 _path.addAll(existingData.path)
                 pause()
             } catch(e: Exception) {
@@ -116,9 +120,9 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
         val runUpdate = RunData(run = _run.value, location = cur)
 
         val prev = _location.value
+        cur.distance = prev.distance
+        cur.kcal = prev.kcal
         if (!prev.isInit()) {
-            cur.distance = prev.distance
-            cur.kcal = prev.kcal
             val distanceDifference = prev.distance(cur)
             val timeDifference = (cur.time - prev.time) / 1000
             cur.speed = if (timeDifference != 0L) distanceDifference / timeDifference else prev.speed
@@ -129,9 +133,11 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
                 val slope = if (distanceDifference != 0.0) (cur.altitude - prev.altitude)/distanceDifference else 0.0
                 val expenditure = kcalExpenditure(cur.speed, slope, userWeight)
                 cur.kcal += expenditure*timeDifference
-                _path.add(cur)
-                runUpdate.path = listOf(cur)
             }
+        }
+        if (_run.value.state == Run.State.RUNNING) {
+            _path.add(cur)
+            runUpdate.path = listOf(cur)
         }
         _location.value = cur
         if (_run.value.state != Run.State.READY
@@ -167,9 +173,11 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
         segmentEndUpdate()
     }
     private fun segmentEndUpdate() {
-        _location.value = _location.value.copy(end = true, time = _location.value.time + 1)
-        _path.add(_location.value)
-        val runUpdate = RunData(run = _run.value, path = listOf(_location.value))
+        val last = _path.lastOrNull()
+        if (last == null || last.end) return
+        val fakeend = last.copy(end = true, time = last.time + 1)
+        _path.add(fakeend)
+        val runUpdate = RunData(run = _run.value, location = _location.value, path = listOf(fakeend))
         scope.launch {
             runRepository.update(runUpdate)
         }

@@ -5,6 +5,7 @@ import com.example.runpal.models.RunData
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface RunApi {
@@ -23,4 +24,9 @@ interface RunApi {
     @GET("run/since")
     suspend fun getSince(@Query("since") since: Long): GenericResponse<List<RunData>>
 
+    @GET("run/unfinished")
+    suspend fun unfinished(): GenericResponse<RunData>
+
+    @GET("run/delete/{id}")
+    suspend fun delete(@Path("id") id: Long): GenericResponse<Unit>
 }

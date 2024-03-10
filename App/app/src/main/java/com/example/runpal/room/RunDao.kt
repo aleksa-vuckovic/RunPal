@@ -32,7 +32,13 @@ interface RunDao {
     @Query("select * from runs where user = :user and `end` is not null and start >= :since order by start asc")
     suspend fun allSince(user: String, since: Long): List<Run>
 
+    @Query("select * from runs where user = :user and `end` is null order by start desc")
+    suspend fun unfinished(user: String): Run?
+
     @Query("delete from runs")
     suspend fun deleteAll()
+
+    @Query("delete from runs where user = :user and id = :runId")
+    suspend fun delete(user: String, runId: Long)
 
 }

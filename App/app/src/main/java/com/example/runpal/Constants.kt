@@ -23,6 +23,7 @@ const val EVENT_ID_KEY: String = "EVENT_ID"
 //const val SERVER_ADDRESS = "http://127.0.0.1:4000/"
 //const val SERVER_ADDRESS = "http://10.174.9.184:4000/"
 const val SERVER_ADDRESS = "http://192.168.0.7:4000/"
+//const val SERVER_ADDRESS = "http://192.168.43.89:4000/"
 
 const val ACTION_DAILY_REMINDER = "com.example.runpal.ACTION_DAILY_REMINDER"
 const val ACTION_CURRENT_REMINDER = "com.example.runpal.ACTION_CURRENT_REMINDER"

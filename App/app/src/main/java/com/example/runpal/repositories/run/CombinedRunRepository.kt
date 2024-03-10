@@ -1,6 +1,7 @@
 package com.example.runpal.repositories.run
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import com.example.runpal.NotFound
 import com.example.runpal.R
@@ -116,9 +117,11 @@ class CombinedRunRepository @Inject constructor(
             try {
                 return localRunRepository.getUpdate(user, id, room, event, since)
             } catch (e: NotFound) {
+                Log.d("NOT FOUND", "Run not found in local rep. Serching server.")
                 //The run must be from a different device, so synchronize.
                 try {
                     val ret = serverRunRepository.getUpdate(user, id, room, event, since)
+                    Log.d("FOUND", "Found run in server rep. distance = " + ret.location.distance.toString())
                     localRunRepository.create(ret.run)
                     localRunRepository.update(ret)
                     return ret
@@ -172,5 +175,21 @@ class CombinedRunRepository @Inject constructor(
             Toast.makeText(context, context.getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show()
         }
         return localRunRepository.getRunsSince(since)
+    }
+
+    override suspend fun delete(runId: Long) {
+        try {
+            serverRunRepository.delete(runId)
+        } catch(_: Exception) {}
+        localRunRepository.delete(runId)
+    }
+
+    override suspend fun unfinished(): RunData? {
+        var ret: RunData? = null
+        try {
+            ret = serverRunRepository.unfinished()
+        } catch(_: Exception) {}
+        if (ret != null) return ret
+        return localRunRepository.unfinished()
     }
 }

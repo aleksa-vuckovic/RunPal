@@ -1,4 +1,4 @@
-package com.example.runpal.ui
+package com.example.runpal
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -28,12 +28,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.toSize
-import com.example.runpal.EmptyFormatter
-import com.example.runpal.Formatter
-import com.example.runpal.binarySearch
 import com.example.runpal.models.PathPoint
-import com.example.runpal.join
-import com.example.runpal.lightness
 
 
 /**
@@ -213,9 +208,9 @@ data class AxesOptions(
 
 @Composable
 private fun PathChartLine(dataset: PathChartDataset,
-                         options: ChartOptions,
-                         chartConfig: ChartConfig,
-                         touchPositionState: State<Offset>,
+                          options: ChartOptions,
+                          chartConfig: ChartConfig,
+                          touchPositionState: State<Offset>,
                           bounds: Path
                   ) {
     if (!options.show) return

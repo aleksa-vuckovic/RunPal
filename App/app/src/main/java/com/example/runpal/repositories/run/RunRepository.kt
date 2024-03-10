@@ -52,4 +52,15 @@ interface RunRepository {
      * @param since The UNIX timestamp which is the start of the target interval.
      */
     suspend fun getRunsSince(since: Long): List<RunData>
+
+    /**
+     * Returns the most recent unfinished run for the current user, if it exists.
+     * The path is empty.
+     */
+    suspend fun unfinished(): RunData?
+
+    /**
+     * Delete run with given ID.
+     */
+    suspend fun delete(runId: Long)
 }
