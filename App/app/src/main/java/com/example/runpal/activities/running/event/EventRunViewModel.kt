@@ -86,7 +86,7 @@ class EventRunViewModel @Inject constructor(
                 _state.value = State.FAILED
                 return@launch
             } catch(e: Exception) {
-                Toast.makeText(context, "Check your internet connection and rejoin.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.resources.getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show()
                 _state.value = State.FAILED
                 return@launch
             }

@@ -29,8 +29,8 @@ interface Destination {
     val argsRoute: String
     val baseRoute: String
     val icon: ImageVector?
-    val label: String?
-    val title: String?
+    val label: Int?
+    val title: Int?
 }
 
 /**

@@ -61,6 +61,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -121,7 +122,7 @@ fun MenuScreen(onSoloRun: () -> Unit, onGroupRun: () -> Unit, onEvent: () -> Uni
     ) {
         HomeButton(
             icon = Icons.AutoMirrored.Filled.DirectionsRun,
-            text = "Solo run",
+            text = stringResource(id = R.string.solo_run),
             onClick = onSoloRun,
             modifier = Modifier
                 .fillMaxWidth()
@@ -129,7 +130,7 @@ fun MenuScreen(onSoloRun: () -> Unit, onGroupRun: () -> Unit, onEvent: () -> Uni
         )
         HomeButton(
             icon = Icons.Default.Groups,
-            text = "Group run",
+            text = stringResource(id = R.string.group_run),
             onClick = onGroupRun,
             modifier = Modifier
                 .fillMaxWidth()
@@ -137,7 +138,7 @@ fun MenuScreen(onSoloRun: () -> Unit, onGroupRun: () -> Unit, onEvent: () -> Uni
         )
         HomeButton(
             icon = Icons.Default.SportsScore,
-            text = "Event",
+            text = stringResource(id = R.string.event),
             onClick = onEvent,
             modifier = Modifier
                 .fillMaxWidth()
@@ -186,7 +187,7 @@ fun EventsRow(events: List<Event>, onClick: (Event) -> Unit, modifier: Modifier 
             .fillMaxWidth()
             .background(color = MaterialTheme.colorScheme.primaryContainer),
     ) {
-        Text(text = "Events you follow",
+        Text(text = stringResource(id = R.string.events_you_follow),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onPrimaryContainer,
             modifier = Modifier.padding(10.dp))
@@ -200,7 +201,7 @@ fun EventsRow(events: List<Event>, onClick: (Event) -> Unit, modifier: Modifier 
             for (event in events) {
                 SmallEventCard(event = event, onClick = {onClick(event)})
             }
-            if (events.size == 0) Text(text = "Nothing to show... Events you follow will appear here.",
+            if (events.size == 0) Text(text = stringResource(id = R.string.no_events_to_show),
                 modifier = Modifier.padding(10.dp))
         }
     }
@@ -270,10 +271,10 @@ fun EventsScreen(followedEvents: List<Event>,
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text(text = "Create an event")
+                Text(text = stringResource(id = R.string.create_event))
                 Icon(
                     imageVector = Icons.Default.Create,
-                    contentDescription = "Create event"
+                    contentDescription = stringResource(id = R.string.create_event)
                 )
             }
         }
@@ -284,12 +285,12 @@ fun EventsScreen(followedEvents: List<Event>,
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Search"
+                        contentDescription = stringResource(id = R.string.search)
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
-                    Text(text = "Search for upcoming events...")
+                    Text(text = stringResource(id = R.string.search_upcoming_events))
                 }
             )
         }
@@ -350,14 +351,14 @@ fun CreateEventScreen(onCreate: (String, String, Long?, Double, Uri?) -> Unit,
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Name", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.event_name), style = style, modifier = Modifier.weight(0.3f))
             StandardTextField(value = name, onChange = {name = it}, modifier = Modifier.weight(0.7f))
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Description", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.description), style = style, modifier = Modifier.weight(0.3f))
             StandardTextField(value = description,
                 onChange = {description = it},
                 minLines = 4,
@@ -368,7 +369,7 @@ fun CreateEventScreen(onCreate: (String, String, Long?, Double, Uri?) -> Unit,
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Distance", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.distance), style = style, modifier = Modifier.weight(0.3f))
             Row(modifier = Modifier.weight(0.7f),
                 horizontalArrangement = Arrangement.End) {
                 DoubleInput(initial = distance, onChange = {distance = it}, modifier = Modifier.width(150.dp))
@@ -389,7 +390,7 @@ fun CreateEventScreen(onCreate: (String, String, Long?, Double, Uri?) -> Unit,
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Date and time (UTC)", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.date_and_time_utc), style = style, modifier = Modifier.weight(0.3f))
             StandardTextField(
                 value = if (selectedTime()!= null) UTCDateTimeFormatter.format(selectedTime()!!).first else "Click to select",
                 onChange = {},
@@ -402,7 +403,7 @@ fun CreateEventScreen(onCreate: (String, String, Long?, Double, Uri?) -> Unit,
             onDismissRequest = { dateDialog = false },
             confirmButton = {
                 Button(onClick = {dateDialog = false; timeDialog = true}) {
-                    Text("Next")
+                    Text(stringResource(id = R.string.next))
                 }
             }) {
             DatePicker(state = date)
@@ -411,7 +412,7 @@ fun CreateEventScreen(onCreate: (String, String, Long?, Double, Uri?) -> Unit,
             onDismissRequest = { timeDialog = false },
             confirmButton = {
                 Button(onClick = { timeDialog = false }) {
-                    Text("OK")
+                    Text(stringResource(id = R.string.ok))
                 }
             },
             modifier = Modifier.padding(50.dp)) {
@@ -422,13 +423,13 @@ fun CreateEventScreen(onCreate: (String, String, Long?, Double, Uri?) -> Unit,
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Display image", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.event_image), style = style, modifier = Modifier.weight(0.3f))
             ImageSelector(input = image, onSelect = {image = it}, Modifier.size(200.dp))
         }
 
         StandardButton(onClick = { onCreate(name, description, selectedTime(), units.fromStandardDistanceInput(distance), image)})
         {
-            Text("Create")
+            Text(stringResource(id = R.string.create))
         }
         Text(text = errorMessage, style = style.copy(color = Color.Red))
     }
@@ -437,14 +438,14 @@ fun CreateEventScreen(onCreate: (String, String, Long?, Double, Uri?) -> Unit,
 @Composable
 fun EventStatus(event: Event, textColor: Color) {
     if (event.status == Event.Status.UPCOMING)
-        Text(text = "Starting in ${LongTimeFormatter.format(event.time - System.currentTimeMillis()).first}",
+        Text(text = stringResource(id = R.string.starting_in) + " " + LongTimeFormatter.format(event.time - System.currentTimeMillis()).first,
             style = MaterialTheme.typography.bodySmall,
             color = textColor)
     else if (event.status == Event.Status.CURRENT)
-        StandardBadge(text = "Happening now",
+        StandardBadge(text = stringResource(id = R.string.happening_now),
             type = BadgeType.SUCCESS
         )
-    else StandardBadge(text = "Past",
+    else StandardBadge(text = stringResource(id = R.string.past),
         type = BadgeType.DANGER
     )
 }
@@ -485,7 +486,7 @@ fun EventScreen(event: Event, onJoin: () -> Unit, onFollow: () -> Unit, onUnfoll
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     StandardBadge(text = event.followers.toString(), fontSize = 20.sp)
-                    Text(text = "followers", style = MaterialTheme.typography.labelMedium)
+                    Text(text = stringResource(id = R.string.of_followes), style = MaterialTheme.typography.labelMedium)
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 EventStatus(event = event, textColor = textColor)
@@ -515,7 +516,7 @@ fun EventScreen(event: Event, onJoin: () -> Unit, onFollow: () -> Unit, onUnfoll
                         colors = ButtonDefaults.elevatedButtonColors(
                             containerColor = LightGreen
                         )) {
-                        Text(text = "Join now!")
+                        Text(text = stringResource(id = R.string.join_now))
                     }
                 if (event.following)
                     ElevatedButton(onClick = onUnfollow,
@@ -523,14 +524,14 @@ fun EventScreen(event: Event, onJoin: () -> Unit, onFollow: () -> Unit, onUnfoll
                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
                             contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                         )) {
-                        Text(text = "Unfollow")
+                        Text(text = stringResource(id = R.string.unfollow))
                     }
                 else ElevatedButton(onClick = onFollow,
                     colors = ButtonDefaults.elevatedButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )) {
-                    Text(text = "Follow")
+                    Text(text = stringResource(id = R.string.follow))
                 }
             }
         }
@@ -556,8 +557,8 @@ fun RunInfo(runData: RunData, onClick: () -> Unit, units: Units, modifier: Modif
     ) {
         Text(text = DateOnlyFormatter.format(runData.run.start!!).first, style = MaterialTheme.typography.labelMedium)
         Spacer(modifier = Modifier.width(10.dp))
-        if (runData.run.room != null) StandardBadge(text = "group", type = BadgeType.INFO)
-        else if (runData.run.event != null) StandardBadge(text = "event", type = BadgeType.SUCCESS)
+        if (runData.run.room != null) StandardBadge(text = stringResource(id = R.string.group), type = BadgeType.INFO)
+        else if (runData.run.event != null) StandardBadge(text = stringResource(id = R.string.event_lowercase), type = BadgeType.SUCCESS)
         Spacer(modifier = Modifier.weight(1f))
         PanelText(text = TimeFormatter.format(runData.run.running), modifier = Modifier
             .padding(10.dp))
@@ -570,7 +571,8 @@ fun RunInfo(runData: RunData, onClick: () -> Unit, units: Units, modifier: Modif
 fun HistoryScreen(onClick: (Run) -> Unit, units: Units) {
     val vm: HistoryViewModel = hiltViewModel()
     LazyColumn(
-        modifier = Modifier.background(color = MaterialTheme.colorScheme.background)
+        modifier = Modifier
+            .background(color = MaterialTheme.colorScheme.background)
             .padding(20.dp),
         state = rememberLazyListState()
     ) {
@@ -613,8 +615,5 @@ fun PreviewHomeButton() {
                 .padding(20.dp)
                 .fillMaxWidth())
     }
-
-
-
     
 }

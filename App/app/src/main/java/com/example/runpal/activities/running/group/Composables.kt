@@ -48,6 +48,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -92,7 +93,7 @@ fun EntryScreen( onJoin: (String) -> Unit, onCreate: () -> Unit, modifier: Modif
         verticalArrangement = Arrangement.SpaceAround
     ) {
 
-        Text(text = "Paste the room ID here:",
+        Text(text = stringResource(id = R.string.paste_room_here),
             style = style,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth())
@@ -116,16 +117,16 @@ fun EntryScreen( onJoin: (String) -> Unit, onCreate: () -> Unit, modifier: Modif
                     contentColor = Color.Black
                 )
             ) {
-                Text(text = "Join")
+                Text(text = stringResource(id = R.string.join))
             }
         }
 
-        Text(text = "Or create and share the code with your friends:",
+        Text(text = stringResource(id = R.string.or_create_and_share),
             style = style,
             textAlign = TextAlign.Center)
 
         StandardButton(onClick = onCreate) {
-            Text(text = "Create")
+            Text(text = stringResource(id = R.string.create))
         }
     }
 }
@@ -151,7 +152,7 @@ fun LobbyScreen(room: Room,
             horizontalAlignment = Alignment.Start
         ) {
 
-            Text(text = "Copy and share the code:")
+            Text(text = stringResource(id = R.string.copy_and_share_code))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -167,7 +168,7 @@ fun LobbyScreen(room: Room,
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-            Text(text = "Members: ${room.members.size}/5")
+            Text(text = stringResource(id = R.string.members) + ": ${room.members.size}/5")
 
             Column(
                 modifier = Modifier
@@ -216,7 +217,7 @@ fun LobbyScreen(room: Room,
                         ) {
                             if (ready) Icon(
                                 imageVector = Icons.Default.CheckCircleOutline,
-                                contentDescription = "Ready",
+                                contentDescription = stringResource(id = R.string.ready),
                                 modifier = Modifier.size(50.dp)
                             )
                         }
@@ -242,7 +243,7 @@ fun LobbyScreen(room: Room,
                     .clickable { onLeave() }
                     .background(color = LightRed),
                     contentAlignment = Alignment.Center) {
-                    Text(text = "Leave", style = MaterialTheme.typography.labelMedium)
+                    Text(text = stringResource(id = R.string.leave), style = MaterialTheme.typography.labelMedium)
                 }
                 Box(modifier = Modifier
                     .fillMaxHeight()
@@ -251,10 +252,10 @@ fun LobbyScreen(room: Room,
                     .clickable { onReady() }
                     .background(color = LightGreen),
                     contentAlignment = Alignment.Center) {
-                    Text(text = "I'm ready", style = MaterialTheme.typography.labelMedium)
+                    Text(text = stringResource(id = R.string.im_ready), style = MaterialTheme.typography.labelMedium)
                 }
             }
-            else if (state == LobbyViewModel.State.READY) Text(text = "Waiting for other members...")
+            else if (state == LobbyViewModel.State.READY) Text(text = stringResource(id = R.string.waiting_for_others))
         }
     }
 }
@@ -346,9 +347,9 @@ fun UserRankingRow(runState: RunState,
                 .clip(shape = RoundedCornerShape(5.dp)),
             contentScale = ContentScale.Crop)
         Text(text = user.name, style = MaterialTheme.typography.titleSmall)
-        if (runState.run.state == Run.State.ENDED) StandardBadge(text = "finish", type = BadgeType.DANGER)
-        else if (runState.run.state == Run.State.PAUSED) StandardBadge(text = "pause", type = BadgeType.INFO)
-        else if (runState.run.state == Run.State.READY) StandardBadge(text = "start", type = BadgeType.SUCCESS)
+        if (runState.run.state == Run.State.ENDED) StandardBadge(text = stringResource(id = R.string.finish_lower), type = BadgeType.DANGER)
+        else if (runState.run.state == Run.State.PAUSED) StandardBadge(text = stringResource(id = R.string.pause_lower), type = BadgeType.INFO)
+        else if (runState.run.state == Run.State.READY) StandardBadge(text = stringResource(id = R.string.start_lower), type = BadgeType.SUCCESS)
         Spacer(modifier = Modifier.weight(1f))
         PanelText(text = if (pace) units.paceFormatter.format(runState.location.speed)
                         else units.speedFormatter.format(runState.location.speed),

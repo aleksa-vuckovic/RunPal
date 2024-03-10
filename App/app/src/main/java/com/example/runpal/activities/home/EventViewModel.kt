@@ -13,6 +13,7 @@ import com.example.runpal.ACTION_CURRENT_REMINDER
 import com.example.runpal.ACTION_DAILY_REMINDER
 import com.example.runpal.EVENT_ID_KEY
 import com.example.runpal.EventReminderReceiver
+import com.example.runpal.R
 import com.example.runpal.REMINDER_REQUEST_CODE
 import com.example.runpal.ServerException
 import com.example.runpal.models.Event
@@ -57,7 +58,7 @@ class EventViewModel @Inject constructor(
                 _state.value = State.LOADED
             } catch (e: Exception) {
                 e.printStackTrace()
-                Toast.makeText(context, "Check your internet connection.", Toast.LENGTH_SHORT)
+                Toast.makeText(context, context.resources.getString(R.string.no_internet_message), Toast.LENGTH_SHORT)
                 _state.value = State.ERROR
             }
         }
@@ -70,7 +71,7 @@ class EventViewModel @Inject constructor(
                 _event.value = _event.value.copy(following = true)
             } catch (_: ServerException) {}
             catch (e: Exception) {
-                Toast.makeText(context, "Check your internet connection.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.resources.getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show()
             }
 
             val till = _event.value.time - System.currentTimeMillis()
@@ -92,7 +93,7 @@ class EventViewModel @Inject constructor(
                 _event.value = _event.value.copy(following = false)
             } catch (_: ServerException) {}
             catch (e: Exception) {
-                Toast.makeText(context, "Check your internet connection.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.resources.getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show()
             }
         }
     }

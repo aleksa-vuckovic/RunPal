@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -16,9 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
@@ -26,8 +24,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.runpal.ErrorScreen
-import com.example.runpal.LoadingDots
 import com.example.runpal.LoadingScreen
+import com.example.runpal.R
 import com.example.runpal.activities.home.StatsDestination
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.repositories.SettingsManager
@@ -60,9 +58,10 @@ class AccountActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     val startDestination = AccountDestination.argsRoute
-                    val curDestination = navController.currentBackStackEntryAsState().value?.destination?.route ?: startDestination
+                    val curRoute = navController.currentBackStackEntryAsState().value?.destination?.route ?: startDestination
                     val user by vm.user.collectAsState()
                     val state by vm.state.collectAsState()
+                    val curDestination = destinationsMap[curRoute]!!
                     Scaffold(
                         topBar = {
                             StandardTopBar(
@@ -72,7 +71,8 @@ class AccountActivity : ComponentActivity() {
                                     loginManager.logout()
                                     this@AccountActivity.restartApp()
                                 },
-                                title = destinationsMap[curDestination]?.title ?: "")
+                                title = stringResource(id = curDestination.title!!)
+                            )
                         },
                         modifier = Modifier.fillMaxSize()
                     ) {
@@ -115,7 +115,7 @@ class AccountActivity : ComponentActivity() {
                             }
                         }
                         else if (state == AccountViewModel.State.LOADING) LoadingScreen()
-                        else ErrorScreen(message = "An error has occured. Check your internet connection.")
+                        else ErrorScreen(message = stringResource(id = R.string.no_internet_message))
                     }
                 }
             }

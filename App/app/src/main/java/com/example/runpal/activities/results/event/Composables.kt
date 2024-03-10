@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.runpal.R
 import com.example.runpal.TimeFormatter
@@ -63,7 +64,7 @@ fun EventResultScreen(ranking: List<EventResult>, user: String) {
             .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(20.dp)) {
-            val placetext = place.toString() + (if (place == 1) "st" else if (place == 2) "nd" else if (place == 3) "rd" else "th")
+            val placetext = place.toString() + (if (place == 1) stringResource(id = R.string.st) else if (place == 2) stringResource(id = R.string.nd) else if (place == 3) stringResource(id = R.string.rd) else stringResource(id = R.string.th))
             Box(modifier = Modifier
                 .width(150.dp)
                 .height(200.dp)
@@ -74,7 +75,7 @@ fun EventResultScreen(ranking: List<EventResult>, user: String) {
             ) {
                 Text(text = placetext, style = MaterialTheme.typography.displayLarge, color = colors.second)
             }
-            Text(text = "Congrats! You won ${placetext} place.")
+            Text(text = stringResource(id = R.string.congrats_you_won)+ " ${placetext} " + stringResource(id = R.string.place) + ".")
         }
         Row(
             modifier = Modifier
@@ -85,9 +86,9 @@ fun EventResultScreen(ranking: List<EventResult>, user: String) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = "", style = MaterialTheme.typography.titleSmall, modifier = Modifier.width(30.dp))
-            Text(text = "User", style = MaterialTheme.typography.titleSmall)
+            Text(text = stringResource(id = R.string.user), style = MaterialTheme.typography.titleSmall)
             Spacer(modifier = Modifier.weight(1f))
-            Text(text = "Time", style = MaterialTheme.typography.titleSmall)
+            Text(text = stringResource(id = R.string.time), style = MaterialTheme.typography.titleSmall)
         }
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
             items(ranking.indices.toList()) {

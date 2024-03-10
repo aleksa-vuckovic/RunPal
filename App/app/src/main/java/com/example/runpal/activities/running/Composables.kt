@@ -36,6 +36,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.runpal.GoogleMapPath
 import com.example.runpal.KcalFormatter
@@ -51,6 +52,7 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import kotlinx.coroutines.delay
+import com.example.runpal.R
 
 
 @Composable
@@ -159,7 +161,7 @@ fun RunStart(onStart: () -> Unit, sound: MediaPlayer? = null) {
                 .align(Alignment.BottomCenter)
 
         ) {
-            Text("Start")
+            Text(stringResource(id = R.string.start))
         }
     }
 }
@@ -177,7 +179,7 @@ fun RunPause(onPause: () -> Unit, onFinish: () -> Unit) {
                 .size(70.dp)
                 .align(Alignment.BottomStart)
         ) {
-            Icon(imageVector = Icons.Default.Pause, contentDescription = "Pause", modifier = Modifier.size(40.dp))
+            Icon(imageVector = Icons.Default.Pause, contentDescription = stringResource(id = R.string.pause), modifier = Modifier.size(40.dp))
         }
         ProgressFloatingButton(
             onProgress = { if (it > 1f) onFinish() },
@@ -189,7 +191,7 @@ fun RunPause(onPause: () -> Unit, onFinish: () -> Unit) {
                 .align(Alignment.BottomStart)
 
         ) {
-            Text("Finish")
+            Text(stringResource(id = R.string.finish))
         }
     }
 }
@@ -214,7 +216,7 @@ fun RunResume(onResume: () -> Unit, onFinish: () -> Unit) {
                 .size(70.dp)
                 .align(Alignment.BottomStart)
         ) {
-            Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "Resume", modifier = Modifier.size(40.dp))
+            Icon(imageVector = Icons.Default.PlayArrow, contentDescription = stringResource(id = R.string.resume), modifier = Modifier.size(40.dp))
         }
         ProgressFloatingButton(
             onProgress = { if (it > 1f) onFinish() },
@@ -225,7 +227,7 @@ fun RunResume(onResume: () -> Unit, onFinish: () -> Unit) {
                 .size(70.dp)
                 .align(Alignment.BottomStart)
         ) {
-            Text("Finish")
+            Text(stringResource(id = R.string.finish))
         }
     }
 }

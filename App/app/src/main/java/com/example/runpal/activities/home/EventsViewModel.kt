@@ -6,6 +6,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.runpal.R
 import com.example.runpal.models.Event
 import com.example.runpal.repositories.ServerEventRepository
 import com.example.runpal.tryRepeat
@@ -48,7 +49,7 @@ class EventsViewModel @Inject constructor(
                 _followedEvents.value = tryRepeat { serverEventRepository.find(following = true) }
                 _otherEvents.value = tryRepeat { serverEventRepository.find(following = false) }
             } catch(e: Exception) {
-                Toast.makeText(context, "Check your internet connection and reload.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.resources.getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show()
             }
             _state.value = State.LOADED
         }
@@ -59,7 +60,7 @@ class EventsViewModel @Inject constructor(
             try {
                 _otherEvents.value = tryRepeat { serverEventRepository.find(search = term, following = false) }
             } catch(e: Exception) {
-                Toast.makeText(context, "Check your internet connectin.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.resources.getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show()
             }
         }
     }

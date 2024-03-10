@@ -1,20 +1,24 @@
 package com.example.runpal.activities.home
 
+import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.runpal.R
 import com.example.runpal.ServerException
 import com.example.runpal.repositories.ServerEventRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 @HiltViewModel
 class CreateEventViewModel @Inject constructor(
-    private val serverEventRepository: ServerEventRepository
+    private val serverEventRepository: ServerEventRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     enum class State {
@@ -32,7 +36,7 @@ class CreateEventViewModel @Inject constructor(
 
     fun create(name: String, description: String, time: Long?, distance: Double, image: Uri?) {
         if (time == null) {
-            _error.value = "Time must be specified."
+            _error.value = context.resources.getString(R.string.time_must_be_specified)
             return
         }
         _state.value = State.WAITING
@@ -44,7 +48,7 @@ class CreateEventViewModel @Inject constructor(
                 _error.value = e.message ?: ""
                 _state.value = State.INPUT
             } catch(e: Exception) {
-                _error.value = "Check your internet connection and try again."
+                _error.value = context.resources.getString(R.string.no_internet_message)
                 _state.value = State.INPUT
             }
 

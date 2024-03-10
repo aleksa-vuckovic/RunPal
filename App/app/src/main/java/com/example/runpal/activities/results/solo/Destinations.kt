@@ -3,29 +3,29 @@ package com.example.runpal.activities.results.solo
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.AreaChart
-import androidx.compose.material.icons.filled.SportsScore
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.runpal.Destination
+import com.example.runpal.R
 
 
 object ChartsDestination: Destination {
     override val argsRoute: String = "charts"
     override val baseRoute: String = "charts"
     override val icon: ImageVector = Icons.Default.AreaChart
-    override val label: String = "Details"
-    override val title: String = "Details"
+    override val label: Int = R.string.distance
+    override val title: Int = R.string.distance
 }
 
 object ResultsDestination: Destination {
     override val argsRoute: String = "results"
     override val baseRoute: String = "results"
     override val icon: ImageVector = Icons.AutoMirrored.Filled.DirectionsRun
-    override val label: String = "Results"
-    override val title: String = "Results"
+    override val label: Int = R.string.results
+    override val title: Int = R.string.results
 }
 
 val bottomBarDestinations = listOf(ChartsDestination, ResultsDestination)
-val destinationMap = mapOf(
+val destinationsMap = mapOf(
     ChartsDestination.argsRoute to ChartsDestination,
     ResultsDestination.argsRoute to ResultsDestination
 )

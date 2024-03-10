@@ -49,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -58,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.runpal.Destination
 import com.example.runpal.lightness
+import com.example.runpal.R
 
 
 @Composable
@@ -110,10 +112,10 @@ fun StandardNavBar(destinations: List<Destination>, curRoute: String, onClick: (
                 selected = curRoute == dest.argsRoute,
                 onClick = {onClick(dest)},
                 icon = {
-                    if (dest.icon != null) Icon(imageVector = dest.icon!!, contentDescription = dest.title)
+                    if (dest.icon != null) Icon(imageVector = dest.icon!!, contentDescription = stringResource(id = dest.title!!))
                 },
                 label = {
-                    if (dest.label != null) Text(text = dest.label!!)
+                    if (dest.label != null) Text(text = stringResource(id = dest.label!!))
                 },
                 colors = NavigationBarItemDefaults.colors()
             )
@@ -261,7 +263,7 @@ fun StandardDialog(text: String, onDismiss: () -> Unit, onOk: () -> Unit, modifi
                     textAlign = TextAlign.Center
                 )
                 StandardButton(onClick = onOk) {
-                    Text(text = "OK")
+                    Text(text = stringResource(id = R.string.ok))
                 }
             }
         }

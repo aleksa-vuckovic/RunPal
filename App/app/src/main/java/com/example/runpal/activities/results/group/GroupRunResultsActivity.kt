@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -41,7 +41,6 @@ import com.example.runpal.activities.account.AccountActivity
 import com.example.runpal.activities.results.GeneralResults
 import com.example.runpal.activities.results.PathChartAndPanel
 import com.example.runpal.activities.results.UserSelection
-import com.example.runpal.activities.results.solo.SoloRunResultsViewModel
 import com.example.runpal.borderBottom
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.repositories.SettingsManager
@@ -53,6 +52,7 @@ import com.example.runpal.ui.theme.StandardSpinner
 import com.example.runpal.ui.theme.StandardTopBar
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import com.example.runpal.R
 
 @AndroidEntryPoint
 class GroupRunResultsActivity : ComponentActivity() {
@@ -77,7 +77,7 @@ class GroupRunResultsActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     val startDestination = ResultsDestination.argsRoute
                     val curRoute = navController.currentBackStackEntryAsState().value?.destination?.route ?: startDestination
-                    val curDestination = destinationMap[curRoute]!!
+                    val curDestination = destinationsMap[curRoute]!!
                     Scaffold(
                         topBar = {
                             StandardTopBar(
@@ -88,7 +88,7 @@ class GroupRunResultsActivity : ComponentActivity() {
                                     loginManager.logout()
                                     this@GroupRunResultsActivity.restartApp()
                                 },
-                                title = curDestination.title
+                                title = stringResource(id = curDestination.title!!)
                             )
                         },
                         bottomBar = {
@@ -133,7 +133,7 @@ class GroupRunResultsActivity : ComponentActivity() {
                                         .verticalScroll(rememberScrollState())
                                         .padding(10.dp)) {
                                         PathChartAndPanel(
-                                            title = "Speed",
+                                            title = stringResource(id = R.string.speed),
                                             datasets = vm.speedDatasets,
                                             selected = selected,
                                             axesOptions = axesOptions,
@@ -142,7 +142,7 @@ class GroupRunResultsActivity : ComponentActivity() {
                                                 .height(400.dp)
                                         )
                                         PathChartAndPanel(
-                                            title = "Kcal",
+                                            title = stringResource(id = R.string.kcal),
                                             datasets = vm.kcalDatasets,
                                             selected = selected,
                                             axesOptions = axesOptions.copy(yLabel = KcalFormatter),
@@ -152,7 +152,7 @@ class GroupRunResultsActivity : ComponentActivity() {
                                                 .height(400.dp)
                                         )
                                         PathChartAndPanel(
-                                            title = "Altitude",
+                                            title = stringResource(id = R.string.altitude),
                                             datasets = vm.altitudeDatasets,
                                             selected = selected,
                                             axesOptions = axesOptions.copy(yLabel = units.distanceFormatter, ySpanMin = 20.0),
@@ -161,7 +161,7 @@ class GroupRunResultsActivity : ComponentActivity() {
                                                 .height(400.dp)
                                         )
                                         PathChartAndPanel(
-                                            title = "Distance",
+                                            title = stringResource(id = R.string.distance),
                                             datasets = vm.distanceDatasets,
                                             selected = selected,
                                             axesOptions = axesOptions.copy(yLabel = units.distanceFormatter),
@@ -192,13 +192,13 @@ class GroupRunResultsActivity : ComponentActivity() {
                                         mapMin = vm.mapMins[selected],
                                         mapMax = vm.mapMaxs[selected],
                                         values = listOf(
-                                            "Total distance" to units.distanceFormatter.format(vm.distanceDatasets[selected].maxY),
-                                            "Start time" to (if (vm.runs[selected].run.start != null) LocalDateTimeFormatter.format(vm.runs[selected].run.start!!) else "TBD" to ""),
-                                            "Running time" to TimeFormatter.format(vm.runs[selected].run.running),
-                                            "Finish time" to (if (vm.runs[selected].run.end != null) LocalDateTimeFormatter.format(vm.runs[selected].run.end!!) else "TBD" to ""),
-                                            "Avg pace" to units.paceFormatter.format(vm.speedDatasets[selected].avgY),
-                                            "Max pace" to units.paceFormatter.format(vm.speedDatasets[selected].maxY),
-                                            "Total kcal" to KcalFormatter.format(vm.kcalDatasets[selected].maxY)
+                                            stringResource(id = R.string.total_distance) to units.distanceFormatter.format(vm.distanceDatasets[selected].maxY),
+                                            stringResource(id = R.string.start_time) to (if (vm.runs[selected].run.start != null) LocalDateTimeFormatter.format(vm.runs[selected].run.start!!) else "TBD" to ""),
+                                            stringResource(id = R.string.running_time) to TimeFormatter.format(vm.runs[selected].run.running),
+                                            stringResource(id = R.string.finish_time) to (if (vm.runs[selected].run.end != null) LocalDateTimeFormatter.format(vm.runs[selected].run.end!!) else "TBD" to ""),
+                                            stringResource(id = R.string.avg_pace) to units.paceFormatter.format(vm.speedDatasets[selected].avgY),
+                                            stringResource(id = R.string.max_pace) to units.paceFormatter.format(vm.speedDatasets[selected].maxY),
+                                            stringResource(id = R.string.total_kcal) to KcalFormatter.format(vm.kcalDatasets[selected].maxY)
                                         ),
                                         modifier = Modifier.fillMaxWidth()
                                     )
@@ -206,24 +206,28 @@ class GroupRunResultsActivity : ComponentActivity() {
                             }
 
                             composable(route = RankingDestination.argsRoute) {
+                                val distance = stringResource(id = R.string.distance)
+                                val pace = stringResource(id = R.string.pace)
+                                val speed = stringResource(id = R.string.speed)
+                                val kcal = stringResource(id = R.string.kcal)
                                 val possibleCriteria = remember {
-                                    listOf("Distance", "Pace", "Speed", "Kcal")
+                                    listOf(distance, pace, speed, kcal)
                                 }
                                 var criteria by rememberSaveable {
-                                    mutableStateOf("Distance")
+                                    mutableStateOf(distance)
                                 }
                                 val ranking = remember(criteria) {
-                                    if (criteria == "Distance")
+                                    if (criteria == distance)
                                         vm.runs.zip(vm.users).sortedBy {-it.first.location.distance}.map {
                                             it.second to units.distanceFormatter.format(it.first.location.distance)
                                         }
-                                    else if (criteria == "Kcal")
+                                    else if (criteria == kcal)
                                         vm.runs.zip(vm.users).sortedBy {-it.first.location.kcal}.map {
                                             it.second to KcalFormatter.format(it.first.location.kcal)
                                         }
                                     else
                                         vm.speedDatasets.zip(vm.users).sortedBy { -it.first.avgY }.map {
-                                            it.second to (if (criteria == "Speed") units.speedFormatter.format(it.first.avgY) else units.paceFormatter.format(it.first.avgY))
+                                            it.second to (if (criteria == speed) units.speedFormatter.format(it.first.avgY) else units.paceFormatter.format(it.first.avgY))
                                         }
                                 }
                                 Column(modifier = Modifier
@@ -235,7 +239,7 @@ class GroupRunResultsActivity : ComponentActivity() {
                                             .padding(vertical = 10.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                       Text(text = "Criteria: ")
+                                       Text(text = stringResource(id = R.string.criteria) + ": ")
                                        StandardSpinner(
                                            values = possibleCriteria,
                                            selected = criteria,

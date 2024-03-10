@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.runpal.R
 
 @HiltViewModel
 class LobbyViewModel  @Inject constructor(
@@ -80,7 +81,7 @@ class LobbyViewModel  @Inject constructor(
                 } catch (e: Exception) {
                     retries++
                     if (retries == MAX_RETRIES) {
-                        Toast.makeText(context, "Please check your internet connection and join again.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show()
                         _state.value = State.ERROR
                         break
                     }
@@ -116,7 +117,7 @@ class LobbyViewModel  @Inject constructor(
                 Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 e.printStackTrace()
-                Toast.makeText(context, "Check your internet connection and try again.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show()
             }
         }
     }

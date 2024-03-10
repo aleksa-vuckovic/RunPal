@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
@@ -53,6 +54,7 @@ import com.example.runpal.ui.theme.StandardNavBar
 import com.example.runpal.ui.theme.StandardTopBar
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import com.example.runpal.R
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
@@ -101,7 +103,7 @@ class HomeActivity : ComponentActivity() {
                     Scaffold(
                         topBar = {
                             StandardTopBar(
-                                title = destinationMap[curDestination]?.title,
+                                title = stringResource(destinationsMap[curDestination]!!.title!!),
                                 onBack = { if(!navController.popBackStack()) finish() },
                                 onAccount = { startActivity(Intent(this@HomeActivity, AccountActivity::class.java)) },
                                 onLogout = {
@@ -203,7 +205,7 @@ class HomeActivity : ComponentActivity() {
                                     if (vm.state == CreateEventViewModel.State.WAITING) LoadingScreen()
                                     else if (vm.state == CreateEventViewModel.State.SUCCESS) {
                                         StandardDialog(
-                                            text = "Your event is now public! You can see it in the 'Followed events' section of the Events screen.",
+                                            text = stringResource(id = R.string.your_event_is_public),
                                             onDismiss = { navController.popBackStack() },
                                             onOk = {navController.popBackStack()})
                                     }
@@ -224,7 +226,7 @@ class HomeActivity : ComponentActivity() {
                                     }
                                 }
 
-                                if (vm.state == EventViewModel.State.ERROR) ErrorScreen(message = "Can't connect. Check your internet connection")
+                                if (vm.state == EventViewModel.State.ERROR) ErrorScreen(message = stringResource(id = R.string.no_internet_message))
                                 else if (vm.state == EventViewModel.State.LOADING) LoadingScreen()
                                 else EventScreen(
                                     event = vm.event,

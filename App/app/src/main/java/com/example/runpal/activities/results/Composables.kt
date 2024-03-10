@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
@@ -54,6 +55,7 @@ import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlin.math.log2
+import com.example.runpal.R
 
 @Composable
 fun PathChartAndPanel(
@@ -107,7 +109,7 @@ fun PathChartAndPanel(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Total", style = MaterialTheme.typography.labelLarge, modifier = Modifier.fillMaxHeight(0.5f))
+            Text(text = stringResource(id = R.string.total), style = MaterialTheme.typography.labelLarge, modifier = Modifier.fillMaxHeight(0.5f))
             PanelText(text = axesOptions.yLabel.format(main.maxY), modifier = Modifier.fillMaxHeight(0.5f))
         }
         else Row(
@@ -138,7 +140,8 @@ fun PathChartAndPanel(
 @Composable
 fun UserSelection(users: List<User>, selected: List<Boolean>, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
     Row(
-        modifier = modifier.horizontalScroll(rememberScrollState())
+        modifier = modifier
+            .horizontalScroll(rememberScrollState())
             .padding(bottom = 4.dp)
     ) {
         for (i in users.indices) {
@@ -210,7 +213,10 @@ fun GeneralResults(runData: RunData,
                 .clip(shape = RoundedCornerShape(10.dp))
                 .onSizeChanged {
                     cameraPositionState.position = CameraPosition.fromLatLngZoom(
-                        LatLng((mapMin.latitude + mapMax.latitude) / 2, (mapMin.longitude + mapMax.longitude) / 2),
+                        LatLng(
+                            (mapMin.latitude + mapMax.latitude) / 2,
+                            (mapMin.longitude + mapMax.longitude) / 2
+                        ),
                         zoomToFit(
                             latSpan = mapMax.latitude - mapMin.latitude,
                             height = it.height,

@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
@@ -47,6 +48,7 @@ import com.example.runpal.models.User
 import com.example.runpal.ui.theme.StandardButton
 import com.example.runpal.ui.theme.StandardSpinner
 import com.example.runpal.ui.theme.StandardTextField
+import com.example.runpal.R
 
 @Composable
 fun EditScreen(init: User,
@@ -84,7 +86,7 @@ fun EditScreen(init: User,
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("First name", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.first_name), style = style, modifier = Modifier.weight(0.3f))
             StandardTextField(value = name, onChange = {name = it}, modifier = Modifier.weight(0.7f))
         }
 
@@ -92,7 +94,7 @@ fun EditScreen(init: User,
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Last name", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.last_name), style = style, modifier = Modifier.weight(0.3f))
             StandardTextField(value = last, onChange = {last = it}, modifier = Modifier.weight(0.7f))
         }
 
@@ -101,7 +103,7 @@ fun EditScreen(init: User,
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Weight", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.weight), style = style, modifier = Modifier.weight(0.3f))
             Row(modifier = Modifier.weight(0.7f),
                 horizontalArrangement = Arrangement.End) {
                 DoubleInput(initial = weight, onChange = {weight = it}, modifier = Modifier.width(150.dp))
@@ -122,13 +124,13 @@ fun EditScreen(init: User,
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Profile photo", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.profile_photo), style = style, modifier = Modifier.weight(0.3f))
             ImageSelector(input = profile, onSelect = {profile = it}, Modifier.size(200.dp))
         }
 
         StandardButton(onClick = { onUpdate(name, last, units.fromStandardWeightInput(weight), profile)})
         {
-            Text("Update")
+            Text(stringResource(id = R.string.update))
         }
         Text(text = errorMessage, style = style.copy(color = Color.Red))
     }
@@ -137,7 +139,11 @@ fun EditScreen(init: User,
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
-fun AccountScreen(user: User, onEdit: () -> Unit, units: Units, onSelectUnits: (Units) -> Unit,  modifier: Modifier) {
+fun AccountScreen(user: User,
+                  onEdit: () -> Unit,
+                  units: Units,
+                  onSelectUnits: (Units) -> Unit,
+                  modifier: Modifier) {
 
     Box(modifier = modifier) {
         Column(
@@ -168,7 +174,7 @@ fun AccountScreen(user: User, onEdit: () -> Unit, units: Units, onSelectUnits: (
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(painter = rememberImagePainter(data = user.profileUri),
-                        contentDescription = "Profile photo",
+                        contentDescription = stringResource(id = R.string.profile_photo),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(140.dp)
@@ -188,7 +194,7 @@ fun AccountScreen(user: User, onEdit: () -> Unit, units: Units, onSelectUnits: (
                     .fillMaxWidth()
                     .padding(20.dp)
             ) {
-                Text(text = "Weight: ${user.weight}kg", style = MaterialTheme.typography.bodyLarge)
+                Text(text = stringResource(id = R.string.weight) + ": ${units.toStandardWeightInput(user.weight)}${units.standardWeightInput}", style = MaterialTheme.typography.bodyLarge)
             }
             Row(
                 modifier = Modifier
@@ -196,7 +202,7 @@ fun AccountScreen(user: User, onEdit: () -> Unit, units: Units, onSelectUnits: (
                     .padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Preferred units: ", style = MaterialTheme.typography.bodyLarge)
+                Text(text = stringResource(id = R.string.preferred_units) +": ", style = MaterialTheme.typography.bodyLarge)
                 StandardSpinner(values = Units.values().map { it.name }, selected = units.name, onSelect = {onSelectUnits(Units.valueOf(it))})
             }
 
@@ -207,7 +213,7 @@ fun AccountScreen(user: User, onEdit: () -> Unit, units: Units, onSelectUnits: (
                 .align(Alignment.BottomEnd)
                 .padding(20.dp)) {
                 Icon(imageVector = Icons.Default.Edit,
-                    contentDescription = "Edit")
+                    contentDescription = stringResource(id = R.string.edit))
         }
     }
 }

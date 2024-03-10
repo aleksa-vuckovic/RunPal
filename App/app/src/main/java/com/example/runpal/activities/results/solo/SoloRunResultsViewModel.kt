@@ -20,7 +20,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
+import com.example.runpal.R
 
 @HiltViewModel
 class SoloRunResultsViewModel @Inject constructor(
@@ -91,7 +91,7 @@ class SoloRunResultsViewModel @Inject constructor(
                 _state.value = State.ERROR
             } catch(e: Exception) {
                 e.printStackTrace()
-                Toast.makeText(context, "Check your internet connection and try again.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.resources.getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show()
                 _state.value = State.ERROR
             }
 

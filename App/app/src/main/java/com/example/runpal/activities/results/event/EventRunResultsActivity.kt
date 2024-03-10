@@ -5,33 +5,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SportsScore
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -47,9 +32,6 @@ import com.example.runpal.TimeFormatter
 import com.example.runpal.activities.account.AccountActivity
 import com.example.runpal.activities.results.GeneralResults
 import com.example.runpal.activities.results.PathChartAndPanel
-import com.example.runpal.activities.results.solo.SoloRunResultsViewModel
-import com.example.runpal.activities.running.PanelText
-import com.example.runpal.borderBottom
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.repositories.SettingsManager
 import com.example.runpal.restartApp
@@ -83,7 +65,7 @@ class EventRunResultsActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     val startDestination = ResultsDestination.argsRoute
                     val curRoute = navController.currentBackStackEntryAsState().value?.destination?.route ?: startDestination
-                    val curDestination = destinationMap[curRoute]!!
+                    val curDestination = destinationsMap[curRoute]!!
                     Scaffold(
                         topBar = {
                             StandardTopBar(
@@ -94,7 +76,7 @@ class EventRunResultsActivity : ComponentActivity() {
                                     loginManager.logout()
                                     this@EventRunResultsActivity.restartApp()
                                 },
-                                title = curDestination.title
+                                title = stringResource(id = curDestination.title!!)
                             )
                         },
                         bottomBar = {
@@ -124,7 +106,7 @@ class EventRunResultsActivity : ComponentActivity() {
                                     .verticalScroll(rememberScrollState())
                                     .padding(10.dp)) {
                                     PathChartAndPanel(
-                                        title = "Speed",
+                                        title = stringResource(R.string.speed),
                                         datasets = listOf(vm.speedDataset),
                                         selected = listOf(true),
                                         axesOptions = axesOptions,
@@ -133,7 +115,7 @@ class EventRunResultsActivity : ComponentActivity() {
                                             .height(400.dp)
                                     )
                                     PathChartAndPanel(
-                                        title = "Kcal",
+                                        title = stringResource(id = R.string.kcal),
                                         datasets = listOf(vm.kcalDataset),
                                         selected = listOf(true),
                                         axesOptions = axesOptions.copy(yLabel = KcalFormatter),
@@ -143,7 +125,7 @@ class EventRunResultsActivity : ComponentActivity() {
                                             .height(400.dp)
                                     )
                                     PathChartAndPanel(
-                                        title = "Altitude",
+                                        title = stringResource(id = R.string.altitude),
                                         datasets = listOf(vm.altitudeDataset),
                                         selected = listOf(true),
                                         axesOptions = axesOptions.copy(yLabel = units.distanceFormatter, ySpanMin = 20.0),
@@ -152,7 +134,7 @@ class EventRunResultsActivity : ComponentActivity() {
                                             .height(400.dp)
                                     )
                                     PathChartAndPanel(
-                                        title = "Distance",
+                                        title = stringResource(id = R.string.distance),
                                         datasets = listOf(vm.distanceDataset),
                                         selected = listOf(true),
                                         axesOptions = axesOptions.copy(yLabel = units.distanceFormatter),
@@ -174,13 +156,13 @@ class EventRunResultsActivity : ComponentActivity() {
                                         mapMin = vm.mapMin,
                                         mapMax = vm.mapMax,
                                         values = listOf(
-                                            "Total distance" to units.distanceFormatter.format(vm.distanceDataset.maxY),
-                                            "Start time" to (if (vm.run.run.start != null) LocalDateTimeFormatter.format(vm.run.run.start!!) else "TBD" to ""),
-                                            "Running time" to TimeFormatter.format(vm.run.run.running),
-                                            "Finish time" to (if (vm.run.run.end != null) LocalDateTimeFormatter.format(vm.run.run.end!!) else "TBD" to ""),
-                                            "Avg pace" to units.paceFormatter.format(vm.speedDataset.avgY),
-                                            "Max pace" to units.paceFormatter.format(vm.speedDataset.maxY),
-                                            "Total kcal" to KcalFormatter.format(vm.kcalDataset.maxY)
+                                            stringResource(id = R.string.total_distance) to units.distanceFormatter.format(vm.distanceDataset.maxY),
+                                            stringResource(id = R.string.start_time) to (if (vm.run.run.start != null) LocalDateTimeFormatter.format(vm.run.run.start!!) else "TBD" to ""),
+                                            stringResource(id = R.string.running_time) to TimeFormatter.format(vm.run.run.running),
+                                            stringResource(id = R.string.finish_time) to (if (vm.run.run.end != null) LocalDateTimeFormatter.format(vm.run.run.end!!) else "TBD" to ""),
+                                            stringResource(id = R.string.avg_pace) to units.paceFormatter.format(vm.speedDataset.avgY),
+                                            stringResource(id = R.string.max_pace) to units.paceFormatter.format(vm.speedDataset.maxY),
+                                            stringResource(id = R.string.total_kcal) to KcalFormatter.format(vm.kcalDataset.maxY)
                                         ),
                                         modifier = Modifier.fillMaxWidth()
                                     )

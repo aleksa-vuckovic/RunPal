@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.runpal.DoubleInput
@@ -32,6 +33,7 @@ import com.example.runpal.Units
 import com.example.runpal.borderBottom
 import com.example.runpal.ui.theme.StandardButton
 import com.example.runpal.ui.theme.StandardTextField
+import com.example.runpal.R
 
 @Composable
 fun LoginScreen(onLogin: (String, String) -> Unit, errorMessage: String, modifier: Modifier = Modifier) {
@@ -54,7 +56,7 @@ fun LoginScreen(onLogin: (String, String) -> Unit, errorMessage: String, modifie
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Email", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.email), style = style, modifier = Modifier.weight(0.3f))
             StandardTextField(value = email, onChange = {email = it}, modifier = Modifier.weight(0.7f))
         }
         Spacer(modifier = Modifier.height(30.dp))
@@ -63,7 +65,7 @@ fun LoginScreen(onLogin: (String, String) -> Unit, errorMessage: String, modifie
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Password", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.password), style = style, modifier = Modifier.weight(0.3f))
             StandardTextField(value = password,
                 onChange = {password = it},
                 visualTransformation = PasswordVisualTransformation(),
@@ -72,7 +74,7 @@ fun LoginScreen(onLogin: (String, String) -> Unit, errorMessage: String, modifie
         Spacer(modifier = Modifier.height(30.dp))
 
         StandardButton(onClick = { onLogin(email, password)}) {
-            Text("Login")
+            Text(stringResource(id = R.string.login))
         }
         Spacer(modifier = Modifier.height(30.dp))
 
@@ -117,14 +119,14 @@ fun RegisterScreen(onRegister: (String, String, String, String, Double, Uri?) ->
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Email", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.email), style = style, modifier = Modifier.weight(0.3f))
             StandardTextField(value = email, onChange = {email = it}, modifier = Modifier.weight(0.7f))
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Password", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.password), style = style, modifier = Modifier.weight(0.3f))
             StandardTextField(value = password,
                 onChange = {password = it},
                 visualTransformation = PasswordVisualTransformation(),
@@ -135,7 +137,7 @@ fun RegisterScreen(onRegister: (String, String, String, String, Double, Uri?) ->
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("First name", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.first_name), style = style, modifier = Modifier.weight(0.3f))
             StandardTextField(value = name, onChange = {name = it}, modifier = Modifier.weight(0.7f))
         }
 
@@ -143,7 +145,7 @@ fun RegisterScreen(onRegister: (String, String, String, String, Double, Uri?) ->
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Last name", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.last_name), style = style, modifier = Modifier.weight(0.3f))
             StandardTextField(value = last, onChange = {last = it}, modifier = Modifier.weight(0.7f))
         }
 
@@ -152,7 +154,7 @@ fun RegisterScreen(onRegister: (String, String, String, String, Double, Uri?) ->
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Weight", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.weight), style = style, modifier = Modifier.weight(0.3f))
             Row(modifier = Modifier.weight(0.7f),
                 horizontalArrangement = Arrangement.End) {
                 DoubleInput(initial = 80.0, onChange = {weight = it}, modifier = Modifier.width(150.dp))
@@ -172,13 +174,13 @@ fun RegisterScreen(onRegister: (String, String, String, String, Double, Uri?) ->
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Profile photo", style = style, modifier = Modifier.weight(0.3f))
+            Text(stringResource(id = R.string.profile_photo), style = style, modifier = Modifier.weight(0.3f))
             ImageSelector(input = profile, onSelect = {profile = it}, Modifier.size(200.dp))
         }
 
         StandardButton(onClick = { onRegister(email, password, name, last, units.fromStandardWeightInput(weight), profile)})
          {
-            Text("Register")
+            Text(stringResource(id = R.string.register))
         }
         Text(text = errorMessage, style = style.copy(color = Color.Red))
     }
