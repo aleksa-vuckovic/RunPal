@@ -22,6 +22,7 @@ import com.example.runpal.activities.running.LocalRunStateFactory
 import com.example.runpal.activities.running.RunState
 import com.example.runpal.getMarkerBitmap
 import com.example.runpal.models.Event
+import com.example.runpal.models.EventResult
 import com.example.runpal.models.Run
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.repositories.ServerEventRepository
@@ -31,6 +32,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -52,6 +54,7 @@ class EventRunViewModel @Inject constructor(
     private val _event = mutableStateOf(Event())
     private val _runState: LocalRunState
     private val _marker: MutableState<BitmapDescriptor>
+    private val _rankingLive = mutableStateOf(listOf<EventResult>())
 
     val mapState: MapState = MapState()
     val state: State
@@ -62,6 +65,8 @@ class EventRunViewModel @Inject constructor(
         get() = _runState
     val marker: BitmapDescriptor
         get() = _marker.value
+    val rankingLive: List<EventResult>
+        get() = _rankingLive.value
 
     init {
         val user = loginManager.currentUser()!!
@@ -89,6 +94,15 @@ class EventRunViewModel @Inject constructor(
                 .getMarkerBitmap(RUN_MARKER_SIZE, color = RUN_MARKER_COLORS[0])
             _marker.value = BitmapDescriptorFactory.fromBitmap(bitmap)
             _state.value = State.LOADED
+
+            launch {
+                while(true) {
+                    try {
+                        _rankingLive.value = serverEventRepository.rankingLive(eventID)
+                    } catch (e: Exception) {e.printStackTrace()}
+                    delay(2000)
+                }
+            }
         }
     }
 

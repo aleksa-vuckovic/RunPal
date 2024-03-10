@@ -30,5 +30,11 @@ eventRouter.route("/follow/:event").get(async (req: express.Request, res: expres
 eventRouter.route("/unfollow/:event").get(async (req: express.Request, res: express.Response) => {
     new EventController().unfollow(req, res)
 })
+eventRouter.route("/ranking/:event").get(async (req: express.Request, res: express.Response) => {
+    new EventController().ranking(req, res)
+})
+eventRouter.route("/rankinglive/:event").get(async (req: express.Request, res: express.Response) => {
+    new EventController().rankingLive(req, res)
+})
 
 export default eventRouter

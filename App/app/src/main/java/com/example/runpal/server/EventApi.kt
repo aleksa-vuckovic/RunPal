@@ -1,8 +1,8 @@
 package com.example.runpal.server
 
 import com.example.runpal.models.Event
+import com.example.runpal.models.EventResult
 import okhttp3.MultipartBody
-import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -60,5 +60,21 @@ interface EventApi {
      */
     @GET("event/unfollow/:event")
     suspend fun unfollow(@Path("event") event: String): GenericResponse<Unit>
+
+
+    /**
+     * Returns the entire list of results for users who have finished the race,
+     * sorted from best. Only returns users who have finished.
+     */
+    @GET("event/ranking/:event")
+    suspend fun ranking(@Path("event") event: String): GenericResponse<List<EventResult>>
+
+    /**
+     * Returns the live results of an event, limited to 10 entries.
+     * First entries are users who have finished the race, sorted by time,
+     * and second are users who are still running, sorted by distance.
+     */
+    @GET("event/rankinglive/:event")
+    suspend fun rankingLive(@Path("event") event: String): GenericResponse<List<EventResult>>
 
 }

@@ -5,15 +5,13 @@ import android.net.Uri
 import com.example.runpal.ServerException
 import com.example.runpal.getBitmap
 import com.example.runpal.models.Event
+import com.example.runpal.models.EventResult
 import com.example.runpal.server.EventApi
 import com.example.runpal.server.GenericResponse
 import com.example.runpal.toMultipartPart
 import dagger.hilt.android.qualifiers.ApplicationContext
-import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.POST
 import retrofit2.http.Path
-import retrofit2.http.Query
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -88,5 +86,27 @@ class ServerEventRepository @Inject constructor(
         val response = eventApi.unfollow(event)
         if (response.message != "ok") throw ServerException(response.message)
     }
+
+    /**
+     * Returns the entire list of results for users who have finished the race,
+     * sorted from best. Only returns users who have finished.
+     */
+    suspend fun ranking(event: String): List<EventResult> {
+        val response = eventApi.ranking(event)
+        if (response.message != "ok") throw ServerException(response.message)
+        return response.data!!
+    }
+
+    /**
+     * Returns the live results of an event, limited to 10 entries.
+     * First entries are users who have finished the race, sorted by time,
+     * and second are users who are still running, sorted by distance.
+     */
+    suspend fun rankingLive(event: String): List<EventResult> {
+        val response = eventApi.rankingLive(event)
+        if (response.message != "ok") throw ServerException(response.message)
+        return response.data!!
+    }
+
 
 }

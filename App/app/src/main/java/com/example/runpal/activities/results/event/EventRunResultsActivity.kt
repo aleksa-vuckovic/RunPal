@@ -5,18 +5,33 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SportsScore
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,12 +41,15 @@ import com.example.runpal.ErrorScreen
 import com.example.runpal.KcalFormatter
 import com.example.runpal.LoadingScreen
 import com.example.runpal.LocalDateTimeFormatter
+import com.example.runpal.R
 import com.example.runpal.RUN_MARKER_COLORS
 import com.example.runpal.TimeFormatter
 import com.example.runpal.activities.account.AccountActivity
 import com.example.runpal.activities.results.GeneralResults
 import com.example.runpal.activities.results.PathChartAndPanel
 import com.example.runpal.activities.results.solo.SoloRunResultsViewModel
+import com.example.runpal.activities.running.PanelText
+import com.example.runpal.borderBottom
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.repositories.SettingsManager
 import com.example.runpal.restartApp
@@ -53,6 +71,7 @@ class EventRunResultsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val units = settingsManager.units
+        val user = loginManager.currentUser()!!
 
         setContent {
             RunPalTheme {
@@ -169,7 +188,7 @@ class EventRunResultsActivity : ComponentActivity() {
                             }
 
                             composable(route = RankingDestination.argsRoute) {
-                                Text(text = "TO DO")
+                                EventResultScreen(ranking = vm.ranking, user = user)
                             }
                         }
                     }

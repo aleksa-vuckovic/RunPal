@@ -219,4 +219,101 @@ export class DB {
         ])
         return ret
     }
+
+    static async eventRanking(eventID: string): Promise<Array<any>> {
+        let event = await eventModel.findOne({_id: new ObjectId(eventID)})
+        if (event == null) return []
+        let ret = await runModel.aggregate([
+            {
+                $match: {
+                    event: event._id
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    user: "$user",
+                    finish: {
+                        $filter: {
+                            input: "$path",
+                            cond: {$gte:["$$this", event.distance]},
+                            limit: 1
+                        }
+                    }
+                }
+            },
+            {
+                $unwind: "$finish"
+            },
+            {
+                $sort: {
+                    "finish.time": 1
+                }
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "user",
+                    foreignField: "email",
+                    as: "data"
+                }
+            },
+            {
+                $unwind: "$data"
+            },
+            {
+                $project: {
+                    user: "$user",
+                    name: "$data.name",
+                    last: "$data.last",
+                    time: {$sub: ["$finish.time", event.time]}
+                }
+            }
+        ])
+        return ret
+    }
+    static async eventRankingLive(eventID: string): Promise<Array<any>> {
+        let ranking = await this.eventRanking(eventID)
+        if (ranking.length >= 10) return ranking.slice(0, 10)
+        let event = await eventModel.findOne({_id: new ObjectId(eventID)})
+        if (event == null) return []
+        let ret = await runModel.aggregate([
+            {
+                $match: {
+                    event: new ObjectId(eventID),
+                    "location.distance": {$lt: event.distance}
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    user: "$user",
+                    distance: "$location.distance"
+                }
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "$user",
+                    foreignField: "$email",
+                    as: "data"
+                }
+            },
+            {
+                $project: {
+                    user: "$user",
+                    name: "$data.name",
+                    last: "$data.last",
+                    distance: "$distance"
+                }
+            },
+            {
+                $sort: {"distance": -1}
+            },
+            {
+                $limit: 10-ranking.length
+            }
+        ])
+        return ranking.concat(ret)   
+    }
 }

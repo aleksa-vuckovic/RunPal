@@ -8,9 +8,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.runpal.EVENT_ID_KEY
 import com.example.runpal.ServerException
+import com.example.runpal.models.EventResult
 import com.example.runpal.models.RunData
 import com.example.runpal.models.User
 import com.example.runpal.repositories.LoginManager
+import com.example.runpal.repositories.ServerEventRepository
 import com.example.runpal.repositories.run.CombinedRunRepository
 import com.example.runpal.repositories.user.CombinedUserRepository
 import com.example.runpal.tryRepeat
@@ -26,6 +28,7 @@ class EventRunResultsViewModel @Inject constructor(
     private val userRepository: CombinedUserRepository,
     private val runRepository: CombinedRunRepository,
     private val loginManager: LoginManager,
+    private val eventRepository: ServerEventRepository,
     savedStateHandle: SavedStateHandle,
     @ApplicationContext private val context: Context
 ): ViewModel() {
@@ -41,6 +44,7 @@ class EventRunResultsViewModel @Inject constructor(
     private val _distanceDataset = mutableStateOf(PathChartDataset.EMPTY)
     private val _mapMin = mutableStateOf(LatLng(0.0, 0.0))
     private val _mapMax = mutableStateOf(LatLng(0.0,0.0))
+    private val _ranking = mutableStateOf(listOf<EventResult>())
 
     val state: State
         get() = _state.value
@@ -60,6 +64,8 @@ class EventRunResultsViewModel @Inject constructor(
         get() = _mapMin.value
     val mapMax: LatLng
         get() = _mapMax.value
+    val ranking: List<EventResult>
+        get() = _ranking.value
 
     val eventID: String = savedStateHandle[EVENT_ID_KEY]!!
     val email = loginManager.currentUser()!!
@@ -74,6 +80,7 @@ class EventRunResultsViewModel @Inject constructor(
             try {
                 _user.value = tryRepeat { userRepository.getUser(email) }
                 _run.value = tryRepeat { runRepository.getUpdate(user = email, id = null, event = eventID) }
+                _ranking.value = tryRepeat { eventRepository.ranking(eventID) }
                 _speedDataset.value = PathChartDataset(path = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.speed})
                 _kcalDataset.value = PathChartDataset(path = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.kcal})
                 _altitudeDataset.value = PathChartDataset(path = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.altitude})

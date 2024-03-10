@@ -48,6 +48,7 @@ import com.example.runpal.LoadingDots
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.R
 import com.example.runpal.RUN_MARKER_SIZE
+import com.example.runpal.Units
 import com.example.runpal.activities.home.CreateEventScreen
 import com.example.runpal.activities.home.EventsScreen
 import com.example.runpal.activities.home.HomeActivity
@@ -55,6 +56,7 @@ import com.example.runpal.activities.home.SmallEventCard
 import com.example.runpal.activities.login.LoginActivity
 import com.example.runpal.activities.results.PathChartAndPanel
 import com.example.runpal.activities.results.UserSelection
+import com.example.runpal.activities.results.event.EventResultScreen
 import com.example.runpal.activities.running.group.MapRanking
 import com.example.runpal.activities.running.group.fakeRunState
 import com.example.runpal.activities.running.group.fakeRunState2
@@ -62,6 +64,7 @@ import com.example.runpal.activities.running.group.fakeUser
 import com.example.runpal.activities.running.group.fakeUser2
 import com.example.runpal.generateSimpleMarkerBitmap
 import com.example.runpal.models.Event
+import com.example.runpal.models.EventResult
 import com.example.runpal.models.PathPoint
 import com.example.runpal.repositories.run.CombinedRunRepository
 import com.example.runpal.room.PathDao
@@ -103,7 +106,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-
+/*
         lifecycleScope.launch {
             runDao.deleteAll()
             pathDao.deleteAll()
@@ -120,7 +123,7 @@ class MainActivity : ComponentActivity() {
             }
 
         }
-
+*/
 
 
 
@@ -137,8 +140,18 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val ranks = listOf(
+                        EventResult(user = "user1", name = "Some", last = "Name", time = 12*60000),
+                        EventResult(user = "user2", name = "Some2", last = "Name", time = 13*60200),
+                        EventResult(user = "user3", name = "Some3", last = "Name", time = 14*60500),
+                        EventResult(user = "user4", name = "Some3", last = "Name", time = 15*60500),
+                        /*EventResult(name = "Some4", last = "Name", distance = 1289.0),
+                        EventResult(name = "Some5", last = "Name", distance = 1223.0)*/
+                    )
+                    EventResultScreen(ranking = ranks, user = "user4")
 
 
+/*
                     Box(modifier = Modifier.fillMaxSize()) {
                         Image(painter = painterResource(id = R.drawable.runner),
                             contentDescription = "Loading",
@@ -148,7 +161,7 @@ class MainActivity : ComponentActivity() {
                         LoadingDots(size = 30.dp, count = 3, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 30.dp))
                     }
 
-                     
+                     */
 
                 }
             }

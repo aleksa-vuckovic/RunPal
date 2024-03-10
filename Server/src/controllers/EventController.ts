@@ -50,4 +50,18 @@ export class EventController {
         let ret =await DB.unfollowEvent(req.jwt.email, req.params.event)
         res.json({message: ret})
     }
+
+    ranking = async(req: express.Request, res: express.Response) => {
+        let eventID = req.params.event
+        let ret = await DB.eventRanking(eventID)
+        res.json({message: "ok", data: ret})
+        return
+    }
+
+    rankingLive = async(req: express.Request, res: express.Response) => {
+        let eventID = req.params.event
+        let ret = await DB.eventRankingLive(eventID)
+        res.json({message: "ok", data: ret})
+        return
+    }
 }

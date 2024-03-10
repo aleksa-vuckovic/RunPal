@@ -119,8 +119,14 @@ class EventRunActivity : ComponentActivity() {
                                 vm.start()
                                 longbeep?.start()
                             }, sound = shortbeep)
-                            else if (state == Run.State.RUNNING) RunPause(onPause = vm::pause, onFinish = vm::end)
-                            else if (state == Run.State.PAUSED) RunResume(onResume = vm::resume, onFinish = vm::end)
+                            else if (state == Run.State.RUNNING) {
+                                RunPause(onPause = vm::pause, onFinish = vm::end)
+                                MapRanking(ranking = vm.rankingLive, units = units)
+                            }
+                            else if (state == Run.State.PAUSED) {
+                                RunResume(onResume = vm::resume, onFinish = vm::end)
+                                MapRanking(ranking = vm.rankingLive, units = units)
+                            }
                             LaunchedEffect(key1 = state) {
                                 if (state == Run.State.ENDED) {
                                     delay(200) //giving time for the server update

@@ -304,6 +304,7 @@ fun MapRanking(runStates: List<RunState>, users: List<User>, units: Units, pace:
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .shadow(elevation = 5.dp, shape = RoundedCornerShape(topEnd = 10.dp))
                     .clip(shape = RoundedCornerShape(topEnd = 10.dp))
                     .background(color = MaterialTheme.colorScheme.background)
             ) {
