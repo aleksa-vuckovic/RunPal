@@ -5,7 +5,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,7 +22,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
@@ -38,12 +42,14 @@ import com.example.runpal.activities.results.GeneralResults
 import com.example.runpal.activities.results.PathChartAndPanel
 import com.example.runpal.activities.results.UserSelection
 import com.example.runpal.activities.results.solo.SoloRunResultsViewModel
+import com.example.runpal.borderBottom
 import com.example.runpal.repositories.LoginManager
 import com.example.runpal.repositories.SettingsManager
 import com.example.runpal.restartApp
 import com.example.runpal.ui.AxesOptions
 import com.example.runpal.ui.theme.RunPalTheme
 import com.example.runpal.ui.theme.StandardNavBar
+import com.example.runpal.ui.theme.StandardSpinner
 import com.example.runpal.ui.theme.StandardTopBar
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -200,7 +206,50 @@ class GroupRunResultsActivity : ComponentActivity() {
                             }
 
                             composable(route = RankingDestination.argsRoute) {
-                                Text(text = "TO DO")
+                                val possibleCriteria = remember {
+                                    listOf("Distance", "Pace", "Speed", "Kcal")
+                                }
+                                var criteria by rememberSaveable {
+                                    mutableStateOf("Distance")
+                                }
+                                val ranking = remember(criteria) {
+                                    if (criteria == "Distance")
+                                        vm.runs.zip(vm.users).sortedBy {-it.first.location.distance}.map {
+                                            it.second to units.distanceFormatter.format(it.first.location.distance)
+                                        }
+                                    else if (criteria == "Kcal")
+                                        vm.runs.zip(vm.users).sortedBy {-it.first.location.kcal}.map {
+                                            it.second to KcalFormatter.format(it.first.location.kcal)
+                                        }
+                                    else
+                                        vm.speedDatasets.zip(vm.users).sortedBy { -it.first.avgY }.map {
+                                            it.second to (if (criteria == "Speed") units.speedFormatter.format(it.first.avgY) else units.paceFormatter.format(it.first.avgY))
+                                        }
+                                }
+                                Column(modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(20.dp)) {
+                                    Row(
+                                        modifier = Modifier
+                                            .borderBottom()
+                                            .padding(vertical = 10.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                       Text(text = "Criteria: ")
+                                       StandardSpinner(
+                                           values = possibleCriteria,
+                                           selected = criteria,
+                                           onSelect = {criteria = it}
+                                       )
+                                    }
+                                    for (i in ranking.indices) {
+                                        UserRankingRow(value = ranking[i].second,
+                                            user = ranking[i].first,
+                                            rank = i+1
+                                        )
+                                    }
+                                }
+
                             }
                         }
                     }

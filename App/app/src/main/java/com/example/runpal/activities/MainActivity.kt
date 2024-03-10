@@ -106,7 +106,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-/*
+
         lifecycleScope.launch {
             runDao.deleteAll()
             pathDao.deleteAll()
@@ -123,7 +123,7 @@ class MainActivity : ComponentActivity() {
             }
 
         }
-*/
+
 
 
 
@@ -140,18 +140,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val ranks = listOf(
-                        EventResult(user = "user1", name = "Some", last = "Name", time = 12*60000),
-                        EventResult(user = "user2", name = "Some2", last = "Name", time = 13*60200),
-                        EventResult(user = "user3", name = "Some3", last = "Name", time = 14*60500),
-                        EventResult(user = "user4", name = "Some3", last = "Name", time = 15*60500),
-                        /*EventResult(name = "Some4", last = "Name", distance = 1289.0),
-                        EventResult(name = "Some5", last = "Name", distance = 1223.0)*/
-                    )
-                    EventResultScreen(ranking = ranks, user = "user4")
 
-
-/*
                     Box(modifier = Modifier.fillMaxSize()) {
                         Image(painter = painterResource(id = R.drawable.runner),
                             contentDescription = "Loading",
@@ -160,8 +149,6 @@ class MainActivity : ComponentActivity() {
                                 .size(140.dp))
                         LoadingDots(size = 30.dp, count = 3, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 30.dp))
                     }
-
-                     */
 
                 }
             }

@@ -68,8 +68,10 @@ import com.example.runpal.models.PathPoint
 import com.example.runpal.models.Room
 import com.example.runpal.models.Run
 import com.example.runpal.models.User
+import com.example.runpal.ui.theme.BadgeType
 import com.example.runpal.ui.theme.LightGreen
 import com.example.runpal.ui.theme.LightRed
+import com.example.runpal.ui.theme.StandardBadge
 import com.example.runpal.ui.theme.StandardButton
 import com.example.runpal.ui.theme.StandardOutlinedTextField
 import com.example.runpal.ui.theme.TransparentWhite
@@ -318,6 +320,8 @@ fun MapRanking(runStates: List<RunState>, users: List<User>, units: Units, pace:
     }
 }
 
+
+
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun UserRankingRow(runState: RunState,
@@ -325,20 +329,16 @@ fun UserRankingRow(runState: RunState,
                    rank: Int,
                    units: Units,
                    pace: Boolean) {
-    val bg = if (runState.run.state == Run.State.ENDED) LightRed
-        else if (runState.run.state == Run.State.PAUSED) Color.LightGray
-        else if (runState.run.state == Run.State.READY) LightGreen
-        else Color.Transparent
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = bg)
             .borderBottom()
             .padding(10.dp)
         , verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        Text(text = "${rank}.", style = MaterialTheme.typography.titleSmall)
+        Text(text = "${rank}.", style = MaterialTheme.typography.titleSmall, modifier = Modifier.width(30.dp))
         Image(painter = rememberImagePainter(data = user.profileUri),
             contentDescription = user.name,
             modifier = Modifier
@@ -346,6 +346,9 @@ fun UserRankingRow(runState: RunState,
                 .clip(shape = RoundedCornerShape(5.dp)),
             contentScale = ContentScale.Crop)
         Text(text = user.name, style = MaterialTheme.typography.titleSmall)
+        if (runState.run.state == Run.State.ENDED) StandardBadge(text = "finish", type = BadgeType.DANGER)
+        else if (runState.run.state == Run.State.PAUSED) StandardBadge(text = "pause", type = BadgeType.INFO)
+        else if (runState.run.state == Run.State.READY) StandardBadge(text = "start", type = BadgeType.SUCCESS)
         Spacer(modifier = Modifier.weight(1f))
         PanelText(text = if (pace) units.paceFormatter.format(runState.location.speed)
                         else units.speedFormatter.format(runState.location.speed),
