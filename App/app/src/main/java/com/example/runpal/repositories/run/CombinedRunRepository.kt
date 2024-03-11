@@ -31,51 +31,48 @@ class CombinedRunRepository @Inject constructor(
     @ApplicationContext private val context: Context
 ): RunRepository {
 
-    private val unsynced: MutableSet<Pair<String, Long>> = mutableSetOf()
+    private val unsynced: MutableMap<Pair<String, Long>, Long?> = mutableMapOf()
+    private val syncing: MutableMap<Pair<String, Long>, Unit> = mutableMapOf()
     init {
         CoroutineScope(Dispatchers.Main).launch {
-            for (sync in syncDao.getAll()) unsynced.add(sync.user to sync.runId)
+            for (sync in syncDao.getAll()) unsynced.put(sync.user to sync.runId, sync.since)
         }
     }
     private suspend fun unsyncedCreate(run: Run) {
-        if (!isSynced(run)) return
-        unsynced.add(run.user to run.id)
+        val key = run.user to run.id
+        unsynced[key] = null
         syncDao.insert(Sync(user = run.user, runId = run.id, since = null))
     }
     private suspend fun unsyncedUpdate(runData: RunData) {
         val run = runData.run
-        if (!isSynced(run)) return
-        unsynced.add(run.user to run.id)
+        val key = run.user to run.id
+        if (unsynced.containsKey(key)) return
         val since = if (runData.path.size > 0) runData.path[0].time - 1 else System.currentTimeMillis()
+        unsynced[key] = since
         syncDao.insert(Sync(user = run.user, runId = run.id, since = since))
     }
-    private fun isSynced(run: Run) = !unsynced.contains(run.user to run.id)
+    private fun isUnsynced(run: Run) = unsynced.contains(run.user to run.id)
     private suspend fun attemptSync(run: Run) {
-        val s = syncDao.get(run.user, run.id)
-        if (s == null) {
-            unsynced.remove(run.user to run.id)
-            return
-        }
-        val update = localRunRepository.getUpdate(user = run.user, id = run.id, since = s.since ?: 0)
+        val key = run.user to run.id
+        if (!unsynced.containsKey(key) || syncing[key] != null) return
+        syncing[key] = Unit
+        val update = localRunRepository.getUpdate(user = run.user, id = run.id, since = unsynced[key] ?: 0L)
         try {
-            if (s.since == null) {
+            if (unsynced[key] == null) {
                 serverRunRepository.create(update.run)
-                s.since = 0L
-                syncDao.update(s)
+                unsynced[key] = 0L
+                syncDao.update(Sync(user = run.user, runId = run.id, since = 0L))
             }
             serverRunRepository.update(update)
-            syncDao.delete(s)
-            unsynced.remove(run.user to run.id)
-        } catch(e: ServerException) {
-            //The server has received the request and rejected it
-            syncDao.delete(s)
-            unsynced.remove(run.user to run.id)
+            syncDao.delete(Sync(user = run.user, runId = run.id, since = null))
+            unsynced.remove(key)
         } catch(e: Exception) {
             //The data remains to be synced
         }
+        syncing.remove(key)
     }
     suspend fun attemptSyncAll() {
-        for (item in syncDao.getAll()) attemptSync(Run(user = item.user, id = item.runId ))
+        for (item in unsynced.keys) attemptSync(Run(user = item.first, id = item.second ))
     }
 
 
@@ -86,23 +83,17 @@ class CombinedRunRepository @Inject constructor(
 
     override suspend fun create(run: Run) {
         localRunRepository.create(run)
-        if (isSynced(run)) try {
+        if (!isUnsynced(run)) try {
             serverRunRepository.create(run)
-        } catch(_: ServerException) {/*-||-*/}
-        catch(e: Exception) {
-            unsyncedCreate(run)
-        }
+        } catch(e: Exception) { unsyncedCreate(run) }
         else attemptSync(run)
     }
     override suspend fun update(runData: RunData) {
         localRunRepository.update(runData)
         val run = runData.run
-        if (isSynced(run)) try {
+        if (!isUnsynced(run)) try {
             serverRunRepository.update(runData)
-        } catch (_: ServerException) {/*-||-*/}
-        catch(e: Exception) {
-            unsyncedUpdate(runData)
-        }
+        } catch(e: Exception) { unsyncedUpdate(runData) }
         else attemptSync(run)
     }
 
@@ -117,11 +108,9 @@ class CombinedRunRepository @Inject constructor(
             try {
                 return localRunRepository.getUpdate(user, id, room, event, since)
             } catch (e: NotFound) {
-                Log.d("NOT FOUND", "Run not found in local rep. Serching server.")
                 //The run must be from a different device, so synchronize.
                 try {
                     val ret = serverRunRepository.getUpdate(user, id, room, event, since)
-                    Log.d("FOUND", "Found run in server rep. distance = " + ret.location.distance.toString())
                     localRunRepository.create(ret.run)
                     localRunRepository.update(ret)
                     return ret

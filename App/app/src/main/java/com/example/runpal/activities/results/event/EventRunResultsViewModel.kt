@@ -23,6 +23,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.example.runpal.R
+import com.example.runpal.models.Event
 
 @HiltViewModel
 class EventRunResultsViewModel @Inject constructor(
@@ -37,6 +38,7 @@ class EventRunResultsViewModel @Inject constructor(
         LOADING, LOADED, ERROR
     }
     private val _state = mutableStateOf(State.LOADING)
+    private val _data = mutableStateOf(Event())
     private val _user = mutableStateOf(User())
     private val _run = mutableStateOf(RunData())
     private val _speedDataset = mutableStateOf(PathChartDataset.EMPTY)
@@ -49,6 +51,8 @@ class EventRunResultsViewModel @Inject constructor(
 
     val state: State
         get() = _state.value
+    val data: Event
+        get() = _data.value
     val user: User
         get() = _user.value
     val run: RunData
@@ -82,14 +86,15 @@ class EventRunResultsViewModel @Inject constructor(
                 _user.value = tryRepeat { userRepository.getUser(email) }
                 _run.value = tryRepeat { runRepository.getUpdate(user = email, id = null, event = eventID) }
                 _ranking.value = tryRepeat { eventRepository.ranking(eventID) }
+                _data.value = tryRepeat { eventRepository.data(eventID) }
                 _speedDataset.value = PathChartDataset(data = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.speed})
                 _kcalDataset.value = PathChartDataset(data = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.kcal})
                 _altitudeDataset.value = PathChartDataset(data = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.altitude})
                 _distanceDataset.value = PathChartDataset(data = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.distance})
-                val minLat = _run.value.path.minOf { it.latitude }
-                val maxLat = _run.value.path.maxOf { it.latitude }
-                val minLng = _run.value.path.minOf { it.longitude }
-                val maxLng = _run.value.path.maxOf { it.longitude }
+                val minLat = _run.value.path.minOfOrNull { it.latitude } ?: 0.0
+                val maxLat = _run.value.path.maxOfOrNull { it.latitude } ?: 0.0
+                val minLng = _run.value.path.minOfOrNull { it.longitude } ?: 0.0
+                val maxLng = _run.value.path.maxOfOrNull { it.longitude } ?: 0.0
                 _mapMin.value = LatLng(minLat, minLng)
                 _mapMax.value = LatLng(maxLat, maxLng)
                 _state.value = State.LOADED

@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.runpal.EVENT_ID_KEY
+import com.example.runpal.LOCATION_UPDATE_PERIOD
 import com.example.runpal.LoadingScreen
 import com.example.runpal.R
 import com.example.runpal.RUN_MARKER_COLORS
@@ -70,8 +71,9 @@ class EventRunActivity : ComponentActivity() {
 
         if (!this.hasLocationPermission()) this.finish()
         provider = LocationServices.getFusedLocationProviderClient(this)
-        val req = LocationRequest.Builder(200).setMaxUpdateAgeMillis(0).setPriority(
-            Priority.PRIORITY_HIGH_ACCURACY).build()
+        val req = LocationRequest.Builder(LOCATION_UPDATE_PERIOD)
+            .setMaxUpdateAgeMillis(0)
+            .setPriority(Priority.PRIORITY_HIGH_ACCURACY).build()
         provider.requestLocationUpdates(req, locationListener, null)
 
         setContent {

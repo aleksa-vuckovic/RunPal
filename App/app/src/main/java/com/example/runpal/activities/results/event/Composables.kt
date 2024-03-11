@@ -27,11 +27,13 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.runpal.R
 import com.example.runpal.TimeFormatter
 import com.example.runpal.activities.running.PanelText
 import com.example.runpal.borderBottom
+import com.example.runpal.models.Event
 import com.example.runpal.models.EventResult
 import com.example.runpal.ui.theme.Bronze
 import com.example.runpal.ui.theme.DarkBronze
@@ -44,7 +46,7 @@ import com.example.runpal.ui.theme.RichBlack
 import com.example.runpal.ui.theme.Silver
 
 @Composable
-fun EventResultScreen(ranking: List<EventResult>, user: String) {
+fun EventResultScreen(ranking: List<EventResult>, user: String, event: Event) {
     val place = remember(ranking) {
         ranking.indexOfFirst { it.user == user } + 1
     }
@@ -58,6 +60,15 @@ fun EventResultScreen(ranking: List<EventResult>, user: String) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .borderBottom()
+                .padding(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = event.name, textAlign = TextAlign.Center, style = MaterialTheme.typography.titleMedium)
+        }
         Column(modifier = Modifier
             .fillMaxWidth()
             .borderBottom()

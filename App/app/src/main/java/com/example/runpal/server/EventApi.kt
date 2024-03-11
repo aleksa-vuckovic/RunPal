@@ -52,7 +52,7 @@ interface EventApi {
     /**
      * Follow the event.
      */
-    @GET("event/follow/:event")
+    @GET("event/follow/{event}")
     suspend fun follow(@Path("event") event: String): GenericResponse<Unit>
 
     /**
@@ -66,7 +66,7 @@ interface EventApi {
      * Returns the entire list of results for users who have finished the race,
      * sorted from best. Only returns users who have finished.
      */
-    @GET("event/ranking/:event")
+    @GET("event/ranking/{event}")
     suspend fun ranking(@Path("event") event: String): GenericResponse<List<EventResult>>
 
     /**
@@ -74,7 +74,7 @@ interface EventApi {
      * First entries are users who have finished the race, sorted by time,
      * and second are users who are still running, sorted by distance.
      */
-    @GET("event/rankinglive/:event")
+    @GET("event/rankinglive/{event}")
     suspend fun rankingLive(@Path("event") event: String): GenericResponse<List<EventResult>>
 
 }

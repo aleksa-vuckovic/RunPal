@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -22,6 +23,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.runpal.LoadingScreen
+import com.example.runpal.MAX_IMAGE_SIZE
 import com.example.runpal.R
 import com.example.runpal.ServerException
 import com.example.runpal.repositories.LoginManager
@@ -97,8 +100,13 @@ class LoginActivity : ComponentActivity() {
                                 var error by remember {
                                     mutableStateOf("")
                                 }
+                                var loading by rememberSaveable {
+                                    mutableStateOf(false)
+                                }
                                 val scope = rememberCoroutineScope()
+                                if (loading) LoadingScreen()
                                 RegisterScreen(onRegister = { email, password, name, last, weight, uri ->
+                                    loading = true
                                     scope.launch {
                                         try {
                                             loginManager.register(email, password, name, last, weight, uri)
@@ -115,6 +123,7 @@ class LoginActivity : ComponentActivity() {
                                         } catch (e: Exception) {
                                             e.printStackTrace()
                                         }
+                                        loading = false
                                     }
                                 }, errorMessage = error,
                                     modifier = Modifier.padding(20.dp))

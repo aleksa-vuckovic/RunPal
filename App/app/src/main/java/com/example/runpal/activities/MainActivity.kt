@@ -66,9 +66,11 @@ class MainActivity : ComponentActivity() {
         super.onStart()
 
         lifecycleScope.launch {
+            /*
             runDao.deleteAll()
             pathDao.deleteAll()
             syncDao.deleteAll()
+             */
 
             //combinedRunRepository.attemptSyncAll()
             try {

@@ -286,7 +286,7 @@ export class DB {
                     finish: {
                         $filter: {
                             input: "$path",
-                            cond: {$gte:["$$this", event.distance]},
+                            cond: {$gte:["$$this.distance", event.distance]},
                             limit: 1
                         }
                     }
@@ -316,7 +316,7 @@ export class DB {
                     user: "$user",
                     name: "$data.name",
                     last: "$data.last",
-                    time: {$sub: ["$finish.time", event.time]}
+                    time: {$subtract: ["$finish.time", event.time]}
                 }
             }
         ])
@@ -344,10 +344,13 @@ export class DB {
             {
                 $lookup: {
                     from: "users",
-                    localField: "$user",
-                    foreignField: "$email",
+                    localField: "user",
+                    foreignField: "email",
                     as: "data"
                 }
+            },
+            {
+                $unwind: "$data"
             },
             {
                 $project: {

@@ -1,5 +1,6 @@
 package com.example.runpal
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,11 +48,11 @@ open class ChartDataset<T>(
     open val avgY: Double
 
     init {
-        minX = data.minOf(xValue)
-        maxX = data.maxOf(xValue)
-        minY = data.minOf(yValue)
-        maxY = data.maxOf(yValue)
-        avgY = data.sumOf(yValue) / data.size
+        minX = data.minOfOrNull(xValue) ?: 0.0
+        maxX = data.maxOfOrNull(xValue) ?: 0.0
+        minY = data.minOfOrNull(yValue) ?: 0.0
+        maxY = data.maxOfOrNull(yValue) ?: 0.0
+        avgY = data.sumOf(yValue) / if (data.size == 0) 1 else data.size
     }
 }
 
@@ -102,18 +103,20 @@ class ChartConfig(val datasets: List<ChartDataset<*>>,
         val minY = datasets.minOf { it.minY }
         val maxY = datasets.maxOf { it.maxY }
 
+
         val spanX = (maxX-minX)*axes.xExpandFactor
         if (spanX < axes.xSpanMin) this.spanX = axes.xSpanMin
         else this.spanX = spanX
-        val originX = minX - (spanX-(maxX-minX))/2
+        val originX = minX - (this.spanX-(maxX-minX))/2
         if (originX < 0.0) this.originX = 0.0
         else this.originX = originX
+        //Log.d("CHARTS", "minX = ${minX}, maxX = ${maxX}, spanX = ${spanX}, axes.xSpanMin=${axes.xSpanMin}, this.spanX=${this.spanX}, originX=${originX}")
 
 
         val spanY = (maxY-minY)*axes.yExpandFactor
         if (spanY < axes.ySpanMin) this.spanY = axes.ySpanMin
         else this.spanY = spanY
-        val originY = minY - (spanY-(maxY-minY))/2
+        val originY = minY - (this.spanY-(maxY-minY))/2
         if (originY < 0.0) this.originY = 0.0
         else this.originY = originY
     }
@@ -298,7 +301,6 @@ private fun <T> ScatterChart(dataset: ChartDataset<T>,
 ) {
     if (!options.show) return
     val textMeasurer = rememberTextMeasurer()
-    val chartOrigin = chartConfig.chartOrigin
     Canvas(modifier = Modifier.fillMaxSize()) {
         clipPath(
             path = bounds,

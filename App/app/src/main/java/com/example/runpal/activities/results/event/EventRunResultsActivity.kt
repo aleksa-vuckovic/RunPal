@@ -39,8 +39,10 @@ import com.example.runpal.AxesOptions
 import com.example.runpal.ui.theme.RunPalTheme
 import com.example.runpal.ui.theme.StandardNavBar
 import com.example.runpal.ui.theme.StandardTopBar
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class EventRunResultsActivity : ComponentActivity() {
     @Inject
     lateinit var loginManager: LoginManager
@@ -170,7 +172,7 @@ class EventRunResultsActivity : ComponentActivity() {
                             }
 
                             composable(route = RankingDestination.argsRoute) {
-                                EventResultScreen(ranking = vm.ranking, user = user)
+                                EventResultScreen(ranking = vm.ranking, user = user, event = vm.data)
                             }
                         }
                     }

@@ -53,10 +53,10 @@ class StatsViewModel @Inject constructor(
                 val key = options[i]
                 val runs = runRepository.getRunsSince(cur-times[i])
                 _totalKm[key] = runs.sumOf { it.location.distance }
-                _bestKm[key] = runs.maxOf { it.location.distance }
-                _avgKm[key] = _totalKm[key]!!/runs.size
+                _bestKm[key] = runs.maxOfOrNull { it.location.distance } ?: 0.0
+                _avgKm[key] = _totalKm[key]!!/(if (runs.size == 0) 1 else runs.size)
                 _totalTime[key] = runs.sumOf { it.run.running }
-                _longestTime[key] = runs.maxOf { it.run.running }
+                _longestTime[key] = runs.maxOfOrNull { it.run.running } ?: 0L
                 _runData[key] = runs
             }
             _state.value = State.LOADED

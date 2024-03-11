@@ -99,4 +99,5 @@
     <string name="average_run">Average run</string>
     <string name="longest_run">Longest run</string>
     <string name="total_running_time">Total running time</string>
+    <string name="max_image_size_message">Max image size iz 5MB.</string>
 </resources>

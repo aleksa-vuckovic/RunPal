@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toFile
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,6 +26,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.runpal.ErrorScreen
 import com.example.runpal.LoadingScreen
+import com.example.runpal.MAX_IMAGE_SIZE
 import com.example.runpal.R
 import com.example.runpal.activities.home.StatsDestination
 import com.example.runpal.repositories.LoginManager
@@ -98,13 +100,18 @@ class AccountActivity : ComponentActivity() {
                             }
 
                             composable(route = EditDestination.argsRoute) {
+
+                                var error by remember {
+                                    mutableStateOf("")
+                                }
+
                                 EditScreen(init = user,
                                     onUpdate = { name, last, weight, profile ->
                                         lifecycleScope.launch {
                                             vm.update(name, last, weight, profile)
                                         }
                                         navController.navigate(AccountDestination.argsRoute)
-                                    }, errorMessage = "",
+                                    }, errorMessage = error,
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .padding(20.dp))

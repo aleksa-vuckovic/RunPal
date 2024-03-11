@@ -2,10 +2,12 @@ package com.example.runpal.activities.home
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.runpal.MAX_IMAGE_SIZE
 import com.example.runpal.R
 import com.example.runpal.ServerException
 import com.example.runpal.repositories.ServerEventRepository
@@ -51,10 +53,7 @@ class CreateEventViewModel @Inject constructor(
                 _error.value = context.resources.getString(R.string.no_internet_message)
                 _state.value = State.INPUT
             }
-
-
         }
-
     }
 
 }

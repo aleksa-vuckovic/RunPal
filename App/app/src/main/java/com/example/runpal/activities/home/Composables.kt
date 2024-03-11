@@ -422,7 +422,7 @@ fun CreateEventScreen(onCreate: (String, String, Long?, Double, Uri?) -> Unit,
                 }
             },
             modifier = Modifier.padding(50.dp)) {
-            TimeInput(state = time, modifier = Modifier.align(Alignment.CenterHorizontally))
+            TimeInput(state = time, modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 10.dp))
         }
 
         Row(

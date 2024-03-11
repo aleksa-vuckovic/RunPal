@@ -13,6 +13,11 @@ export class RunController {
             res.json({message: ret})
             return
         }
+        let existing = await DB.run(output.user, output.id)
+        if (existing != null) {
+            res.json({message: "ok"})
+            return
+        }
         ret = await DB.createRun(output)
         res.json({message: ret})
         return
