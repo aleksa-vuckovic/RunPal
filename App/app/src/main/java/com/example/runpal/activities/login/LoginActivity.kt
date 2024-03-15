@@ -78,9 +78,13 @@ class LoginActivity : ComponentActivity() {
                                 var error by remember {
                                     mutableStateOf("")
                                 }
+                                var loading by rememberSaveable {
+                                    mutableStateOf(false)
+                                }
                                 val scope = rememberCoroutineScope()
                                 LoginScreen(onLogin = { email, password ->
                                     scope.launch {
+                                        loading = true
                                         try {
                                             loginManager.login(email, password)
                                             this@LoginActivity.startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
@@ -90,11 +94,14 @@ class LoginActivity : ComponentActivity() {
                                             Toast.makeText(this@LoginActivity, this@LoginActivity.getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show()
                                             e.printStackTrace()
                                         }
+                                        loading = false
                                     }
                                 }, errorMessage = error,
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .padding(20.dp))
+                                        .padding(20.dp)
+                                )
+                                if (loading) LoadingScreen()
                             }
                             composable(route = RegisterDestination.argsRoute) {
                                 var error by remember {
@@ -104,7 +111,6 @@ class LoginActivity : ComponentActivity() {
                                     mutableStateOf(false)
                                 }
                                 val scope = rememberCoroutineScope()
-                                if (loading) LoadingScreen()
                                 RegisterScreen(onRegister = { email, password, name, last, weight, uri ->
                                     loading = true
                                     scope.launch {
@@ -126,7 +132,9 @@ class LoginActivity : ComponentActivity() {
                                         loading = false
                                     }
                                 }, errorMessage = error,
-                                    modifier = Modifier.padding(20.dp))
+                                    modifier = Modifier.padding(20.dp)
+                                )
+                                if (loading) LoadingScreen()
                             }
                         }
                     }

@@ -87,7 +87,7 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
         }
     }
 
-    private val positionFilter: PositionFilter = PositionFilter(if (updateInterval < 2000) 2000/updateInterval.toInt() else 1, 3, 10.0, 2000)
+    private val positionFilter: PositionFilter = PositionFilter(if (updateInterval < 2000) 2000/updateInterval.toInt() else 1, 3, 20.0, 2000)
     private val speedFilter: MovingAverageFilter = MovingAverageFilter(if (updateInterval < 2000) 2000/updateInterval.toInt() else 1)
 
     override val run: Run
