@@ -35,3 +35,10 @@ const val REMINDER_CHANNEL_ID = "REMINDER_CHANNEL"
 const val EVENT_DEEP_LINK_URI = "https://runpal.example.com/event/"
 const val EVENT_VIEW_REQUEST_CODE = 1
 const val REMINDER_NOTIFICATION_ID = 1
+
+const val RUNNING_CHANNEL_ID = "RUNNING_ACTIVITY"
+const val RUNNING_NOTIFICATION_ID = 1
+const val RUNNING_REQUEST_CODE = 1
+
+const val CLASS_NAME_KEY = "CLASSNAME"
+const val PACKAGE_KEY = "PACKAGE"

@@ -1,10 +1,14 @@
 package com.example.runpal.activities.running.solo
 
 import android.annotation.SuppressLint
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.location.Location
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.IBinder
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -22,8 +26,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.runpal.CLASS_NAME_KEY
 import com.example.runpal.LOCATION_UPDATE_PERIOD
 import com.example.runpal.LoadingScreen
+import com.example.runpal.LocationService
+import com.example.runpal.PACKAGE_KEY
 import com.example.runpal.R
 import com.example.runpal.RUN_ID_KEY
 import com.example.runpal.RUN_MARKER_COLORS
@@ -51,12 +58,13 @@ class SoloRunActivity : ComponentActivity() {
 
 
     val vm: SoloRunViewModel by viewModels()
-    val locationListener: LocationListener = object: LocationListener {
-        override fun onLocationChanged(p0: Location) {
-            vm.updateLocation(p0)
+    lateinit var serviceIntent: Intent
+    val connection = object: ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            (service as LocationService.LocalBinder).setListener { vm.updateLocation(it) }
         }
+        override fun onServiceDisconnected(name: ComponentName?) {}
     }
-    lateinit var provider: FusedLocationProviderClient
     var shortbeep: MediaPlayer? = null
     var longbeep: MediaPlayer? = null
 
@@ -66,18 +74,16 @@ class SoloRunActivity : ComponentActivity() {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!this.hasLocationPermission()) this.finish()
+        serviceIntent = Intent(this, LocationService::class.java).apply {
+            putExtra(PACKAGE_KEY, componentName.packageName);
+            putExtra(CLASS_NAME_KEY, componentName.className)
+        }
+        startForegroundService(serviceIntent)
+        bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE)
 
         shortbeep = MediaPlayer.create(this, R.raw.shortbeep)
         longbeep = MediaPlayer.create(this, R.raw.longbeep)
-
-        if (!this.hasLocationPermission()) this.finish()
-        provider = LocationServices.getFusedLocationProviderClient(this)
-        val req = LocationRequest.Builder(LOCATION_UPDATE_PERIOD)
-            .setMaxUpdateAgeMillis(0)
-            .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-            .build()
-        provider.requestLocationUpdates(req, locationListener, null)
-
 
         setContent {
             RunPalTheme {
@@ -142,7 +148,8 @@ class SoloRunActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        provider.removeLocationUpdates(locationListener)
+        unbindService(connection)
+        stopService(serviceIntent)
         shortbeep?.release()
         longbeep?.release()
         shortbeep = null

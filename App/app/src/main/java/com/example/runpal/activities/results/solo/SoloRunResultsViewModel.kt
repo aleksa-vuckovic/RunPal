@@ -1,6 +1,7 @@
 package com.example.runpal.activities.results.solo
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
@@ -75,10 +76,12 @@ class SoloRunResultsViewModel @Inject constructor(
             try {
                 _user.value = tryRepeat { userRepository.getUser(email) }
                 _run.value = tryRepeat { runRepository.getUpdate(user = email, id = runID) }
+                Log.d("TEST","OK2")
                 _speedDataset.value = PathChartDataset(data = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.speed})
                 _kcalDataset.value = PathChartDataset(data = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.kcal})
                 _altitudeDataset.value = PathChartDataset(data = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.altitude})
                 _distanceDataset.value = PathChartDataset(data = _run.value.path, xValue = {it.time.toDouble()}, yValue = {it.distance})
+                Log.d("TEST","OK3")
                 val minLat = _run.value.path.minOf { it.latitude }
                 val maxLat = _run.value.path.maxOf { it.latitude }
                 val minLng = _run.value.path.minOf { it.longitude }
@@ -86,6 +89,7 @@ class SoloRunResultsViewModel @Inject constructor(
                 _mapMin.value = LatLng(minLat, minLng)
                 _mapMax.value = LatLng(maxLat, maxLng)
                 _state.value = State.LOADED
+                Log.d("TEST","OK4")
             } catch(e: ServerException) {
                 e.printStackTrace()
                 _state.value = State.ERROR

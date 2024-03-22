@@ -91,6 +91,9 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
 
+    //service
+    implementation("androidx.lifecycle:lifecycle-service:2.7.0")
+
     //hilt
     implementation("com.google.dagger:hilt-android:2.44")
     kapt("com.google.dagger:hilt-compiler:2.44")

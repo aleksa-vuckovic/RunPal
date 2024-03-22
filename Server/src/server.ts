@@ -7,6 +7,7 @@ import runRouter from './routers/runRouter'
 import roomRouter from './routers/roomRouter'
 import eventRouter from './routers/eventRouter'
 import multer from 'multer'
+import runModel from './models/Run'
 
 mongoose.connect("mongodb+srv://aleksavuckovic77:nintendowii@iepproba.yn7bmhq.mongodb.net/runpal")
 mongoose.connection.once('open', async () => {

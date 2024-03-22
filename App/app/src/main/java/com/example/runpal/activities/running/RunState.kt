@@ -2,13 +2,12 @@ package com.example.runpal.activities.running
 
 import android.content.Context
 import android.location.Location
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.example.runpal.models.PathPoint
 import com.example.runpal.filters.MovingAverageFilter
-import com.example.runpal.filters.PositionFilter
+import com.example.runpal.filters.LocationFilter
 import com.example.runpal.kcalExpenditure
 import com.example.runpal.models.Run
 import com.example.runpal.models.RunData
@@ -50,7 +49,6 @@ interface RunState {
  */
 class LocalRunState @AssistedInject constructor (@Assisted run: Run,
                                                  @Assisted private val scope: CoroutineScope,
-                                                 @Assisted updateInterval: Long,
                                                  private val runRepository: CombinedRunRepository,
                                                  private val userRepository: UserRepository
 ): RunState {
@@ -71,7 +69,6 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
                     room = run.room,
                     event = run.event
                 )
-                Log.d("GOT EXISTING UPDATE", "Location distance = " + existingData.location.distance.toString() + " , time = " + existingData.location.time.toString())
                 _run.value = existingData.run
                 _location.value = PathPoint.init(distance = existingData.location.distance, kcal = existingData.location.kcal)
                 _path.addAll(existingData.path)
@@ -87,8 +84,7 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
         }
     }
 
-    private val positionFilter: PositionFilter = PositionFilter(if (updateInterval < 2000) 2000/updateInterval.toInt() else 1, 3, 20.0, 2000)
-    private val speedFilter: MovingAverageFilter = MovingAverageFilter(if (updateInterval < 2000) 2000/updateInterval.toInt() else 1)
+    private val speedFilter = MovingAverageFilter(5)
 
     override val run: Run
         get() = _run.value
@@ -111,37 +107,32 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
 
 
     /**
-     * @param loc The current location provided by GPS.
+     * @param loc The current location (filtered).
      */
     fun update(loc: Location) {
-        val cur = positionFilter.filter(loc.toPathPoint())
-        if (cur == null) return
-
+        val cur = loc.toPathPoint()
         val runUpdate = RunData(run = _run.value, location = cur)
 
         val prev = _location.value
+        cur.speed = prev.speed
         cur.distance = prev.distance
         cur.kcal = prev.kcal
-        if (!prev.isInit()) {
-            val distanceDifference = prev.distance(cur)
-            val timeDifference = (cur.time - prev.time) / 1000
-            cur.speed = if (timeDifference != 0L) distanceDifference / timeDifference else prev.speed
-            cur.speed = speedFilter.filter(cur.speed)
-
-            if (_run.value.state == Run.State.RUNNING) {
+        if (_run.value.state == Run.State.RUNNING) {
+            if (!prev.isInit()) {
+                val distanceDifference = prev.distance(cur)
+                val timeDifference = (cur.time - prev.time) / 1000
+                cur.speed = if (timeDifference != 0L) distanceDifference / timeDifference else prev.speed
+                cur.speed = speedFilter.filter(cur.speed)
                 cur.distance += distanceDifference
                 val slope = if (distanceDifference != 0.0) (cur.altitude - prev.altitude)/distanceDifference else 0.0
                 val expenditure = kcalExpenditure(cur.speed, slope, userWeight)
                 cur.kcal += expenditure*timeDifference
             }
-        }
-        if (_run.value.state == Run.State.RUNNING) {
             _path.add(cur)
             runUpdate.path = listOf(cur)
         }
         _location.value = cur
-        if (_run.value.state != Run.State.READY
-            && _run.value.state != Run.State.LOADING)
+        if (_run.value.state != Run.State.READY && _run.value.state != Run.State.LOADING)
             scope.launch { runRepository.update(runUpdate) }
     }
 
@@ -240,8 +231,7 @@ class NonlocalRunState @AssistedInject constructor (
 @AssistedFactory
 interface LocalRunStateFactory {
     fun createLocalRunState(run: Run,
-                            scope: CoroutineScope,
-                            updateInterval: Long = 200L): LocalRunState
+                            scope: CoroutineScope): LocalRunState
 }
 @AssistedFactory
 interface NonlocalRunStateFactory {

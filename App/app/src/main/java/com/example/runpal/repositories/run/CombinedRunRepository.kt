@@ -106,6 +106,7 @@ class CombinedRunRepository @Inject constructor(
     ): RunData {
         if (loginManager.currentUser() == user) {
             try {
+                //throw NotFound("not fohnd")
                 return localRunRepository.getUpdate(user, id, room, event, since)
             } catch (e: NotFound) {
                 //The run must be from a different device, so synchronize.

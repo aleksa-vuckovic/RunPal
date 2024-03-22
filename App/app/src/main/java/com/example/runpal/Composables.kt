@@ -303,13 +303,43 @@ fun PathEndMarker(latLng: LatLng, color: Color) {
     )
 }
 
+
+fun List<PathPoint>.toSegments(): List<List<LatLng>> {
+    val res: MutableList<List<LatLng>> = mutableListOf()
+    var cur: MutableList<LatLng> = mutableListOf()
+    for (p in this) {
+        cur.add(p.toLatLng())
+        if (p.end) {
+            res.add(cur)
+            cur = mutableListOf()
+        }
+    }
+    if (!cur.isEmpty()) res.add(cur)
+    return res
+}
 @Composable
 fun GoogleMapPath(pathPoints: List<PathPoint>, startColor: Color = Color.Green, color: Color, endColor: Color = Color.Red) {
+    /*
+    val skip: Int = pathPoints.size / max
+    var prev: PathPoint? = null
     for (i in 0..pathPoints.size-2) {
         if (pathPoints[i].end || pathPoints[i+1].end) PathEndMarker(latLng = pathPoints[i+1].toLatLng(), color = if (i == pathPoints.size - 2) endColor else color)
         if (!pathPoints[i].end) Polyline(points = listOf(pathPoints[i].toLatLng(), pathPoints[i+1].toLatLng()), color = color, width = 10f, visible = true)
     }
     if (pathPoints.isNotEmpty()) PathEndMarker(latLng = pathPoints[0].toLatLng(), color = startColor)
+    */
+    val segments = pathPoints.toSegments()
+    for (i in segments.indices) {
+        if (i == 0) PathEndMarker(latLng = segments[i].first(), color = startColor)
+        else PathEndMarker(latLng = segments[i].first(), color = color)
+        Polyline(points = segments[i], color = color, width = 10f, visible = true)
+        if (i == segments.size - 1) {
+            if (pathPoints.lastOrNull()?.end == true)
+                PathEndMarker(latLng = segments[i].last(), color = endColor)
+        }
+        else PathEndMarker(latLng = segments[i].last(), color = color)
+
+    }
 }
 
 
@@ -324,7 +354,7 @@ fun risingDoubleAsState(target: Double): State<Double> {
         while(true) {
             delay(20)
             val x = (System.currentTimeMillis() - start).toDouble()/time
-            val t = sqrt(x)
+            val t = Math.pow(x, 0.2)
             if (t >= 1) {
                 cur.value = target
                 break
