@@ -8,6 +8,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.example.runpal.models.PathPoint
 import com.example.runpal.filters.MovingAverageFilter
 import com.example.runpal.filters.LocationFilter
+import com.example.runpal.filters.SpeedFilter
 import com.example.runpal.kcalExpenditure
 import com.example.runpal.models.Run
 import com.example.runpal.models.RunData
@@ -84,7 +85,7 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
         }
     }
 
-    private val speedFilter = MovingAverageFilter(5)
+    private val speedFilter = SpeedFilter(20000L)
 
     override val run: Run
         get() = _run.value
@@ -121,9 +122,8 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
             if (!prev.isInit()) {
                 val distanceDifference = prev.distance(cur)
                 val timeDifference = (cur.time - prev.time) / 1000
-                cur.speed = if (timeDifference != 0L) distanceDifference / timeDifference else prev.speed
-                cur.speed = speedFilter.filter(cur.speed)
                 cur.distance += distanceDifference
+                cur.speed = speedFilter.filter(cur)
                 val slope = if (distanceDifference != 0.0) (cur.altitude - prev.altitude)/distanceDifference else 0.0
                 val expenditure = kcalExpenditure(cur.speed, slope, userWeight)
                 cur.kcal += expenditure*timeDifference
@@ -143,35 +143,36 @@ class LocalRunState @AssistedInject constructor (@Assisted run: Run,
             paused = false,
             id = if (_run.value.id == Run.UNKNOWN_ID) System.currentTimeMillis() else _run.value.id
         )
-        scope.launch {
-            runRepository.create(_run.value)
-        }
+        speedFilter.clear(_location.value)
+        scope.launch { runRepository.create(_run.value) }
     }
     fun pause() {
         if (_run.value.state != Run.State.RUNNING) return
         _run.value = _run.value.copy(paused = true)
-        segmentEndUpdate()
+        val update = segmentEndUpdate()
+        scope.launch { runRepository.update(update) }
     }
     fun resume() {
         if (_run.value.state != Run.State.PAUSED) return
         _run.value = _run.value.copy(paused = false)
+        speedFilter.clear(_location.value)
     }
     fun stop() {
         if (_run.value.state == Run.State.READY
             || _run.value.state == Run.State.ENDED
             || _run.value.state == Run.State.LOADING) return
         _run.value = _run.value.copy(end = System.currentTimeMillis())
-        segmentEndUpdate()
+        val update = segmentEndUpdate()
+        scope.launch { runRepository.update(update) }
     }
-    private fun segmentEndUpdate() {
+    private fun segmentEndUpdate(): RunData {
+        val update = RunData(run = _run.value, location = _location.value, path = listOf())
         val last = _path.lastOrNull()
-        if (last == null || last.end) return
+        if (last == null || last.end) return update
         val fakeend = last.copy(end = true, time = last.time + 1)
         _path.add(fakeend)
-        val runUpdate = RunData(run = _run.value, location = _location.value, path = listOf(fakeend))
-        scope.launch {
-            runRepository.update(runUpdate)
-        }
+        update.path = listOf(fakeend)
+        return update
     }
 }
 

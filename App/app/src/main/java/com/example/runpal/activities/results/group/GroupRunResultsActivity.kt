@@ -159,7 +159,7 @@ class GroupRunResultsActivity : ComponentActivity() {
                                             title = stringResource(id = R.string.altitude),
                                             datasets = vm.altitudeDatasets,
                                             selected = selected,
-                                            axesOptions = axesOptions.copy(yLabel = units.distanceFormatter, ySpanMin = 20.0),
+                                            axesOptions = axesOptions.copy(yLabel = units.distanceFormatter, ySpanMin = 100.0),
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .height(400.dp)

@@ -194,7 +194,7 @@ fun AccountScreen(user: User,
                     .fillMaxWidth()
                     .padding(20.dp)
             ) {
-                Text(text = stringResource(id = R.string.weight) + ": ${units.toStandardWeightInput(user.weight)}${units.standardWeightInput}", style = MaterialTheme.typography.bodyLarge)
+                Text(text = stringResource(id = R.string.weight) + ": %.2f%s".format(units.toStandardWeightInput(user.weight), units.standardWeightInput), style = MaterialTheme.typography.bodyLarge)
             }
             Row(
                 modifier = Modifier

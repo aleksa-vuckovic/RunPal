@@ -139,7 +139,7 @@ class EventRunResultsActivity : ComponentActivity() {
                                         title = stringResource(id = R.string.altitude),
                                         datasets = listOf(vm.altitudeDataset),
                                         selected = listOf(true),
-                                        axesOptions = axesOptions.copy(yLabel = units.distanceFormatter, ySpanMin = 20.0),
+                                        axesOptions = axesOptions.copy(yLabel = units.distanceFormatter, ySpanMin = 100.0),
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(400.dp)
