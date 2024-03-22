@@ -60,6 +60,7 @@ fun PathChartAndPanel(
     selected: List<Boolean>,
     axesOptions: AxesOptions,
     cumulative: Boolean = false,
+    onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier) {
 
     if (datasets.isEmpty()) return
@@ -87,6 +88,7 @@ fun PathChartAndPanel(
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable { onClick?.invoke() }
                 .background(color = MaterialTheme.colorScheme.surface)
                 .padding(10.dp),
             color = MaterialTheme.colorScheme.onSurface)

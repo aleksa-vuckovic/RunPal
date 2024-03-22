@@ -54,6 +54,12 @@ object LocalDateTimeFormatter: Formatter<Long> {
         return LocalDateTime.ofInstant(date, ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) to ""
     }
 }
+object TimeOnlyFormatter: Formatter<Long> {
+    override fun format(value: Long): Pair<String, String> {
+        val date = Instant.ofEpochMilli(value)
+        return LocalDateTime.ofInstant(date, ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("HH:mm:ss")) to ""
+    }
+}
 object DateOnlyFormatter: Formatter<Long> {
     override fun format(value: Long): Pair<String, String> {
         val date = Instant.ofEpochMilli(value)

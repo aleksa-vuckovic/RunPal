@@ -15,6 +15,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -36,6 +40,7 @@ import com.example.runpal.repositories.LoginManager
 import com.example.runpal.repositories.SettingsManager
 import com.example.runpal.restartApp
 import com.example.runpal.AxesOptions
+import com.example.runpal.TimeOnlyFormatter
 import com.example.runpal.ui.theme.RunPalTheme
 import com.example.runpal.ui.theme.StandardNavBar
 import com.example.runpal.ui.theme.StandardTopBar
@@ -98,20 +103,24 @@ class EventRunResultsActivity : ComponentActivity() {
                             composable(route = ChartsDestination.argsRoute) {
 
                                 val axesOptions = AxesOptions(
-                                    yLabel = units.speedFormatter,
                                     labelStyle = MaterialTheme.typography.labelSmall,
                                     yTickCount = 5
                                 )
+                                var pace by remember { mutableStateOf(false) }
 
                                 Column(modifier = Modifier
                                     .fillMaxWidth()
                                     .verticalScroll(rememberScrollState())
                                     .padding(10.dp)) {
                                     PathChartAndPanel(
-                                        title = stringResource(R.string.speed),
+                                        title = stringResource(if (pace) R.string.pace else R.string.speed),
                                         datasets = listOf(vm.speedDataset),
                                         selected = listOf(true),
-                                        axesOptions = axesOptions,
+                                        axesOptions = axesOptions.copy(
+                                            yLabel = if (pace) units.paceFormatter else units.speedFormatter,
+                                            yTickCount = if (pace) 0 else 5
+                                        ),
+                                        onClick = {pace = !pace},
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(400.dp)
@@ -159,9 +168,9 @@ class EventRunResultsActivity : ComponentActivity() {
                                         mapMax = vm.mapMax,
                                         values = listOf(
                                             stringResource(id = R.string.total_distance) to units.distanceFormatter.format(vm.distanceDataset.maxY),
-                                            stringResource(id = R.string.start_time) to (if (vm.run.run.start != null) LocalDateTimeFormatter.format(vm.run.run.start!!) else "TBD" to ""),
+                                            stringResource(id = R.string.start_time) to (if (vm.run.run.start != null) TimeOnlyFormatter.format(vm.run.run.start!!) else "TBD" to ""),
                                             stringResource(id = R.string.running_time) to TimeFormatter.format(vm.run.run.running),
-                                            stringResource(id = R.string.finish_time) to (if (vm.run.run.end != null) LocalDateTimeFormatter.format(vm.run.run.end!!) else "TBD" to ""),
+                                            stringResource(id = R.string.finish_time) to (if (vm.run.run.end != null) TimeOnlyFormatter.format(vm.run.run.end!!) else "TBD" to ""),
                                             stringResource(id = R.string.avg_pace) to units.paceFormatter.format(vm.speedDataset.avgY),
                                             stringResource(id = R.string.max_pace) to units.paceFormatter.format(vm.speedDataset.maxY),
                                             stringResource(id = R.string.total_kcal) to KcalFormatter.format(vm.kcalDataset.maxY)

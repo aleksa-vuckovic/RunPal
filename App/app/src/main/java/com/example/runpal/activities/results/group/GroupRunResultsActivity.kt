@@ -53,6 +53,7 @@ import com.example.runpal.ui.theme.StandardTopBar
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.example.runpal.R
+import com.example.runpal.TimeOnlyFormatter
 
 @AndroidEntryPoint
 class GroupRunResultsActivity : ComponentActivity() {
@@ -112,12 +113,11 @@ class GroupRunResultsActivity : ComponentActivity() {
                                     res.addAll(vm.users.map { true })
                                     res
                                 }
-
                                 val axesOptions = AxesOptions(
-                                    yLabel = units.speedFormatter,
                                     labelStyle = MaterialTheme.typography.labelSmall,
                                     yTickCount = 5
                                 )
+                                var pace by remember { mutableStateOf(false) }
 
                                 Column(
                                     modifier = Modifier.fillMaxSize()
@@ -133,10 +133,14 @@ class GroupRunResultsActivity : ComponentActivity() {
                                         .verticalScroll(rememberScrollState())
                                         .padding(10.dp)) {
                                         PathChartAndPanel(
-                                            title = stringResource(id = R.string.speed),
+                                            title = stringResource(id = if (pace) R.string.pace else R.string.speed),
                                             datasets = vm.speedDatasets,
                                             selected = selected,
-                                            axesOptions = axesOptions,
+                                            axesOptions = axesOptions.copy(
+                                                yLabel = if (pace) units.paceFormatter else units.speedFormatter,
+                                                yTickCount = if (pace) 0 else 5
+                                            ),
+                                            onClick = {pace = !pace},
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .height(400.dp)
@@ -193,9 +197,9 @@ class GroupRunResultsActivity : ComponentActivity() {
                                         mapMax = vm.mapMaxs[selected],
                                         values = listOf(
                                             stringResource(id = R.string.total_distance) to units.distanceFormatter.format(vm.distanceDatasets[selected].maxY),
-                                            stringResource(id = R.string.start_time) to (if (vm.runs[selected].run.start != null) LocalDateTimeFormatter.format(vm.runs[selected].run.start!!) else "TBD" to ""),
+                                            stringResource(id = R.string.start_time) to (if (vm.runs[selected].run.start != null) TimeOnlyFormatter.format(vm.runs[selected].run.start!!) else "TBD" to ""),
                                             stringResource(id = R.string.running_time) to TimeFormatter.format(vm.runs[selected].run.running),
-                                            stringResource(id = R.string.finish_time) to (if (vm.runs[selected].run.end != null) LocalDateTimeFormatter.format(vm.runs[selected].run.end!!) else "TBD" to ""),
+                                            stringResource(id = R.string.finish_time) to (if (vm.runs[selected].run.end != null) TimeOnlyFormatter.format(vm.runs[selected].run.end!!) else "TBD" to ""),
                                             stringResource(id = R.string.avg_pace) to units.paceFormatter.format(vm.speedDatasets[selected].avgY),
                                             stringResource(id = R.string.max_pace) to units.paceFormatter.format(vm.speedDatasets[selected].maxY),
                                             stringResource(id = R.string.total_kcal) to KcalFormatter.format(vm.kcalDatasets[selected].maxY)
