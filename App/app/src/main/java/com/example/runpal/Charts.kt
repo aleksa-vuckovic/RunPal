@@ -20,11 +20,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -286,7 +288,17 @@ private fun PathChartLine(dataset: PathChartDataset,
             if (options.markerLabel != null) {
                 val label = options.markerLabel.format(selectedY).join()
                 val text = textMeasurer.measure(label, options.markerLabelStyle)
-                drawText(text, topLeft = Offset(selected.x - text.size.width - options.width*4, selected.y - text.size.height))
+                /*
+                val topLeftText = Offset(
+                    selected.x - text.size.width - options.width * 4,
+                    selected.y - text.size.height * 1.2f
+                )
+                */
+                val topLeftText = Offset(
+                    selected.x - text.size.width / 2,
+                    selected.y - text.size.height - options.width * 4
+                )
+                drawMarkerLabel(text, topLeftText, options.color)
             }
         }
     }
@@ -342,20 +354,24 @@ private fun <T> ScatterChart(dataset: ChartDataset<T>,
                         selected.x - text.size.width / 2,
                         selected.y - text.size.height - options.width * 4
                     )
-                    val pad = 10f
-                    val topLeftRect = Offset(topLeftText.x - pad, topLeftText.y - pad)
-                    drawRoundRect(
-                        color = options.color.lightness(0.8f),
-                        topLeft = topLeftRect,
-                        size = Size(text.size.width + 2 * pad, text.size.height + 2 * pad),
-                        cornerRadius = CornerRadius(pad, pad)
-                    )
-                    drawText(text, topLeft = topLeftText)
+                    drawMarkerLabel(text, topLeftText, options.color)
                 }
             }
         }
     }
 }
+
+fun DrawScope.drawMarkerLabel(text: TextLayoutResult, topLeftText: Offset, color: Color, pad: Float = 10f) {
+    val topLeftRect = Offset(topLeftText.x - pad, topLeftText.y - pad)
+    drawRoundRect(
+        color = color.lightness(0.9f),
+        topLeft = topLeftRect,
+        size = Size(text.size.width + 2 * pad, text.size.height + 2 * pad),
+        cornerRadius = CornerRadius(pad, pad)
+    )
+    drawText(text, topLeft = topLeftText)
+}
+
 @Composable
 fun Chart(datasets: List<ChartDataset<*>>,
           options: List<ChartOptions>,

@@ -48,6 +48,7 @@ class LocationService : LifecycleService() {
     @SuppressLint("MissingPermission")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
+        clientListener = null
         provider = LocationServices.getFusedLocationProviderClient(this)
         val req = LocationRequest.Builder(LOCATION_UPDATE_PERIOD)
             .setMaxUpdateAgeMillis(0)

@@ -101,5 +101,5 @@
     <string name="longest_run">Najduža trka</string>
     <string name="total_running_time">Ukupno vreme trčanja</string>
     <string name="max_image_size_message">Slika ne sme biti veća od 5MB.</string>
-    <string name="running_activity_in_progress">Aktivnost je u toku.</string>
+    <string name="running_activity_in_progress">RunPal koristi servise lokacije.</string>
 </resources>
