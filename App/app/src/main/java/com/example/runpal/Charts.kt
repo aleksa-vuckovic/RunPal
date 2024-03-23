@@ -381,11 +381,13 @@ fun Chart(datasets: List<ChartDataset<*>>,
     var size by remember {
         mutableStateOf(Size(0f, 0f))
     }
-    val chartOffset = Size(90f, 45f)
-    val chartSize = remember(size) {
+    var chartOffset by remember {
+        mutableStateOf(Size(90f, 45f))
+    }
+    val chartSize = remember(chartOffset, size) {
         size.copy(width = size.width - chartOffset.width, height = size.height - chartOffset.height)
     }
-    val chartConfig = remember(datasets, axesOptions, size) {
+    val chartConfig = remember(datasets, axesOptions, chartOffset, size) {
         ChartConfig(datasets = datasets, axes = axesOptions, chartSize = chartSize, chartOffset = chartOffset)
     }
     val textMeasurer = rememberTextMeasurer()
@@ -426,7 +428,8 @@ fun Chart(datasets: List<ChartDataset<*>>,
             drawLine(color = Color.Black, strokeWidth = 1f, start = chartOrigin, end = chartOrigin.copy(x = size.width))
 
             //drawing the ticks and labels
-            if (axesOptions.xTickCount!= 0 && axesOptions.xLabel != null) {
+
+            if (axesOptions.xTickCount!= 0) {
                 val stepX = chartConfig.spanX / axesOptions.xTickCount
                 for (i in 0..axesOptions.xTickCount) {
                     val x = chartConfig.originX + i*stepX
@@ -439,7 +442,9 @@ fun Chart(datasets: List<ChartDataset<*>>,
                     drawText(text, topLeft = pos.copy(x = pos.x - text.size.width/2, y = pos.y+6f))
                 }
             }
-            if (axesOptions.yTickCount != 0 && axesOptions.yLabel != null) {
+
+            var maxWidth = 0
+            if (axesOptions.yTickCount != 0) {
                 val stepY = chartConfig.spanY / axesOptions.yTickCount
                 for (i in 0..axesOptions.yTickCount) {
                     val y = chartConfig.originY + i*stepY
@@ -449,8 +454,11 @@ fun Chart(datasets: List<ChartDataset<*>>,
                     val label = axesOptions.yLabel.format(y).join()
                     val text = textMeasurer.measure(label, axesOptions.labelStyle)
                     drawText(text, topLeft = pos.copy(x = pos.x - chartOffset.width, y = pos.y - (if(i!=axesOptions.yTickCount) text.size.height/2  else 0)))
+                    if (maxWidth< text.size.width) maxWidth = text.size.width
                 }
             }
+            val width = maxWidth.toFloat() + 20f
+            if (chartOffset.width < width-10f || chartOffset.width > width+10f) chartOffset = chartOffset.copy(width = width)
         }
         val bounds = remember(chartConfig) {
             Path().apply {

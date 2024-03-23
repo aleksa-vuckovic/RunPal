@@ -9,7 +9,7 @@ import com.example.runpal.ui.theme.DarkYellow
 import com.example.runpal.ui.theme.YellowGreen
 
 const val MAX_IMAGE_SIZE = 5*1024*1024
-const val LOCATION_UPDATE_PERIOD: Long = 333L
+const val LOCATION_UPDATE_PERIOD: Long = 250L
 val DEFAULT_PROFILE_URI = Uri.parse("android.resource://com.example.runpal/" + R.drawable.default_prof)
 val RUN_MARKER_COLORS: List<Color> = listOf(DarkBlue, DarkPurple, DarkPink, DarkYellow, YellowGreen)
 const val KM_TO_MILE: Double = 0.621371

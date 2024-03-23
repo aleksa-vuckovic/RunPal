@@ -623,6 +623,7 @@ fun StatsScreen(units: Units) {
             type = ChartType.SCATTER
         )
         val axesOptions = AxesOptions(
+            labelStyle = MaterialTheme.typography.labelSmall,
             yLabel = units.distanceFormatter,
             yTickCount = 5,
             xExpandFactor = 1.2,
@@ -685,7 +686,7 @@ fun StatsScreen(units: Units) {
                 )
                 PanelText(
                     text = LongTimeFormatter.format(totalTime),
-                    bigStyle = MaterialTheme.typography.displayLarge,
+                    bigStyle = MaterialTheme.typography.displayMedium,
                     smallStyle = MaterialTheme.typography.displaySmall,
                     modifier = Modifier
                         .fillMaxWidth()
